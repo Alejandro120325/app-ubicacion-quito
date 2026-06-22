@@ -9,19 +9,19 @@ const InputField = ({
   ...props
 }) => (
   <label className="block">
-    <span className="mb-2 block text-sm font-semibold text-slate-700">
+    <span className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
       {label}
     </span>
     <div
-      className={`flex items-center gap-3 rounded-lg border bg-white px-3 transition ${
+      className={`flex items-center gap-3 rounded-lg border bg-[var(--color-card)] px-3 transition ${
         error
           ? "border-red-300 ring-4 ring-red-50"
-          : "border-slate-200 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100"
+          : "border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-4 focus-within:ring-[var(--color-ring)]"
       }`}
     >
-      {Icon ? <Icon className="h-5 w-5 text-slate-400" aria-hidden="true" /> : null}
+      {Icon ? <Icon className="h-5 w-5 text-[var(--color-muted)]" aria-hidden="true" /> : null}
       <input
-        className="h-12 w-full min-w-0 bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
+        className="h-12 w-full min-w-0 bg-transparent text-[var(--color-text)] outline-none placeholder:text-[var(--color-muted)]"
         id={name}
         name={name}
         value={value}
@@ -31,7 +31,7 @@ const InputField = ({
     {error ? (
       <p className="mt-2 text-sm font-medium text-red-600">{error}</p>
     ) : helperText ? (
-      <p className="mt-2 text-sm text-slate-500">{helperText}</p>
+      <p className="mt-2 text-sm text-[var(--color-muted)]">{helperText}</p>
     ) : null}
   </label>
 );

@@ -3,13 +3,15 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const variants = {
-  primary: "bg-quito-blue text-white hover:bg-blue-700 shadow-soft",
+  primary:
+    "bg-[var(--color-primary)] text-white shadow-soft hover:bg-[var(--color-primary-dark)]",
   secondary:
-    "border border-slate-200 bg-white text-slate-800 hover:border-sky-200 hover:bg-sky-50",
-  dark: "bg-slate-950 text-white hover:bg-slate-800 shadow-soft",
-  success: "bg-quito-mint text-white hover:bg-teal-600 shadow-soft",
-  danger: "bg-rose-500 text-white hover:bg-rose-600 shadow-soft",
-  ghost: "bg-transparent text-slate-700 hover:bg-slate-100"
+    "border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)]",
+  dark: "bg-slate-950 text-white shadow-soft hover:bg-slate-800",
+  success:
+    "bg-[var(--color-secondary)] text-white shadow-soft hover:bg-[var(--color-primary-dark)]",
+  danger: "bg-rose-500 text-white shadow-soft hover:bg-rose-600",
+  ghost: "bg-transparent text-[var(--color-muted)] hover:bg-[var(--color-soft)] hover:text-[var(--color-text)]"
 };
 
 const sizes = {
@@ -19,7 +21,7 @@ const sizes = {
 };
 
 const baseClass =
-  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white focus-ring";
+  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white focus-ring";
 
 const Button = ({
   children,

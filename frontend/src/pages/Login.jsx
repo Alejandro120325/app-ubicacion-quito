@@ -9,6 +9,7 @@ import InputField from "../components/InputField.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import SimulatedMap from "../components/SimulatedMap.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import { validateLoginForm } from "../utils/validators.js";
 
 const demoCredentials = [
@@ -26,6 +27,7 @@ const demoCredentials = [
 
 const Login = () => {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -41,7 +43,7 @@ const Login = () => {
     const { name, value } = event.target;
     const nextForm = { ...form, [name]: value };
     setForm(nextForm);
-    setErrors(validateLoginForm(nextForm));
+    setErrors(validateLoginForm(nextForm, t));
     setServerError("");
   };
 
@@ -51,13 +53,13 @@ const Login = () => {
       password: credential.password
     };
     setForm(nextForm);
-    setErrors(validateLoginForm(nextForm));
+    setErrors(validateLoginForm(nextForm, t));
     setServerError("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validation = validateLoginForm(form);
+    const validation = validateLoginForm(form, t);
     setErrors(validation);
 
     if (Object.keys(validation).length > 0) return;
@@ -67,19 +69,16 @@ const Login = () => {
       const user = await login(form);
       navigate(user.role === "admin" ? "/admin/dashboard" : "/persona/dashboard");
     } catch (error) {
-      setServerError(
-        error.response?.data?.message ||
-          "No pudimos iniciar sesión. Revisa el correo y la contraseña."
-      );
+      setServerError(error.response?.data?.message || t("login.error"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AnimatedBackground className="min-h-screen px-4 py-8">
+    <AnimatedBackground className="min-h-screen px-4 py-8" showThemeToggle>
       <motion.main
-        className="mx-auto grid min-h-[calc(100vh-64px)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.9fr_1fr]"
+        className="mx-auto grid min-h-[calc(100vh-64px)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.95fr_1fr]"
         initial={false}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
@@ -91,27 +90,27 @@ const Login = () => {
               <MapPin className="h-6 w-6" aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-white">Quito Ubicación Segura</p>
-              <p className="text-sm text-sky-100">Acceso por rol</p>
+              <p className="font-bold text-white">{t("app.name")}</p>
+              <p className="text-sm text-sky-100">{t("login.access")}</p>
             </div>
           </div>
 
           <div className="rounded-lg border border-white/20 bg-white/10 p-3 shadow-soft backdrop-blur">
-            <SimulatedMap className="h-[460px] border-white/10" />
+            <SimulatedMap className="border-white/10" large />
           </div>
         </section>
 
-        <section className="rounded-lg bg-white p-5 text-slate-900 shadow-soft sm:p-8">
+        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 text-[var(--color-text)] shadow-soft sm:p-8">
           <div className="mb-7">
-            <p className="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sm font-bold text-sky-700">
+            <p className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-primary)]">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-              Inicio seguro
+              {t("login.secure")}
             </p>
-            <h1 className="mt-4 text-3xl font-bold text-slate-950">
-              Inicia sesión
+            <h1 className="mt-4 text-3xl font-bold text-[var(--color-text)]">
+              {t("login.title")}
             </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Entra con una cuenta de prueba o usa la cuenta que registres como persona.
+            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -121,7 +120,7 @@ const Login = () => {
                 autoComplete="email"
                 error={errors.email}
                 icon={Mail}
-                label="Correo"
+                label={t("login.email")}
                 name="email"
                 placeholder="correo@ejemplo.com"
                 type="email"
@@ -131,9 +130,9 @@ const Login = () => {
               <PasswordField
                 autoComplete="current-password"
                 error={errors.password}
-                label="Contraseña"
+                label={t("login.password")}
                 name="password"
-                placeholder="Tu contraseña"
+                placeholder={t("login.passwordPlaceholder")}
                 value={form.password}
                 onChange={handleChange}
               />
@@ -152,35 +151,37 @@ const Login = () => {
               size="lg"
               type="submit"
             >
-              {loading ? "Ingresando..." : "Iniciar sesión"}
+              {loading ? t("login.loading") : t("home.signIn")}
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <p className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
-              <UserRound className="h-4 w-4 text-quito-blue" aria-hidden="true" />
-              Credenciales de prueba
+          <div className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-4">
+            <p className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--color-text)]">
+              <UserRound className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
+              {t("login.demoTitle")}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {demoCredentials.map((credential) => (
                 <button
-                  className="rounded-lg border border-slate-200 bg-white p-3 text-left text-sm transition hover:border-sky-200 hover:bg-sky-50 focus-ring"
+                  className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-3 text-left text-sm transition hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)] focus-ring"
                   key={credential.role}
                   type="button"
                   onClick={() => fillDemo(credential)}
                 >
-                  <p className="font-bold text-slate-950">{credential.role}</p>
-                  <p className="mt-1 break-words text-slate-500">{credential.email}</p>
-                  <p className="mt-1 text-slate-500">{credential.password}</p>
+                  <p className="font-bold text-[var(--color-text)]">{credential.role}</p>
+                  <p className="mt-1 break-words text-[var(--color-muted)]">
+                    {credential.email}
+                  </p>
+                  <p className="mt-1 text-[var(--color-muted)]">{credential.password}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          <p className="mt-5 text-center text-sm text-slate-500">
-            ¿Aún no tienes cuenta?{" "}
-            <Link className="font-semibold text-quito-blue hover:text-blue-700" to="/register">
-              Crear cuenta persona
+          <p className="mt-5 text-center text-sm text-[var(--color-muted)]">
+            {t("login.noAccount")}{" "}
+            <Link className="font-semibold text-[var(--color-primary)] hover:underline" to="/register">
+              {t("login.createPerson")}
             </Link>
           </p>
         </section>

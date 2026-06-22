@@ -1,38 +1,41 @@
 import React from "react";
 import {
+  BellRing,
   LayoutDashboard,
   LogOut,
   MapPinned,
+  MapPin,
   Radar,
   ShieldCheck,
+  UsersRound,
   UserRound
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import Button from "./Button.jsx";
 
-const getLinks = (role) => {
+const getLinks = (role, t) => {
   if (role === "admin") {
     return [
-      {
-        to: "/admin/dashboard",
-        label: "Panel admin",
-        icon: LayoutDashboard
-      }
+      { to: "/admin/dashboard", label: t("sidebar.adminPanel"), icon: LayoutDashboard },
+      { to: "/admin/dashboard#personas", label: t("sidebar.people"), icon: UsersRound },
+      { to: "/admin/dashboard#mapa", label: t("sidebar.map"), icon: MapPin },
+      { to: "/admin/dashboard#alertas", label: t("sidebar.alerts"), icon: BellRing }
     ];
   }
 
   return [
-    {
-      to: "/persona/dashboard",
-      label: "Mi panel",
-      icon: UserRound
-    }
+    { to: "/persona/dashboard", label: t("sidebar.myPanel"), icon: UserRound },
+    { to: "/persona/dashboard#ubicacion", label: t("sidebar.myLocation"), icon: MapPin },
+    { to: "/persona/dashboard#privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
+    { to: "/persona/dashboard#circulo", label: t("sidebar.familyCircle"), icon: UsersRound }
   ];
 };
 
 const Sidebar = () => {
   const { logout, user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -41,20 +44,20 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="border-b border-slate-200 bg-white lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r">
+    <aside className="border-b border-[var(--color-border)] bg-[var(--color-card)] lg:sticky lg:top-0 lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r">
       <div className="flex h-full flex-col p-4">
         <div className="flex items-center gap-3 rounded-lg bg-slate-950 p-4 text-white shadow-soft">
-          <span className="rounded-lg bg-sky-500 p-2 shadow-glow">
+          <span className="rounded-lg bg-[var(--color-primary)] p-2 shadow-glow">
             <MapPinned className="h-5 w-5" aria-hidden="true" />
           </span>
-          <div>
-            <p className="text-sm font-semibold">Quito Ubicacion</p>
-            <p className="text-xs text-slate-300">Seguimiento simulado</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{t("app.shortName")}</p>
+            <p className="text-xs text-slate-300">{t("app.demo")}</p>
           </div>
         </div>
 
         <nav className="mt-4 grid gap-2">
-          {getLinks(user?.role).map((item) => {
+          {getLinks(user?.role, t).map((item) => {
             const Icon = item.icon;
 
             return (
@@ -62,8 +65,8 @@ const Sidebar = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                      ? "bg-[var(--color-soft)] text-[var(--color-primary)]"
+                      : "text-[var(--color-muted)] hover:bg-[var(--color-soft)] hover:text-[var(--color-text)]"
                   }`
                 }
                 key={item.to}
@@ -76,28 +79,30 @@ const Sidebar = () => {
           })}
         </nav>
 
-        <div className="mt-4 rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm text-teal-900 lg:mt-auto">
-          <div className="mb-2 flex items-center gap-2 font-semibold">
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            Sesion activa
+        <div className="mt-6 grid gap-3 lg:mt-auto">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-4 text-sm text-[var(--color-text)]">
+            <div className="mb-2 flex items-center gap-2 font-semibold">
+              <ShieldCheck className="h-4 w-4 text-[var(--color-secondary)]" aria-hidden="true" />
+              {t("sidebar.session")}
+            </div>
+            <p className="truncate">{user?.fullName}</p>
+            <p className="mt-1 text-xs uppercase tracking-wide text-[var(--color-muted)]">
+              {t("sidebar.role", { role: user?.role })}
+            </p>
           </div>
-          <p>{user?.fullName}</p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-teal-700">
-            Rol: {user?.role}
-          </p>
-        </div>
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
-          <div className="flex items-center gap-2 font-semibold text-slate-700">
-            <Radar className="h-4 w-4 text-sky-600" aria-hidden="true" />
-            Datos de demostracion
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-3 text-xs text-[var(--color-muted)]">
+            <div className="flex items-center gap-2 font-semibold text-[var(--color-text)]">
+              <Radar className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
+              {t("sidebar.demoData")}
+            </div>
+            <p className="mt-1 leading-5">{t("sidebar.demoText")}</p>
           </div>
-          <p className="mt-1 leading-5">No se usan mapas reales ni base de datos.</p>
-        </div>
 
-        <Button className="mt-4 w-full" icon={LogOut} variant="secondary" onClick={handleLogout}>
-          Cerrar sesion
-        </Button>
+          <Button className="w-full" icon={LogOut} variant="secondary" onClick={handleLogout}>
+            {t("sidebar.logout")}
+          </Button>
+        </div>
       </div>
     </aside>
   );

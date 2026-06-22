@@ -1,25 +1,27 @@
 import React from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 const PasswordField = ({ label, name, value, error, ...props }) => {
   const [visible, setVisible] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-slate-700">
+      <span className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
         {label}
       </span>
       <div
-        className={`flex items-center gap-3 rounded-lg border bg-white px-3 transition ${
+        className={`flex items-center gap-3 rounded-lg border bg-[var(--color-card)] px-3 transition ${
           error
             ? "border-red-300 ring-4 ring-red-50"
-            : "border-slate-200 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100"
+            : "border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-4 focus-within:ring-[var(--color-ring)]"
         }`}
       >
-        <Lock className="h-5 w-5 text-slate-400" aria-hidden="true" />
+        <Lock className="h-5 w-5 text-[var(--color-muted)]" aria-hidden="true" />
         <input
-          className="h-12 w-full min-w-0 bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
+          className="h-12 w-full min-w-0 bg-transparent text-[var(--color-text)] outline-none placeholder:text-[var(--color-muted)]"
           id={name}
           name={name}
           type={visible ? "text" : "password"}
@@ -27,8 +29,9 @@ const PasswordField = ({ label, name, value, error, ...props }) => {
           {...props}
         />
         <button
-          aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-ring"
+          aria-label={visible ? t("password.hide") : t("password.show")}
+          className="rounded-lg p-2 text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-text)] focus-ring"
+          title={visible ? t("password.hide") : t("password.show")}
           type="button"
           onClick={() => setVisible((current) => !current)}
         >

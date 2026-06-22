@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 
 const StatCard = ({ title, value, detail, icon: Icon, tone = "blue" }) => {
   const tones = {
-    blue: "bg-blue-50 text-blue-700",
-    mint: "bg-teal-50 text-teal-700",
-    amber: "bg-amber-50 text-amber-700",
+    blue: "bg-[var(--color-soft)] text-[var(--color-primary)]",
+    mint: "bg-[var(--color-soft)] text-[var(--color-secondary)]",
+    amber: "bg-[var(--color-soft)] text-[var(--color-alert)]",
     rose: "bg-rose-50 text-rose-700",
-    slate: "bg-slate-100 text-slate-700"
+    slate: "bg-[var(--color-soft)] text-[var(--color-muted)]"
   };
 
   return (
     <motion.article
-      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200"
+      className="flex min-h-[150px] flex-col justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition hover:border-[var(--color-primary)]"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
@@ -20,8 +20,8 @@ const StatCard = ({ title, value, detail, icon: Icon, tone = "blue" }) => {
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-950">{value}</p>
+          <p className="text-sm font-medium text-[var(--color-muted)]">{title}</p>
+          <p className="mt-2 text-3xl font-bold text-[var(--color-text)]">{value}</p>
         </div>
         {Icon ? (
           <span className={`rounded-lg p-3 ${tones[tone]}`}>
@@ -29,7 +29,7 @@ const StatCard = ({ title, value, detail, icon: Icon, tone = "blue" }) => {
           </span>
         ) : null}
       </div>
-      {detail ? <p className="mt-4 text-sm text-slate-500">{detail}</p> : null}
+      {detail ? <p className="mt-4 text-sm text-[var(--color-muted)]">{detail}</p> : null}
     </motion.article>
   );
 };

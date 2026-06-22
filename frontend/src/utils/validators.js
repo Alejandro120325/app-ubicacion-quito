@@ -1,6 +1,18 @@
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const onlyLettersAndSpacesRegex = /^[\p{L}\s]+$/u;
 
+const defaultT = (key) =>
+  ({
+    "validation.email": "Ingresa un correo válido.",
+    "validation.password": "Ingresa tu contraseña.",
+    "validation.fullName": "Escribe tus nombres completos, solo con letras.",
+    "validation.strongPassword": "Usa 8 caracteres, mayúscula, minúscula y número.",
+    "validation.confirmPassword": "Las contraseñas no coinciden.",
+    "validation.language": "Selecciona un idioma.",
+    "validation.cedula": "Ingresa una cédula ecuatoriana válida.",
+    "validation.phone": "Usa un celular ecuatoriano de 10 dígitos que empiece con 09."
+  })[key] || key;
+
 export const normalizeName = (value = "") => value.trim().replace(/\s+/g, " ");
 
 export const isValidFullName = (fullName = "") => {
@@ -31,7 +43,7 @@ export const isValidEcuadorianCedula = (cedula = "") => {
     return false;
   }
 
-  // Mismo algoritmo usado por el backend para mantener validaciones consistentes.
+  // Keep the same validation algorithm used by the backend.
   const coefficients = [2, 1, 2, 1, 2, 1, 2, 1, 2];
   const sum = coefficients.reduce((total, coefficient, index) => {
     let value = Number(cedula[index]) * coefficient;
@@ -45,49 +57,49 @@ export const isValidEcuadorianCedula = (cedula = "") => {
 
 export const isValidEcuadorianPhone = (phone = "") => /^09\d{8}$/.test(phone);
 
-export const validateLoginForm = ({ email, password }) => {
+export const validateLoginForm = ({ email, password }, t = defaultT) => {
   const errors = {};
 
   if (!isValidEmail(email)) {
-    errors.email = "Ingresa un correo válido.";
+    errors.email = t("validation.email");
   }
 
   if (!password) {
-    errors.password = "Ingresa tu contraseña.";
+    errors.password = t("validation.password");
   }
 
   return errors;
 };
 
-export const validateRegisterForm = (values) => {
+export const validateRegisterForm = (values, t = defaultT) => {
   const errors = {};
 
   if (!isValidFullName(values.fullName)) {
-    errors.fullName = "Escribe tus nombres completos, solo con letras.";
+    errors.fullName = t("validation.fullName");
   }
 
   if (!isValidEmail(values.email)) {
-    errors.email = "Ingresa un correo válido.";
+    errors.email = t("validation.email");
   }
 
   if (!isStrongPassword(values.password)) {
-    errors.password = "Usa 8 caracteres, mayúscula, minúscula y número.";
+    errors.password = t("validation.strongPassword");
   }
 
   if (values.confirmPassword !== values.password) {
-    errors.confirmPassword = "Las contraseñas no coinciden.";
+    errors.confirmPassword = t("validation.confirmPassword");
   }
 
   if (!values.language) {
-    errors.language = "Selecciona un idioma.";
+    errors.language = t("validation.language");
   }
 
   if (!isValidEcuadorianCedula(values.cedula)) {
-    errors.cedula = "Ingresa una cédula ecuatoriana válida.";
+    errors.cedula = t("validation.cedula");
   }
 
   if (!isValidEcuadorianPhone(values.phone)) {
-    errors.phone = "Usa un celular ecuatoriano de 10 dígitos que empiece con 09.";
+    errors.phone = t("validation.phone");
   }
 
   return errors;

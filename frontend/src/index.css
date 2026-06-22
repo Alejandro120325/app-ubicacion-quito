@@ -3,11 +3,85 @@
 @tailwind utilities;
 
 :root {
-  color: #10233f;
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #1e40af;
+  --color-secondary: #14b8a6;
+  --color-accent: #22c55e;
+  --color-alert: #f59e0b;
+  --color-bg: #f6f8fb;
+  --color-card: #ffffff;
+  --color-soft: #f1f5f9;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-ring: rgba(14, 165, 233, 0.2);
+  --shadow-soft-theme: 0 18px 45px rgba(15, 23, 42, 0.12);
+  color: var(--color-text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  background: #f6f8fb;
+  background: var(--color-bg);
+}
+
+:root[data-color-theme="turquoise"] {
+  --color-primary: #0891b2;
+  --color-primary-dark: #0e7490;
+  --color-secondary: #14b8a6;
+  --color-accent: #2dd4bf;
+  --color-alert: #f59e0b;
+  --color-ring: rgba(20, 184, 166, 0.22);
+}
+
+:root[data-color-theme="family"] {
+  --color-primary: #16a34a;
+  --color-primary-dark: #15803d;
+  --color-secondary: #0d9488;
+  --color-accent: #84cc16;
+  --color-alert: #f97316;
+  --color-ring: rgba(34, 197, 94, 0.22);
+}
+
+:root[data-color-theme="night"] {
+  --color-primary: #7c3aed;
+  --color-primary-dark: #6d28d9;
+  --color-secondary: #38bdf8;
+  --color-accent: #a78bfa;
+  --color-alert: #fb7185;
+  --color-ring: rgba(124, 58, 237, 0.24);
+}
+
+:root[data-color-theme="alert"] {
+  --color-primary: #f97316;
+  --color-primary-dark: #ea580c;
+  --color-secondary: #ef4444;
+  --color-accent: #f59e0b;
+  --color-alert: #ef4444;
+  --color-ring: rgba(249, 115, 22, 0.24);
+}
+
+:root[data-color-theme="professional"] {
+  --color-primary: #475569;
+  --color-primary-dark: #334155;
+  --color-secondary: #0f766e;
+  --color-accent: #64748b;
+  --color-alert: #f59e0b;
+  --color-ring: rgba(71, 85, 105, 0.2);
+}
+
+:root[data-theme-mode="dark"] {
+  --color-bg: #020617;
+  --color-card: #0f172a;
+  --color-soft: #111827;
+  --color-text: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-border: #1e293b;
+  --shadow-soft-theme: 0 18px 50px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme-mode="light"] body {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 5%, transparent), transparent 260px),
+    var(--color-bg);
 }
 
 * {
@@ -21,6 +95,11 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
 }
 
 button,
@@ -35,7 +114,83 @@ button {
 
 ::selection {
   color: #ffffff;
-  background: #0f766e;
+  background: var(--color-secondary);
+}
+
+.bg-quito-blue,
+.hover\:bg-blue-700:hover {
+  background-color: var(--color-primary) !important;
+}
+
+.bg-quito-mint,
+.hover\:bg-teal-600:hover {
+  background-color: var(--color-secondary) !important;
+}
+
+.text-quito-blue,
+.text-blue-700,
+.text-sky-600,
+.text-sky-700 {
+  color: var(--color-primary) !important;
+}
+
+.text-quito-mint,
+.text-teal-600,
+.text-teal-700 {
+  color: var(--color-secondary) !important;
+}
+
+.border-sky-200,
+.hover\:border-sky-200:hover,
+.focus\:border-sky-400:focus,
+.focus-within\:border-sky-400:focus-within {
+  border-color: var(--color-primary) !important;
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft-theme) !important;
+}
+
+:root[data-theme-mode="dark"] .bg-white,
+:root[data-theme-mode="dark"] .bg-white\/90,
+:root[data-theme-mode="dark"] .bg-white\/95 {
+  background-color: var(--color-card) !important;
+}
+
+:root[data-theme-mode="dark"] .bg-slate-50,
+:root[data-theme-mode="dark"] .bg-slate-100 {
+  background-color: var(--color-soft) !important;
+}
+
+:root[data-theme-mode="dark"] .bg-slate-950 {
+  background-color: #020617 !important;
+}
+
+:root[data-theme-mode="dark"] .text-slate-950,
+:root[data-theme-mode="dark"] .text-slate-900,
+:root[data-theme-mode="dark"] .text-slate-800,
+:root[data-theme-mode="dark"] .text-slate-700 {
+  color: var(--color-text) !important;
+}
+
+:root[data-theme-mode="dark"] .text-slate-600,
+:root[data-theme-mode="dark"] .text-slate-500,
+:root[data-theme-mode="dark"] .text-slate-400 {
+  color: var(--color-muted) !important;
+}
+
+:root[data-theme-mode="dark"] .border-slate-200,
+:root[data-theme-mode="dark"] .border-slate-200\/80 {
+  border-color: var(--color-border) !important;
+}
+
+:root[data-theme-mode="dark"] input,
+:root[data-theme-mode="dark"] select {
+  color: var(--color-text);
+}
+
+:root[data-theme-mode="dark"] .ring-slate-200 {
+  --tw-ring-color: var(--color-border) !important;
 }
 
 @layer components {
@@ -43,23 +198,13 @@ button {
     @apply min-h-screen;
   }
 
-  .auth-background {
-    background:
-      radial-gradient(circle at 18% 18%, rgba(20, 184, 166, 0.24), transparent 30%),
-      radial-gradient(circle at 82% 20%, rgba(14, 165, 233, 0.22), transparent 26%),
-      linear-gradient(135deg, rgba(16, 35, 63, 0.98), rgba(29, 78, 216, 0.9)),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
-      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-    background-size: auto, 44px 44px, 44px 44px;
-  }
-
   .urban-grid {
     background:
-      radial-gradient(circle at 20% 25%, rgba(20, 184, 166, 0.18), transparent 22%),
-      radial-gradient(circle at 80% 15%, rgba(14, 165, 233, 0.16), transparent 24%),
-      linear-gradient(90deg, rgba(14, 165, 233, 0.18) 1px, transparent 1px),
-      linear-gradient(rgba(20, 184, 166, 0.14) 1px, transparent 1px),
-      #f8fafc;
+      radial-gradient(circle at 20% 25%, color-mix(in srgb, var(--color-secondary) 18%, transparent), transparent 22%),
+      radial-gradient(circle at 80% 15%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 24%),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 20%, transparent) 1px, transparent 1px),
+      linear-gradient(color-mix(in srgb, var(--color-secondary) 16%, transparent) 1px, transparent 1px),
+      var(--color-soft);
     background-size: auto, auto, 36px 36px, 36px 36px;
   }
 
@@ -67,7 +212,7 @@ button {
     position: absolute;
     height: 3px;
     border-radius: 999px;
-    background: linear-gradient(90deg, #0ea5e9, #14b8a6);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
     opacity: 0.8;
   }
 
@@ -76,6 +221,7 @@ button {
   }
 
   .focus-ring {
-    @apply focus:outline-none focus:ring-4 focus:ring-sky-200;
+    @apply focus:outline-none focus:ring-4;
+    --tw-ring-color: var(--color-ring);
   }
 }

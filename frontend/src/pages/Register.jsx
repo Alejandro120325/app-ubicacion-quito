@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck, IdCard, Mail, Phone, UserRound } from "lucide-react";
+import { BadgeCheck, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AnimatedBackground from "../components/AnimatedBackground.jsx";
@@ -8,6 +8,7 @@ import Button from "../components/Button.jsx";
 import InputField from "../components/InputField.jsx";
 import PasswordField from "../components/PasswordField.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import { validateRegisterForm } from "../utils/validators.js";
 
 const initialForm = {
@@ -20,30 +21,48 @@ const initialForm = {
   phone: ""
 };
 
+const passwordRules = [
+  { labelKey: "register.ruleLength", test: (value) => value.length >= 8 },
+  { labelKey: "register.ruleUpper", test: (value) => /[A-Z]/.test(value) },
+  { labelKey: "register.ruleLower", test: (value) => /[a-z]/.test(value) },
+  { labelKey: "register.ruleNumber", test: (value) => /\d/.test(value) }
+];
+
 const Register = () => {
   const { register } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const formHasData = useMemo(
-    () => Object.values(form).some((value) => value.trim()),
-    [form]
+  const passwordScore = useMemo(
+    () => passwordRules.filter((rule) => rule.test(form.password)).length,
+    [form.password]
   );
+
+  const strengthLabels = [
+    t("register.weak0"),
+    t("register.weak1"),
+    t("register.weak2"),
+    t("register.weak3"),
+    t("register.weak4")
+  ];
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     const nextForm = { ...form, [name]: value };
+    const nextHasData = Object.values(nextForm).some((fieldValue) => fieldValue.trim());
+
     setForm(nextForm);
-    setErrors(formHasData ? validateRegisterForm(nextForm) : {});
+    setErrors(nextHasData ? validateRegisterForm(nextForm, t) : {});
     setMessage("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const validation = validateRegisterForm(form);
+    const validation = validateRegisterForm(form, t);
     setErrors(validation);
 
     if (Object.keys(validation).length > 0) return;
@@ -51,21 +70,18 @@ const Register = () => {
     try {
       setLoading(true);
       await register(form);
-      setMessage("Cuenta creada correctamente. Ahora puedes iniciar sesión.");
+      setMessage(t("register.success"));
       setTimeout(() => navigate("/login"), 900);
     } catch (error) {
       setErrors(error.response?.data?.errors || {});
-      setMessage(
-        error.response?.data?.message ||
-          "No pudimos crear la cuenta. Revisa los datos."
-      );
+      setMessage(error.response?.data?.message || t("register.error"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AnimatedBackground className="min-h-screen px-4 py-8">
+    <AnimatedBackground className="min-h-screen px-4 py-8" showThemeToggle>
       <motion.main
         className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-5xl items-center"
         initial={false}
@@ -73,25 +89,22 @@ const Register = () => {
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.28 }}
       >
-        <section className="w-full overflow-hidden rounded-lg bg-white text-slate-900 shadow-soft">
-          <div className="grid lg:grid-cols-[0.75fr_1fr]">
+        <section className="w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] shadow-soft">
+          <div className="grid lg:grid-cols-[0.74fr_1fr]">
             <div className="hidden bg-slate-950 p-8 text-white lg:block">
               <p className="inline-flex rounded-lg bg-teal-400/15 px-3 py-2 text-sm font-bold text-teal-100">
-                Registro persona
+                {t("register.badge")}
               </p>
-              <h1 className="mt-6 text-3xl font-bold">
-                Controla cuándo compartes tu ubicación.
-              </h1>
+              <h1 className="mt-6 text-3xl font-bold">{t("register.sideTitle")}</h1>
               <p className="mt-4 text-sm leading-6 text-slate-300">
-                Esta cuenta no crea perfiles admin. Es una experiencia simple
-                para validar datos personales y el flujo de seguridad.
+                {t("register.sideText")}
               </p>
               <div className="mt-8 grid gap-3">
                 {[
-                  "Cédula ecuatoriana validada",
-                  "Teléfono celular con formato 09",
-                  "Contraseña segura",
-                  "Rol persona asignado automáticamente"
+                  t("register.checkCedula"),
+                  t("register.checkPhone"),
+                  t("register.checkPassword"),
+                  t("register.checkRole")
                 ].map((item) => (
                   <div className="flex items-center gap-3 text-sm" key={item}>
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-400/15 text-teal-100">
@@ -104,23 +117,23 @@ const Register = () => {
             </div>
 
             <form className="p-5 sm:p-8" onSubmit={handleSubmit}>
-              <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-4 border-b border-[var(--color-border)] pb-6 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-wide text-teal-600">
-                    Cuenta tipo persona
+                  <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-secondary)]">
+                    {t("register.accountType")}
                   </p>
-                  <h2 className="mt-2 text-3xl font-bold text-slate-950">
-                    Crear cuenta
+                  <h2 className="mt-2 text-3xl font-bold text-[var(--color-text)]">
+                    {t("register.title")}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Completa tus datos para activar tu panel personal.
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                    {t("register.subtitle")}
                   </p>
                 </div>
                 <Link
-                  className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-ring"
+                  className="inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-soft)] focus-ring"
                   to="/login"
                 >
-                  Volver al login
+                  {t("register.backLogin")}
                 </Link>
               </div>
 
@@ -129,9 +142,9 @@ const Register = () => {
                   <InputField
                     error={errors.fullName}
                     icon={UserRound}
-                    label="Nombres completos"
+                    label={t("register.fullName")}
                     name="fullName"
-                    placeholder="Ej. Ana Carolina Ruiz"
+                    placeholder={t("register.fullNamePlaceholder")}
                     value={form.fullName}
                     onChange={handleChange}
                   />
@@ -139,7 +152,7 @@ const Register = () => {
                     autoComplete="email"
                     error={errors.email}
                     icon={Mail}
-                    label="Correo"
+                    label={t("login.email")}
                     name="email"
                     placeholder="correo@ejemplo.com"
                     type="email"
@@ -152,41 +165,77 @@ const Register = () => {
                   <PasswordField
                     autoComplete="new-password"
                     error={errors.password}
-                    label="Contraseña"
+                    label={t("login.password")}
                     name="password"
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={t("register.minPassword")}
                     value={form.password}
                     onChange={handleChange}
                   />
                   <PasswordField
                     autoComplete="new-password"
                     error={errors.confirmPassword}
-                    label="Confirmar contraseña"
+                    label={t("register.confirmPassword")}
                     name="confirmPassword"
-                    placeholder="Repite tu contraseña"
+                    placeholder={t("register.repeatPassword")}
                     value={form.confirmPassword}
                     onChange={handleChange}
                   />
                 </div>
 
+                <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="flex items-center gap-2 text-sm font-bold text-[var(--color-text)]">
+                      <ShieldCheck className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
+                      {t("register.security")}
+                    </p>
+                    <span className="text-sm font-semibold text-[var(--color-muted)]">
+                      {strengthLabels[passwordScore]}
+                    </span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-300"
+                      style={{ width: `${Math.max(12, (passwordScore / 4) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {passwordRules.map((rule) => {
+                      const passed = rule.test(form.password);
+
+                      return (
+                        <span
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                            passed
+                              ? "bg-green-50 text-green-700"
+                              : "bg-[var(--color-card)] text-[var(--color-muted)]"
+                          }`}
+                          key={rule.labelKey}
+                        >
+                          {t(rule.labelKey)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="grid gap-5 md:grid-cols-3">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-semibold text-slate-700">
-                      Idioma
+                    <span className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
+                      {t("register.language")}
                     </span>
                     <select
-                      className={`h-12 w-full rounded-lg border bg-white px-3 text-slate-900 outline-none transition ${
+                      className={`h-12 w-full rounded-lg border bg-[var(--color-card)] px-3 text-[var(--color-text)] outline-none transition ${
                         errors.language
                           ? "border-red-300 ring-4 ring-red-50"
-                          : "border-slate-200 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                          : "border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-ring)]"
                       }`}
                       name="language"
                       value={form.language}
                       onChange={handleChange}
                     >
-                      <option value="">Selecciona</option>
-                      <option value="es">Español</option>
-                      <option value="en">Inglés</option>
+                      <option value="">{t("register.select")}</option>
+                      <option value="es">{t("language.es")}</option>
+                      <option value="en">{t("language.en")}</option>
                     </select>
                     {errors.language ? (
                       <p className="mt-2 text-sm font-medium text-red-600">
@@ -197,9 +246,9 @@ const Register = () => {
 
                   <InputField
                     error={errors.cedula}
-                    helperText="Debe tener 10 dígitos."
+                    helperText={t("register.cedulaHelp")}
                     icon={IdCard}
-                    label="Cédula ecuatoriana"
+                    label={t("register.cedula")}
                     maxLength="10"
                     name="cedula"
                     placeholder="1710000009"
@@ -208,9 +257,9 @@ const Register = () => {
                   />
                   <InputField
                     error={errors.phone}
-                    helperText="Ej. 0991234567"
+                    helperText={t("register.phoneHelp")}
                     icon={Phone}
-                    label="Teléfono"
+                    label={t("register.phone")}
                     maxLength="10"
                     name="phone"
                     placeholder="0991234567"
@@ -232,8 +281,8 @@ const Register = () => {
                 ) : null}
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm leading-6 text-slate-500">
-                    Tú decides cuándo compartir tu ubicación desde tu panel.
+                  <p className="text-sm leading-6 text-[var(--color-muted)]">
+                    {t("register.privacy")}
                   </p>
                   <Button
                     disabled={loading}
@@ -242,7 +291,7 @@ const Register = () => {
                     type="submit"
                     variant="success"
                   >
-                    {loading ? "Creando..." : "Crear cuenta"}
+                    {loading ? t("register.creating") : t("register.title")}
                   </Button>
                 </div>
               </div>
