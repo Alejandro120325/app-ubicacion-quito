@@ -11,16 +11,23 @@ import {
   UserCheck,
   UserX,
   Wifi,
+  Plus,
   UsersRound
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import api from "../api/api.js";
+import AddMemberModal from "../components/AddMemberModal.jsx";
+import CreateGroupModal from "../components/CreateGroupModal.jsx";
+import GroupCard from "../components/GroupCard.jsx";
+import GroupMapPanel from "../components/GroupMapPanel.jsx";
+import GroupMemberCard from "../components/GroupMemberCard.jsx";
 import LanguageSelector from "../components/LanguageSelector.jsx";
 import LoadingScreen from "../components/LoadingScreen.jsx";
 import SimulatedMap from "../components/SimulatedMap.jsx";
 import StatCard from "../components/StatCard.jsx";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import UserCard from "../components/UserCard.jsx";
+import Button from "../components/Button.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
@@ -36,16 +43,29 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const { language, t } = useLanguage();
   const [people, setPeople] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [selectedPerson, setSelectedPerson] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [groupForMember, setGroupForMember] = useState(null);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [groupMessage, setGroupMessage] = useState("");
 
   useEffect(() => {
-    const loadPeople = async () => {
+    const loadDashboard = async () => {
       try {
-        const { data } = await api.get("/users");
-        setPeople(data.users || []);
-        setSelectedPerson(data.users?.[0] || null);
+        const [usersResponse, groupsResponse] = await Promise.all([
+          api.get("/users"),
+          api.get("/groups")
+        ]);
+        setPeople(usersResponse.data.users || []);
+        setSelectedPerson(usersResponse.data.users?.[0] || null);
+        setGroups(groupsResponse.data.groups || []);
+        setSelectedGroup(groupsResponse.data.groups?.[0] || null);
+        setSelectedMember(groupsResponse.data.groups?.[0]?.members?.[0] || null);
       } catch (requestError) {
         setError(requestError.response?.data?.message || t("admin.loadError"));
       } finally {
@@ -53,7 +73,7 @@ const AdminDashboard = () => {
       }
     };
 
-    loadPeople();
+    loadDashboard();
   }, [t]);
 
   const stats = useMemo(() => {
@@ -65,9 +85,10 @@ const AdminDashboard = () => {
       total: people.length,
       active: activePeople.length,
       inactive: inactivePeople.length,
+      groups: groups.length,
       alerts: simulatedAlerts.length
     };
-  }, [people]);
+  }, [groups.length, people]);
 
   const mapPoints = useMemo(
     () =>
@@ -88,6 +109,51 @@ const AdminDashboard = () => {
       }).format(new Date()),
     [language]
   );
+
+  const handleCreateGroup = async (payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.post("/groups", payload);
+      const nextGroups = [...groups, data.group];
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(null);
+      setCreateGroupOpen(false);
+      setGroupMessage(t("groups.createSuccess"));
+      return true;
+    } catch (requestError) {
+      setGroupMessage(
+        requestError.response?.data?.message || t("groups.error")
+      );
+      return false;
+    }
+  };
+
+  const handleAddMember = async (groupId, payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.post(`/groups/${groupId}/members`, payload);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(data.member);
+      setAddMemberOpen(false);
+      setGroupMessage(t("groups.memberSuccess"));
+      return true;
+    } catch (requestError) {
+      setGroupMessage(
+        requestError.response?.data?.message || t("groups.error")
+      );
+      return false;
+    }
+  };
+
+  const openAddMember = (group) => {
+    setGroupForMember(group);
+    setAddMemberOpen(true);
+  };
 
   return (
     <motion.section
@@ -134,7 +200,7 @@ const AdminDashboard = () => {
         </div>
       ) : null}
 
-      <div id="alertas" className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div id="alertas" className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           detail={t("admin.stats.totalDetail")}
           icon={UsersRound}
@@ -157,6 +223,13 @@ const AdminDashboard = () => {
           value={loading ? "..." : stats.inactive}
         />
         <StatCard
+          detail={t("admin.stats.groupsDetail")}
+          icon={UsersRound}
+          title={t("admin.stats.groups")}
+          tone="blue"
+          value={loading ? "..." : stats.groups}
+        />
+        <StatCard
           detail={t("admin.stats.alertsDetail")}
           icon={Activity}
           title={t("admin.stats.alerts")}
@@ -170,6 +243,7 @@ const AdminDashboard = () => {
           <LoadingScreen message={t("admin.loading")} />
         </div>
       ) : (
+        <>
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)]">
           <section
             id="personas"
@@ -286,6 +360,81 @@ const AdminDashboard = () => {
             ) : null}
           </section>
         </div>
+        <section
+          id="grupos"
+          className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
+                {t("sidebar.groups")}
+              </p>
+              <h2 className="mt-1 text-2xl font-bold text-[var(--color-text)]">
+                {t("groups.title")}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
+                {t("groups.subtitle")}
+              </p>
+            </div>
+            <Button icon={Plus} onClick={() => setCreateGroupOpen(true)}>
+              {t("groups.create")}
+            </Button>
+          </div>
+
+          {groupMessage ? (
+            <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-text)]">
+              {groupMessage}
+            </div>
+          ) : null}
+
+          <div className="mt-5 grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+            <div className="grid gap-4">
+              {groups.length ? (
+                groups.map((group) => (
+                  <GroupCard
+                    active={selectedGroup?.id === group.id}
+                    group={group}
+                    key={group.id}
+                    onAddMember={openAddMember}
+                    onSelect={(nextGroup) => {
+                      setSelectedGroup(nextGroup);
+                      setSelectedMember(nextGroup.members?.[0] || null);
+                    }}
+                  />
+                ))
+              ) : (
+                <p className="rounded-lg bg-[var(--color-soft)] p-4 text-sm text-[var(--color-muted)]">
+                  {t("groups.empty")}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-4">
+              <GroupMapPanel group={selectedGroup} selectedMember={selectedMember} />
+              <div className="grid gap-4 md:grid-cols-2">
+                {(selectedGroup?.members || []).map((member) => (
+                  <GroupMemberCard
+                    key={member.id}
+                    member={member}
+                    onView={setSelectedMember}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        <CreateGroupModal
+          open={createGroupOpen}
+          onClose={() => setCreateGroupOpen(false)}
+          onSubmit={handleCreateGroup}
+        />
+        <AddMemberModal
+          group={groupForMember}
+          open={addMemberOpen}
+          onClose={() => setAddMemberOpen(false)}
+          onSubmit={handleAddMember}
+        />
+        </>
       )}
     </motion.section>
   );

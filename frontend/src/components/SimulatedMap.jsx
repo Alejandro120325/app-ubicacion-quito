@@ -4,11 +4,11 @@ import { Clock3, LocateFixed, MapPin, Navigation, Radio } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
 const defaultPoints = [
-  { label: "La Carolina", top: "27%", left: "62%", active: true },
-  { label: "Centro Histórico", top: "55%", left: "36%", active: true },
-  { label: "Cumbayá", top: "45%", left: "76%", active: false },
-  { label: "Quitumbe", top: "72%", left: "58%", active: false },
-  { label: "Universidad", top: "61%", left: "48%", active: true }
+  { label: "La Carolina", top: "27%", left: "62%", locationStatus: "sharing" },
+  { label: "Centro Histórico", top: "55%", left: "36%", locationStatus: "sharing" },
+  { label: "Cumbayá", top: "45%", left: "76%", locationStatus: "offline" },
+  { label: "Quitumbe", top: "72%", left: "58%", locationStatus: "paused" },
+  { label: "Universidad", top: "61%", left: "48%", locationStatus: "sharing" }
 ];
 
 const roadLines = [
@@ -26,6 +26,15 @@ const variantClasses = {
   default: "min-h-[340px]"
 };
 
+const getPointStatus = (point) =>
+  point.locationStatus || point.status || (point.active ? "sharing" : "paused");
+
+const getMarkerClass = (status) => {
+  if (status === "sharing") return "bg-[var(--color-secondary)] text-white";
+  if (status === "offline") return "bg-slate-950 text-white ring-1 ring-slate-700";
+  return "bg-[var(--color-card)] text-[var(--color-muted)] ring-1 ring-[var(--color-border)]";
+};
+
 // Future real-time connection point: feed this component with coordinates from
 // the Geolocation API or a WebSocket without requesting browser permissions here.
 const SimulatedMap = ({
@@ -36,7 +45,8 @@ const SimulatedMap = ({
   lastUpdate,
   mainLabel = "Quito",
   points = defaultPoints,
-  selectedLabel
+  selectedLabel,
+  showConnections = false
 }) => {
   const { t } = useLanguage();
   const variant = compact ? "compact" : large ? "large" : dashboard ? "dashboard" : "default";
@@ -55,12 +65,21 @@ const SimulatedMap = ({
         ))}
       </div>
 
+      {showConnections ? (
+        <div className="pointer-events-none absolute inset-0 opacity-60">
+          <span className="map-line left-[32%] top-[40%] w-[34%] rotate-[17deg]" />
+          <span className="map-line left-[38%] top-[57%] w-[30%] -rotate-[18deg]" />
+          <span className="map-line left-[55%] top-[46%] w-[24%] rotate-[8deg]" />
+        </div>
+      ) : null}
+
       <div className="absolute left-4 top-4 rounded-lg bg-slate-950/95 px-3 py-2 text-xs font-bold text-white shadow-soft sm:text-sm">
         {t("map.badge", { place: mainLabel })}
       </div>
 
       {points.map((point, index) => {
         const isSelected = selectedLabel ? point.label === selectedLabel : index === 0;
+        const status = getPointStatus(point);
 
         return (
           <motion.button
@@ -72,16 +91,12 @@ const SimulatedMap = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.08 * index }}
           >
-            <span
-              className={`relative flex h-11 w-11 items-center justify-center rounded-lg shadow-soft ${
-                point.active
-                  ? "bg-[var(--color-secondary)] text-white"
-                  : "bg-[var(--color-card)] text-[var(--color-muted)] ring-1 ring-[var(--color-border)]"
-              }`}
-            >
-              {point.active ? (
-                <motion.span
-                  className="absolute inset-0 rounded-lg bg-[var(--color-secondary)]"
+          <span
+            className={`relative flex h-11 w-11 items-center justify-center rounded-lg shadow-soft ${getMarkerClass(status)}`}
+          >
+            {status === "sharing" ? (
+              <motion.span
+                className="absolute inset-0 rounded-lg bg-[var(--color-secondary)]"
                   animate={{ scale: [1, 1.55, 1], opacity: [0.28, 0, 0.28] }}
                   transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.18 }}
                 />

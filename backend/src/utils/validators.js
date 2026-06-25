@@ -110,3 +110,90 @@ export const validateRegisterPayload = (payload, existingUsers = []) => {
     }
   };
 };
+
+export const validLocationStatuses = ["sharing", "paused", "offline"];
+
+export const validateGroupPayload = (payload = {}) => {
+  const name = payload.name?.trim().replace(/\s+/g, " ") || "";
+  const description = payload.description?.trim().replace(/\s+/g, " ") || "";
+  const errors = {};
+
+  if (name.length < 2) {
+    errors.name = "El nombre del grupo es obligatorio.";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+    data: {
+      name,
+      description
+    }
+  };
+};
+
+export const validateGroupMemberPayload = (payload = {}) => {
+  const fullName = payload.fullName?.trim().replace(/\s+/g, " ") || "";
+  const email = payload.email?.trim().toLowerCase() || "";
+  const phone = payload.phone?.trim() || "";
+  const cedula = payload.cedula?.trim() || "";
+  const relation = payload.relation?.trim().replace(/\s+/g, " ") || "";
+  const locationStatus = validLocationStatuses.includes(payload.locationStatus)
+    ? payload.locationStatus
+    : "paused";
+  const errors = {};
+
+  if (!isValidFullName(fullName)) {
+    errors.fullName = "Ingresa nombres completos para el integrante.";
+  }
+
+  if (!isValidEmail(email)) {
+    errors.email = "Ingresa un correo electronico valido.";
+  }
+
+  if (!isValidEcuadorianPhone(phone)) {
+    errors.phone = "Ingresa un celular ecuatoriano valido, por ejemplo 0991234567.";
+  }
+
+  if (cedula && !isValidEcuadorianCedula(cedula)) {
+    errors.cedula = "Ingresa una cedula ecuatoriana valida si la registras.";
+  }
+
+  if (relation.length < 2) {
+    errors.relation = "La relacion dentro del grupo es obligatoria.";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+    data: {
+      fullName,
+      email,
+      phone,
+      cedula,
+      relation,
+      locationStatus,
+      lastLocation: payload.lastLocation?.trim() || "La Mariscal - Quito",
+      lastUpdate: payload.lastUpdate?.trim() || "Actualizado hace unos segundos"
+    }
+  };
+};
+
+export const validateLocationStatusPayload = (payload = {}) => {
+  const locationStatus = payload.locationStatus || "";
+
+  if (!validLocationStatuses.includes(locationStatus)) {
+    return {
+      isValid: false,
+      errors: {
+        locationStatus: "El estado debe ser sharing, paused u offline."
+      }
+    };
+  }
+
+  return {
+    isValid: true,
+    errors: {},
+    data: { locationStatus }
+  };
+};

@@ -1,6 +1,7 @@
 import React from "react";
 import {
   BellRing,
+  Code2,
   LayoutDashboard,
   LogOut,
   MapPinned,
@@ -20,14 +21,17 @@ const getLinks = (role, t) => {
     return [
       { to: "/admin/dashboard", label: t("sidebar.adminPanel"), icon: LayoutDashboard },
       { to: "/admin/dashboard#personas", label: t("sidebar.people"), icon: UsersRound },
+      { to: "/admin/dashboard#grupos", label: t("sidebar.groups"), icon: UsersRound },
       { to: "/admin/dashboard#mapa", label: t("sidebar.map"), icon: MapPin },
-      { to: "/admin/dashboard#alertas", label: t("sidebar.alerts"), icon: BellRing }
+      { to: "/admin/dashboard#alertas", label: t("sidebar.alerts"), icon: BellRing },
+      { to: "/admin/api", label: t("sidebar.api"), icon: Code2 }
     ];
   }
 
   return [
     { to: "/persona/dashboard", label: t("sidebar.myPanel"), icon: UserRound },
     { to: "/persona/dashboard#ubicacion", label: t("sidebar.myLocation"), icon: MapPin },
+    { to: "/persona/dashboard#grupos", label: t("sidebar.myGroup"), icon: UsersRound },
     { to: "/persona/dashboard#privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
     { to: "/persona/dashboard#circulo", label: t("sidebar.familyCircle"), icon: UsersRound }
   ];

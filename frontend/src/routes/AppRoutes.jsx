@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import DashboardLayout from "../layouts/DashboardLayout.jsx";
 import AdminDashboard from "../pages/AdminDashboard.jsx";
+import ApiResearch from "../pages/ApiResearch.jsx";
 import Home from "../pages/Home.jsx";
 import Login from "../pages/Login.jsx";
 import NotFound from "../pages/NotFound.jsx";
@@ -25,6 +26,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/api" element={<ApiResearch />} />
           </Route>
         </Route>
 

@@ -90,6 +90,69 @@ export const users = [
   }
 ];
 
+export const groups = [
+  {
+    id: 1,
+    name: "Familia",
+    createdBy: 2,
+    description: "Circulo familiar de prueba para seguimiento consentido.",
+    members: [
+      {
+        id: 1,
+        fullName: "Persona Demo Quito",
+        email: "persona@quitoapp.com",
+        phone: "0987654321",
+        cedula: "0926687856",
+        relation: "Yo",
+        locationStatus: "sharing",
+        lastLocation: "La Carolina - Quito",
+        lastUpdate: "Actualizado hace unos segundos",
+        top: "27%",
+        left: "62%"
+      },
+      {
+        id: 2,
+        fullName: "Maria Torres",
+        email: "maria.torres@example.com",
+        phone: "0991112222",
+        cedula: "1710034065",
+        relation: "Madre",
+        locationStatus: "sharing",
+        lastLocation: "Centro Historico - Quito",
+        lastUpdate: "Actualizado hace 1 min",
+        top: "55%",
+        left: "36%"
+      },
+      {
+        id: 3,
+        fullName: "Daniel Ruiz",
+        email: "daniel.ruiz@example.com",
+        phone: "0993334444",
+        cedula: "1710000017",
+        relation: "Hermano",
+        locationStatus: "paused",
+        lastLocation: "Universidad - Quito",
+        lastUpdate: "Pausado por el usuario",
+        top: "61%",
+        left: "48%"
+      },
+      {
+        id: 4,
+        fullName: "Sofia Andrade",
+        email: "sofia.andrade@example.com",
+        phone: "0995556666",
+        cedula: "1710000025",
+        relation: "Contacto seguro",
+        locationStatus: "offline",
+        lastLocation: "Cumbaya - Quito",
+        lastUpdate: "Sin conexion reciente",
+        top: "45%",
+        left: "76%"
+      }
+    ]
+  }
+];
+
 export const createSimulatedToken = (userId) => `${TOKEN_PREFIX}-${userId}`;
 
 export const getUserFromToken = (token) => {
@@ -120,4 +183,68 @@ export const updateLocationSharing = (userId, sharing) => {
   user.lastConnection = "2026-06-21 15:45";
 
   return user;
+};
+
+export const getVisibleGroups = (user) => {
+  if (user.role === "admin") return groups;
+
+  return groups.filter(
+    (group) =>
+      group.createdBy === user.id ||
+      group.members.some((member) => member.email === user.email)
+  );
+};
+
+export const getGroupById = (groupId) =>
+  groups.find((group) => group.id === Number(groupId));
+
+export const createGroup = ({ name, description = "", createdBy }) => {
+  const nextGroup = {
+    id: groups.length ? Math.max(...groups.map((group) => group.id)) + 1 : 1,
+    name,
+    description,
+    createdBy,
+    members: []
+  };
+
+  groups.push(nextGroup);
+  return nextGroup;
+};
+
+export const addMemberToGroup = (groupId, member) => {
+  const group = getGroupById(groupId);
+  if (!group) return null;
+
+  const nextMember = {
+    id: group.members.length
+      ? Math.max(...group.members.map((item) => item.id)) + 1
+      : 1,
+    locationStatus: "paused",
+    lastLocation: "La Mariscal - Quito",
+    lastUpdate: "Actualizado hace unos segundos",
+    top: `${34 + ((group.members.length * 9) % 42)}%`,
+    left: `${32 + ((group.members.length * 13) % 44)}%`,
+    ...member
+  };
+
+  group.members.push(nextMember);
+  return nextMember;
+};
+
+export const updateMemberLocationStatus = (groupId, memberId, locationStatus) => {
+  const group = getGroupById(groupId);
+  if (!group) return null;
+
+  const member = group.members.find((item) => item.id === Number(memberId));
+  if (!member) return null;
+
+  member.locationStatus = locationStatus;
+  member.lastUpdate =
+    locationStatus === "sharing"
+      ? "Actualizado hace unos segundos"
+      : locationStatus === "paused"
+        ? "Pausado por el usuario"
+        : "Sin conexion reciente";
+
+  return member;
 };

@@ -1,37 +1,38 @@
-# App Ubicacion Quito
+# Quito Ubicacion Segura
 
-Aplicacion web inicial para visibilizar la ubicacion simulada de una persona en Quito y alrededores. Esta version esta pensada como una primera entrega universitaria: profesional, entendible y lista para crecer sin usar todavia base de datos, Firebase ni autenticacion compleja.
+Aplicacion full-stack academica para compartir ubicacion simulada de forma segura en Quito y alrededores.
 
-## Objetivo
+La app esta pensada como base profesional para evolucionar hacia ubicacion en tiempo real, manteniendo una regla central: la ubicacion solo se comparte con consentimiento del usuario. No hay rastreo oculto.
 
-Construir una base full-stack separada en frontend y backend para probar registro, login, roles y estados de ubicacion simulada.
+## Funcionalidades
 
-## Descripcion general
+- Landing page premium con fondo animado tipo mapa urbano.
+- Login por rol: admin y persona.
+- Registro de cuenta tipo persona.
+- Dashboard admin con personas, mapa simulado, alertas y grupos.
+- Dashboard persona con control de compartir/pausar ubicacion.
+- Grupos familiares/amigos simulados en memoria.
+- Integrantes con relacion, telefono, cedula, estado de ubicacion y ultimo punto simulado.
+- Selector de tema visual.
+- Modo claro/oscuro.
+- Internacionalizacion inicial: Espanol Latino e Ingles Americano.
+- Investigacion de API aplicable al proyecto: Geoapify Location Platform.
 
-El sistema tiene dos perfiles:
-
-- `admin`: visualiza personas registradas, estados activos/inactivos, alertas simuladas y una tarjeta tipo mapa.
-- `persona`: entra a su panel, revisa sus datos y activa o desactiva el uso compartido de ubicacion.
-
-Toda la informacion se guarda en arreglos en memoria dentro del backend. Al reiniciar el servidor, los registros nuevos se pierden porque todavia no existe base de datos.
-
-## Tecnologias usadas
+## Tecnologias
 
 - Frontend: React, Vite, Tailwind CSS, React Router DOM, Framer Motion, Axios y Lucide React.
-- Backend: Node.js, Express, CORS, dotenv y nodemon.
-- Datos: arreglos en memoria, sin base de datos.
-- Autenticacion: token simulado preparado para reemplazarse despues por JWT.
+- Backend: Node.js, Express, CORS y dotenv.
+- Datos: arreglos en memoria, sin base de datos real.
+- Autenticacion: token simulado para pruebas academicas.
 
-## Estructura del repositorio
+## Estructura
 
 ```txt
 app-ubicacion-quito/
-├── frontend/
-├── backend/
-├── docs/
-├── scrum/
-├── .gitignore
-└── README.md
+  frontend/
+  backend/
+  docs/
+  README.md
 ```
 
 ## Credenciales de prueba
@@ -48,20 +49,6 @@ Persona:
 - Password: `Persona123`
 - Rol: `persona`
 
-## Ejecutar frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-URL por defecto:
-
-```txt
-http://localhost:5173
-```
-
 ## Ejecutar backend
 
 ```bash
@@ -76,46 +63,128 @@ URL por defecto:
 http://localhost:4000
 ```
 
-## Rutas principales del frontend
+## Ejecutar frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+URL por defecto:
+
+```txt
+http://localhost:5173
+```
+
+## Variables de entorno
+
+Backend:
+
+```env
+PORT=4000
+FRONTEND_URL=http://localhost:5173
+```
+
+Frontend:
+
+```env
+VITE_API_URL=http://localhost:4000/api
+VITE_MAP_API_KEY=tu_api_key_aqui
+VITE_MAP_PROVIDER=geoapify
+```
+
+No se debe subir una API key real al repositorio.
+
+## Rutas frontend
 
 - `/`: pagina principal.
 - `/login`: inicio de sesion.
-- `/register`: registro de cuenta tipo persona.
-- `/admin/dashboard`: panel del administrador.
-- `/persona/dashboard`: panel de persona.
+- `/register`: registro.
+- `/admin/dashboard`: dashboard admin.
+- `/admin/api`: investigacion visual de API.
+- `/persona/dashboard`: dashboard persona.
 - `/unauthorized`: acceso no autorizado.
-- `*`: pagina 404.
 
-## Rutas principales del backend
+## Endpoints backend
+
+Autenticacion:
 
 - `POST /api/auth/login`
 - `POST /api/auth/register`
+
+Usuarios:
+
 - `GET /api/users`
 - `GET /api/users/me`
+
+Ubicacion:
+
 - `GET /api/location/:userId`
 - `PATCH /api/location/share`
 
-Las rutas protegidas usan el header:
+Grupos simulados:
+
+- `GET /api/groups`
+- `POST /api/groups`
+- `GET /api/groups/:groupId`
+- `POST /api/groups/:groupId/members`
+- `PATCH /api/groups/:groupId/members/:memberId/location-status`
+
+Las rutas protegidas usan:
 
 ```txt
 Authorization: Bearer token-simulado-1
 ```
 
-El token se recibe al iniciar sesion. Tambien se acepta `Bearer token-simulado` para pruebas simples.
+## Grupos familiares/amigos
 
-## Reglas para trabajar en equipo con GitHub
+Los grupos se guardan en memoria dentro del backend. Sirven para simular circulos de confianza:
 
-- No subir `node_modules`, `.env` ni archivos generados como `dist`.
-- Antes de empezar una tarea, hacer `git pull` desde la rama base.
-- Trabajar en ramas pequeñas y con nombres claros.
-- Hacer commits con mensajes descriptivos.
-- Abrir pull request hacia `dev` antes de unir cambios a `main`.
-- Revisar que frontend y backend sigan separados.
-- No modificar archivos de `.idea` si no es estrictamente necesario.
+- Familia.
+- Amigos seguros.
+- Contactos de emergencia.
 
-## Ramas recomendadas
+Cada integrante puede tener:
 
-- `main`: version estable del proyecto.
-- `dev`: integracion de avances del equipo.
-- `feature/frontend`: cambios de interfaz, componentes y rutas React.
-- `feature/backend`: endpoints, controladores, validaciones y datos del servidor.
+- nombres completos
+- correo
+- telefono ecuatoriano
+- cedula ecuatoriana
+- relacion dentro del grupo
+- estado: compartiendo, pausado o sin conexion
+- ultima ubicacion simulada
+
+## API investigada
+
+API seleccionada: Geoapify Location Platform.
+
+Sirve para una futura integracion con:
+
+- mapas reales
+- geocoding
+- reverse geocoding
+- rutas
+- lugares cercanos
+- isolineas
+
+Documento completo:
+
+```txt
+docs/api-investigacion.md
+```
+
+Seccion visual:
+
+```txt
+/admin/api
+```
+
+## Verificacion
+
+```bash
+cd frontend
+npm run build
+```
+
+El proyecto no usa Firebase, no usa base de datos real y no solicita permisos reales de GPS en esta version.

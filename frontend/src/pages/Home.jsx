@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BellRing,
+  Code2,
+  Globe2,
   HeartHandshake,
   LockKeyhole,
   MapPinned,
@@ -230,6 +232,45 @@ const Home = () => {
                     </p>
                   </div>
                 </motion.article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-[var(--color-border)] bg-[var(--color-card)] py-14">
+          <div className="mx-auto grid max-w-7xl items-start gap-8 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
+                {t("api.status")}
+              </p>
+              <h2 className="mt-2 text-3xl font-bold text-[var(--color-text)]">
+                {t("api.title")}
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
+                {t("api.summary")}
+              </p>
+              <Button className="mt-6" icon={Globe2} to="/admin/api" variant="secondary">
+                {t("sidebar.api")}
+              </Button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                [t("api.company"), t("api.companyValue")],
+                [t("api.cost"), t("api.costValue")],
+                [t("api.why"), t("api.whyValue")],
+                [t("api.env"), "VITE_MAP_API_KEY"]
+              ].map(([label, value]) => (
+                <article
+                  className="min-h-[150px] rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-5"
+                  key={label}
+                >
+                  <Code2 className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />
+                  <h3 className="mt-3 font-bold text-[var(--color-text)]">{label}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                    {value}
+                  </p>
+                </article>
               ))}
             </div>
           </div>

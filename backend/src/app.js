@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import authRoutes from "./routes/auth.routes.js";
+import groupsRoutes from "./routes/groups.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/location", locationRoutes);
+app.use("/api/groups", groupsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

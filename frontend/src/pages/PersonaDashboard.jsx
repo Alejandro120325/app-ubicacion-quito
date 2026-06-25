@@ -8,6 +8,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Plus,
   Power,
   ShieldCheck,
   UserRound,
@@ -15,7 +16,12 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import api from "../api/api.js";
+import AddMemberModal from "../components/AddMemberModal.jsx";
 import Button from "../components/Button.jsx";
+import CreateGroupModal from "../components/CreateGroupModal.jsx";
+import GroupCard from "../components/GroupCard.jsx";
+import GroupMapPanel from "../components/GroupMapPanel.jsx";
+import GroupMemberCard from "../components/GroupMemberCard.jsx";
 import LanguageSelector from "../components/LanguageSelector.jsx";
 import LoadingScreen from "../components/LoadingScreen.jsx";
 import SimulatedMap from "../components/SimulatedMap.jsx";
@@ -28,10 +34,17 @@ const PersonaDashboard = () => {
   const { t } = useLanguage();
   const [profile, setProfile] = useState(user);
   const [location, setLocation] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [groupForMember, setGroupForMember] = useState(null);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [sharing, setSharing] = useState(Boolean(user?.sharingLocation));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [groupMessage, setGroupMessage] = useState("");
 
   const circleContacts = useMemo(
     () => [
@@ -64,10 +77,14 @@ const PersonaDashboard = () => {
           api.get("/users/me"),
           api.get(`/location/${user.id}`)
         ]);
+        const groupsResponse = await api.get("/groups");
 
         setProfile(meResponse.data.user);
         setSharing(Boolean(meResponse.data.user.sharingLocation));
         setLocation(locationResponse.data.location);
+        setGroups(groupsResponse.data.groups || []);
+        setSelectedGroup(groupsResponse.data.groups?.[0] || null);
+        setSelectedMember(groupsResponse.data.groups?.[0]?.members?.[0] || null);
         updateUser(meResponse.data.user);
       } catch (requestError) {
         setError(requestError.response?.data?.message || t("persona.loadError"));
@@ -96,6 +113,47 @@ const PersonaDashboard = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCreateGroup = async (payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.post("/groups", payload);
+      const nextGroups = [...groups, data.group];
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(null);
+      setCreateGroupOpen(false);
+      setGroupMessage(t("groups.createSuccess"));
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || t("groups.error"));
+      return false;
+    }
+  };
+
+  const handleAddMember = async (groupId, payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.post(`/groups/${groupId}/members`, payload);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(data.member);
+      setAddMemberOpen(false);
+      setGroupMessage(t("groups.memberSuccess"));
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || t("groups.error"));
+      return false;
+    }
+  };
+
+  const openAddMember = (group) => {
+    setGroupForMember(group);
+    setAddMemberOpen(true);
   };
 
   if (loading) {
@@ -261,6 +319,68 @@ const PersonaDashboard = () => {
           </article>
 
           <article
+            id="grupos"
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
+                  {t("sidebar.myGroup")}
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-[var(--color-text)]">
+                  {t("groups.title")}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  {t("groups.subtitle")}
+                </p>
+              </div>
+              <Button icon={Plus} size="sm" onClick={() => setCreateGroupOpen(true)}>
+                {t("groups.create")}
+              </Button>
+            </div>
+
+            {groupMessage ? (
+              <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-text)]">
+                {groupMessage}
+              </div>
+            ) : null}
+
+            <div className="mt-5 grid gap-4">
+              {groups.length ? (
+                groups.map((group) => (
+                  <GroupCard
+                    active={selectedGroup?.id === group.id}
+                    group={group}
+                    key={group.id}
+                    onAddMember={openAddMember}
+                    onSelect={(nextGroup) => {
+                      setSelectedGroup(nextGroup);
+                      setSelectedMember(nextGroup.members?.[0] || null);
+                    }}
+                  />
+                ))
+              ) : (
+                <p className="rounded-lg bg-[var(--color-soft)] p-4 text-sm text-[var(--color-muted)]">
+                  {t("groups.empty")}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-5 grid gap-4">
+              <GroupMapPanel group={selectedGroup} selectedMember={selectedMember} />
+              <div className="grid gap-4 md:grid-cols-2">
+                {(selectedGroup?.members || []).map((member) => (
+                  <GroupMemberCard
+                    key={member.id}
+                    member={member}
+                    onView={setSelectedMember}
+                  />
+                ))}
+              </div>
+            </div>
+          </article>
+
+          <article
             id="privacidad"
             className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-5"
           >
@@ -321,6 +441,17 @@ const PersonaDashboard = () => {
           </article>
         </section>
       </div>
+      <CreateGroupModal
+        open={createGroupOpen}
+        onClose={() => setCreateGroupOpen(false)}
+        onSubmit={handleCreateGroup}
+      />
+      <AddMemberModal
+        group={groupForMember}
+        open={addMemberOpen}
+        onClose={() => setAddMemberOpen(false)}
+        onSubmit={handleAddMember}
+      />
     </motion.section>
   );
 };
