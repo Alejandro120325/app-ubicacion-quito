@@ -1,0 +1,117 @@
+import { AlertTriangle, CalendarDays, Mail, MapPin, Phone } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+
+import { Card } from "@/components/card";
+import { DetailRow } from "@/components/detail-row";
+import { GradientScreen } from "@/components/gradient-screen";
+import { LoadingView } from "@/components/loading-view";
+import { PersonCard } from "@/components/person-card";
+import { Pill } from "@/components/pill";
+import { Text } from "@/components/text";
+import { useAdminData } from "@/hooks/use-dashboard-data";
+import type { User } from "@/types";
+
+export function AdminPeopleScreen() {
+  const { error, loading, people } = useAdminData();
+  const [selectedPerson, setSelectedPerson] = useState<User | null>(people[0] || null);
+
+  useEffect(() => {
+    setSelectedPerson((current) => current || people[0] || null);
+  }, [people]);
+
+  return (
+    <GradientScreen>
+      <View style={styles.header}>
+        <Pill tone="blue">Personas</Pill>
+        <Text style={styles.title}>Personas registradas</Text>
+        <Text muted style={styles.subtitle}>
+          Persona Demo Quito, Camila Torres y Mateo Andrade son perfiles base de prueba.
+        </Text>
+      </View>
+
+      {error ? (
+        <Card soft style={styles.notice}>
+          <AlertTriangle color="#fde68a" size={18} />
+          <Text style={styles.noticeText}>{error}</Text>
+        </Card>
+      ) : null}
+
+      {loading ? <LoadingView message="Cargando personas..." /> : null}
+
+      <View style={styles.list}>
+        {people.map((person) => (
+          <PersonCard key={person.id} person={person} onPress={setSelectedPerson} />
+        ))}
+      </View>
+
+      {selectedPerson ? (
+        <Card elevated style={styles.detail}>
+          <Pill tone={selectedPerson.active ? "green" : "muted"}>
+            {selectedPerson.active ? "Activo" : "Inactivo"}
+          </Pill>
+          <Text style={styles.detailTitle}>{selectedPerson.fullName}</Text>
+          <Text muted style={styles.detailText}>
+            Detalle de persona seleccionada para revision administrativa.
+          </Text>
+          <DetailRow icon={Mail} label="Correo" value={selectedPerson.email} />
+          <DetailRow icon={Phone} label="Telefono" value={selectedPerson.phone} />
+          <DetailRow
+            icon={MapPin}
+            label="Ultima ubicacion"
+            value={`${selectedPerson.lastLocation?.sector || "Sin datos"} - Quito`}
+          />
+          <DetailRow
+            icon={CalendarDays}
+            label="Ultima conexion"
+            value={selectedPerson.lastConnection}
+          />
+        </Card>
+      ) : null}
+    </GradientScreen>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: {
+    gap: 12,
+    paddingTop: 12
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "900",
+    lineHeight: 37
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22
+  },
+  notice: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 10,
+    padding: 12
+  },
+  noticeText: {
+    color: "#fde68a",
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 19
+  },
+  list: {
+    gap: 12
+  },
+  detail: {
+    gap: 12
+  },
+  detailTitle: {
+    fontSize: 22,
+    fontWeight: "900",
+    lineHeight: 28
+  },
+  detailText: {
+    fontSize: 13,
+    lineHeight: 19
+  }
+});
