@@ -1,5 +1,13 @@
 import { useRouter } from "expo-router";
-import { KeyRound, Mail, ShieldCheck, UserRound } from "lucide-react-native";
+import {
+  AlertCircle,
+  CheckCircle2,
+  KeyRound,
+  Mail,
+  Server,
+  ShieldCheck,
+  UserRound
+} from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -8,11 +16,11 @@ import { Card } from "@/components/card";
 import { FormField } from "@/components/form-field";
 import { GradientScreen } from "@/components/gradient-screen";
 import { Pill } from "@/components/pill";
-import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
 import { demoCredentials } from "@/data/mock-data";
+import { API_BASE_URL } from "@/services/api";
 import { validateLoginForm, type FieldErrors } from "@/utils/validators";
 
 export function LoginScreen() {
@@ -66,13 +74,25 @@ export function LoginScreen() {
         <Pill icon={ShieldCheck} tone="green">
           Acceso seguro
         </Pill>
-        <Text style={styles.title}>Iniciar sesion</Text>
+        <Text style={styles.title}>Quito Ubicacion Segura</Text>
         <Text muted style={styles.subtitle}>
-          Entra con tu cuenta de administrador o persona para ver tu panel movil.
+          Ingresa con una cuenta de administrador o persona para continuar.
         </Text>
       </View>
 
       <Card elevated style={styles.formCard}>
+        <View style={styles.formHeader}>
+          <View style={styles.formIcon}>
+            <KeyRound color={colors.white} size={20} />
+          </View>
+          <View style={styles.formTitleBlock}>
+            <Text style={styles.formTitle}>Iniciar sesion</Text>
+            <Text muted style={styles.formSubtitle}>
+              Acceso validado por el backend local.
+            </Text>
+          </View>
+        </View>
+
         <FormField
           autoCapitalize="none"
           autoComplete="email"
@@ -94,9 +114,13 @@ export function LoginScreen() {
         />
 
         {serverError ? (
-          <Card soft style={styles.errorBox}>
-            <Text style={styles.errorText}>{serverError}</Text>
-          </Card>
+          <View style={styles.errorBox}>
+            <AlertCircle color="#fecaca" size={18} />
+            <View style={styles.errorContent}>
+              <Text style={styles.errorTitle}>Servidor local no responde</Text>
+              <Text style={styles.errorText}>{serverError}</Text>
+            </View>
+          </View>
         ) : null}
 
         <ActionButton
@@ -107,12 +131,26 @@ export function LoginScreen() {
         >
           Iniciar sesion
         </ActionButton>
+
+        {serverError ? (
+          <View style={styles.serverHint}>
+            <Server color={colors.secondary} size={15} />
+            <Text muted style={styles.serverHintText}>
+              Android emulator usa http://10.0.2.2:4000/api. API actual: {API_BASE_URL}
+            </Text>
+          </View>
+        ) : null}
       </Card>
 
       <Card style={styles.demoCard}>
         <View style={styles.demoTitle}>
           <UserRound color={colors.primary} size={18} />
-          <Text style={styles.demoHeading}>Credenciales de prueba</Text>
+          <View style={styles.demoTitleCopy}>
+            <Text style={styles.demoHeading}>Credenciales de prueba</Text>
+            <Text muted style={styles.demoSubheading}>
+              Toca una tarjeta para completar el formulario.
+            </Text>
+          </View>
         </View>
         <View style={styles.demoList}>
           {demoCredentials.map((credential) => (
@@ -122,19 +160,19 @@ export function LoginScreen() {
               onPress={() => fillDemo(credential)}
               style={({ pressed }) => [styles.demoItem, pressed ? styles.pressed : null]}
             >
-              <Text style={styles.demoRole}>{credential.role}</Text>
-              <Text muted style={styles.demoText}>
-                {credential.email}
-              </Text>
-              <Text muted style={styles.demoText}>
-                {credential.password}
-              </Text>
+              <View style={styles.demoContent}>
+                <Text style={styles.demoRole}>{credential.role}</Text>
+                <Text muted style={styles.demoText}>
+                  {credential.email}
+                </Text>
+              </View>
+              <View style={styles.demoAction}>
+                <CheckCircle2 color={colors.secondary} size={18} />
+              </View>
             </Pressable>
           ))}
         </View>
       </Card>
-
-      <SimulatedMap height={300} />
 
       <ActionButton onPress={() => router.push("/register")} variant="secondary">
         Crear cuenta persona
@@ -145,50 +183,122 @@ export function LoginScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    gap: 12,
-    paddingTop: 12
+    gap: 10,
+    paddingTop: 18
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "900",
-    lineHeight: 38
+    lineHeight: 36
   },
   subtitle: {
     fontSize: 15,
     lineHeight: 22
   },
   formCard: {
-    gap: 16
+    gap: 16,
+    padding: 18
+  },
+  formHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12
+  },
+  formIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderCurve: "continuous",
+    borderRadius: 10,
+    height: 44,
+    justifyContent: "center",
+    width: 44
+  },
+  formTitleBlock: {
+    flex: 1,
+    gap: 2
+  },
+  formTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    lineHeight: 25
+  },
+  formSubtitle: {
+    fontSize: 12,
+    lineHeight: 17
   },
   errorBox: {
+    alignItems: "flex-start",
+    backgroundColor: "rgba(127, 29, 29, 0.32)",
     borderColor: "rgba(239, 68, 68, 0.45)",
+    borderCurve: "continuous",
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
     padding: 12
+  },
+  errorContent: {
+    flex: 1,
+    gap: 3
+  },
+  errorTitle: {
+    color: "#fee2e2",
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 17
   },
   errorText: {
     color: "#fecaca",
-    fontSize: 13,
-    fontWeight: "800"
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17
+  },
+  serverHint: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    paddingTop: 12
+  },
+  serverHintText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 15
   },
   demoCard: {
-    gap: 13
+    gap: 13,
+    padding: 16
   },
   demoTitle: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
     gap: 8
   },
+  demoTitleCopy: {
+    flex: 1,
+    gap: 2
+  },
   demoHeading: {
-    fontWeight: "900"
+    fontWeight: "900",
+    lineHeight: 19
+  },
+  demoSubheading: {
+    fontSize: 12,
+    lineHeight: 16
   },
   demoList: {
-    gap: 10
+    gap: 8
   },
   demoItem: {
+    alignItems: "center",
     backgroundColor: colors.cardSoft,
     borderColor: colors.border,
     borderRadius: 8,
     borderWidth: 1,
+    flexDirection: "row",
     gap: 3,
+    justifyContent: "space-between",
     padding: 12
   },
   pressed: {
@@ -199,8 +309,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900"
   },
+  demoContent: {
+    flex: 1,
+    gap: 3
+  },
   demoText: {
     fontSize: 12,
     lineHeight: 17
+  },
+  demoAction: {
+    alignItems: "center",
+    backgroundColor: "rgba(20, 184, 166, 0.12)",
+    borderRadius: 8,
+    height: 34,
+    justifyContent: "center",
+    width: 34
   }
 });

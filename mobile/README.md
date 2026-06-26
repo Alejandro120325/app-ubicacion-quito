@@ -33,7 +33,12 @@ Crea un archivo `.env` dentro de `/mobile` tomando como base `.env.example`:
 EXPO_PUBLIC_API_URL=http://localhost:4000/api
 ```
 
-Segun el destino de prueba, usa una de estas URLs:
+Si no creas `.env`, la app usa automaticamente:
+
+- Android emulator: `http://10.0.2.2:4000/api`
+- Web/iOS simulator: `http://localhost:4000/api`
+
+Si necesitas sobrescribir la URL, usa una de estas opciones:
 
 - Web/local: `http://localhost:4000/api`
 - Android emulator: `http://10.0.2.2:4000/api`

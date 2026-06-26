@@ -1,8 +1,18 @@
 import { getStoredSession } from "@/services/storage";
 
-const DEFAULT_API_URL = "http://localhost:4000/api";
+const DEFAULT_API_URLS = {
+  android: "http://10.0.2.2:4000/api",
+  default: "http://localhost:4000/api",
+  ios: "http://localhost:4000/api",
+  web: "http://localhost:4000/api"
+};
 
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL;
+const getDefaultApiUrl = () => {
+  const os = process.env.EXPO_OS as keyof typeof DEFAULT_API_URLS | undefined;
+  return DEFAULT_API_URLS[os || "default"] || DEFAULT_API_URLS.default;
+};
+
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || getDefaultApiUrl();
 
 export class ApiError extends Error {
   status: number;
@@ -54,7 +64,10 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
     return data as T;
   } catch (error) {
     if (error instanceof ApiError) throw error;
-    throw new ApiError("Backend no disponible. Revisa la URL de la API.", 0);
+    throw new ApiError(
+      `No se pudo conectar con el backend (${API_BASE_URL}). Verifica que este levantado o configura EXPO_PUBLIC_API_URL.`,
+      0
+    );
   }
 }
 
