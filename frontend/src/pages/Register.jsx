@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { BadgeCheck, Home, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AnimatedBackground from "../components/AnimatedBackground.jsx";
@@ -134,6 +134,13 @@ const Register = () => {
                   to="/login"
                 >
                   {t("register.backLogin")}
+                </Link>
+                <Link
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-soft)] focus-ring"
+                  to="/"
+                >
+                  <Home className="h-4 w-4" aria-hidden="true" />
+                  {t("common.backHome")}
                 </Link>
               </div>
 

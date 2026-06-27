@@ -6,6 +6,7 @@ import {
   Code2,
   Globe2,
   HeartHandshake,
+  LogOut,
   LockKeyhole,
   MapPinned,
   PanelLeftOpen,
@@ -18,10 +19,26 @@ import AnimatedBackground from "../components/AnimatedBackground.jsx";
 import Button from "../components/Button.jsx";
 import Navbar from "../components/Navbar.jsx";
 import SimulatedMap from "../components/SimulatedMap.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const { isAuthenticated, logout, user } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  const dashboardPath = user?.role === "admin" ? "/admin/dashboard" : "/persona/dashboard";
+  const apiPath = isAuthenticated
+    ? user?.role === "admin"
+      ? "/admin/api"
+      : "/persona/api"
+    : "/login";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const benefits = [
     {
@@ -108,12 +125,25 @@ const Home = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.24 }}
               >
-                <Button icon={ArrowRight} size="lg" to="/login">
-                  {t("home.signIn")}
-                </Button>
-                <Button icon={UserPlus} size="lg" to="/register" variant="secondary">
-                  {t("home.createAccount")}
-                </Button>
+                {isAuthenticated ? (
+                  <>
+                    <Button icon={ArrowRight} size="lg" to={dashboardPath}>
+                      {t("home.goPanel")}
+                    </Button>
+                    <Button icon={LogOut} size="lg" variant="secondary" onClick={handleLogout}>
+                      {t("sidebar.logout")}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button icon={ArrowRight} size="lg" to="/login">
+                      {t("home.signIn")}
+                    </Button>
+                    <Button icon={UserPlus} size="lg" to="/register" variant="secondary">
+                      {t("home.createAccount")}
+                    </Button>
+                  </>
+                )}
               </motion.div>
 
               <motion.div
@@ -249,7 +279,7 @@ const Home = () => {
               <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
                 {t("api.summary")}
               </p>
-              <Button className="mt-6" icon={Globe2} to="/admin/api" variant="secondary">
+              <Button className="mt-6" icon={Globe2} to={apiPath} variant="secondary">
                 {t("sidebar.api")}
               </Button>
             </div>
@@ -288,12 +318,25 @@ const Home = () => {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button icon={UsersRound} to="/login" variant="dark">
-                {t("home.tryLogin")}
-              </Button>
-              <Button icon={BellRing} to="/register" variant="secondary">
-                {t("home.registerPerson")}
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button icon={UsersRound} to={dashboardPath} variant="dark">
+                    {t("home.goPanel")}
+                  </Button>
+                  <Button icon={LogOut} variant="secondary" onClick={handleLogout}>
+                    {t("sidebar.logout")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button icon={UsersRound} to="/login" variant="dark">
+                    {t("home.tryLogin")}
+                  </Button>
+                  <Button icon={BellRing} to="/register" variant="secondary">
+                    {t("home.registerPerson")}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </section>

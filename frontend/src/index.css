@@ -102,6 +102,13 @@ body {
     color 220ms ease;
 }
 
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 button,
 input,
 select {
@@ -210,10 +217,11 @@ button {
 
   .map-line {
     position: absolute;
-    height: 3px;
+    height: 4px;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
     opacity: 0.8;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-primary) 22%, transparent);
   }
 
   .glass-panel {

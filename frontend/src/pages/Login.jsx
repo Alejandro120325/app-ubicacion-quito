@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { KeyRound, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { Home, KeyRound, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AnimatedBackground from "../components/AnimatedBackground.jsx";
@@ -102,10 +102,19 @@ const Login = () => {
 
         <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 text-[var(--color-text)] shadow-soft sm:p-8">
           <div className="mb-7">
-            <p className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-primary)]">
-              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-              {t("login.secure")}
-            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-primary)]">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                {t("login.secure")}
+              </p>
+              <Link
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-soft)] focus-ring"
+                to="/"
+              >
+                <Home className="h-4 w-4" aria-hidden="true" />
+                {t("common.backHome")}
+              </Link>
+            </div>
             <h1 className="mt-4 text-3xl font-bold text-[var(--color-text)]">
               {t("login.title")}
             </h1>

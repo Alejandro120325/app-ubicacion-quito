@@ -4,7 +4,7 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 
 const statusToActive = (status) => status === "sharing";
 
-const GroupMapPanel = ({ group, selectedMember }) => {
+const GroupMapPanel = ({ className = "", group, selectedMember, variant = "dashboard" }) => {
   const { t } = useLanguage();
   const members = group?.members || [];
   const points = members.map((member) => ({
@@ -16,7 +16,7 @@ const GroupMapPanel = ({ group, selectedMember }) => {
   }));
 
   return (
-    <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
+    <article className={`rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm ${className}`}>
       <div className="mb-4">
         <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
           {t("groups.groupMap")}
@@ -29,10 +29,12 @@ const GroupMapPanel = ({ group, selectedMember }) => {
         </p>
       </div>
       <SimulatedMap
-        dashboard
+        members={members}
         points={points}
-        selectedLabel={selectedMember?.relation || selectedMember?.fullName}
+        selectedMember={selectedMember}
+        showMembers
         showConnections
+        variant={variant}
       />
     </article>
   );

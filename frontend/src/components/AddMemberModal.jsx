@@ -10,8 +10,18 @@ const initialForm = {
   phone: "",
   cedula: "",
   relation: "",
-  locationStatus: "sharing"
+  locationStatus: "sharing",
+  lastLocation: ""
 };
+
+const relationOptions = [
+  "mother",
+  "father",
+  "sibling",
+  "friend",
+  "safeContact",
+  "other"
+];
 
 const AddMemberModal = ({ group, onClose, onSubmit, open }) => {
   const { t } = useLanguage();
@@ -84,13 +94,24 @@ const AddMemberModal = ({ group, onClose, onSubmit, open }) => {
             value={form.cedula}
             onChange={handleChange}
           />
-          <InputField
-            label={t("groups.relation")}
-            name="relation"
-            placeholder={t("groups.relationPlaceholder")}
-            value={form.relation}
-            onChange={handleChange}
-          />
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
+              {t("groups.relation")}
+            </span>
+            <select
+              className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-ring)]"
+              name="relation"
+              value={form.relation}
+              onChange={handleChange}
+            >
+              <option value="">{t("register.select")}</option>
+              {relationOptions.map((relation) => (
+                <option key={relation} value={t(`groups.relations.${relation}`)}>
+                  {t(`groups.relations.${relation}`)}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-[var(--color-text)]">
               {t("groups.status")}
@@ -106,6 +127,13 @@ const AddMemberModal = ({ group, onClose, onSubmit, open }) => {
               <option value="offline">{t("groups.status.offline")}</option>
             </select>
           </label>
+          <InputField
+            label={t("groups.lastLocation")}
+            name="lastLocation"
+            placeholder="La Mariscal - Quito"
+            value={form.lastLocation}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="mt-6 flex justify-end gap-3">

@@ -1,41 +1,15 @@
 import React from "react";
 import {
-  BellRing,
-  Code2,
-  LayoutDashboard,
   LogOut,
   MapPinned,
-  MapPin,
   Radar,
-  ShieldCheck,
-  UsersRound,
-  UserRound
+  ShieldCheck
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { getDashboardLinks } from "../utils/dashboardNavigation.js";
 import Button from "./Button.jsx";
-
-const getLinks = (role, t) => {
-  if (role === "admin") {
-    return [
-      { to: "/admin/dashboard", label: t("sidebar.adminPanel"), icon: LayoutDashboard },
-      { to: "/admin/dashboard#personas", label: t("sidebar.people"), icon: UsersRound },
-      { to: "/admin/dashboard#grupos", label: t("sidebar.groups"), icon: UsersRound },
-      { to: "/admin/dashboard#mapa", label: t("sidebar.map"), icon: MapPin },
-      { to: "/admin/dashboard#alertas", label: t("sidebar.alerts"), icon: BellRing },
-      { to: "/admin/api", label: t("sidebar.api"), icon: Code2 }
-    ];
-  }
-
-  return [
-    { to: "/persona/dashboard", label: t("sidebar.myPanel"), icon: UserRound },
-    { to: "/persona/dashboard#ubicacion", label: t("sidebar.myLocation"), icon: MapPin },
-    { to: "/persona/dashboard#grupos", label: t("sidebar.myGroup"), icon: UsersRound },
-    { to: "/persona/dashboard#privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
-    { to: "/persona/dashboard#circulo", label: t("sidebar.familyCircle"), icon: UsersRound }
-  ];
-};
 
 const Sidebar = () => {
   const { logout, user } = useAuth();
@@ -48,8 +22,8 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="border-b border-[var(--color-border)] bg-[var(--color-card)] lg:sticky lg:top-0 lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r">
-      <div className="flex h-full flex-col p-4">
+    <aside className="hidden border-r border-[var(--color-border)] bg-[var(--color-card)] lg:sticky lg:top-0 lg:flex lg:min-h-screen lg:w-72">
+      <div className="flex h-full w-full flex-col p-5">
         <div className="flex items-center gap-3 rounded-lg bg-slate-950 p-4 text-white shadow-soft">
           <span className="rounded-lg bg-[var(--color-primary)] p-2 shadow-glow">
             <MapPinned className="h-5 w-5" aria-hidden="true" />
@@ -61,7 +35,7 @@ const Sidebar = () => {
         </div>
 
         <nav className="mt-4 grid gap-2">
-          {getLinks(user?.role, t).map((item) => {
+          {getDashboardLinks(user?.role, t).map((item) => {
             const Icon = item.icon;
 
             return (
@@ -74,6 +48,7 @@ const Sidebar = () => {
                   }`
                 }
                 key={item.to}
+                end={item.to === "/"}
                 to={item.to}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
