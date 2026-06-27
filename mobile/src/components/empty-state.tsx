@@ -32,8 +32,10 @@ const styles = StyleSheet.create({
   },
   icon: {
     alignItems: "center",
-    backgroundColor: "rgba(20, 184, 166, 0.16)",
+    backgroundColor: "rgba(20, 184, 166, 0.18)",
+    borderColor: "rgba(153, 246, 228, 0.2)",
     borderRadius: 8,
+    borderWidth: 1,
     height: 42,
     justifyContent: "center",
     width: 42

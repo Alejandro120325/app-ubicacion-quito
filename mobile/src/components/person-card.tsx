@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     lineHeight: 18
   },
   footer: {
-    borderColor: colors.border,
+    borderColor: colors.glassBorder,
     borderTopWidth: 1,
     paddingTop: 12
   },

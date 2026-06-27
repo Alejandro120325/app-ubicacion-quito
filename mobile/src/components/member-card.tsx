@@ -83,8 +83,10 @@ const styles = StyleSheet.create({
     marginTop: 2
   },
   meta: {
-    backgroundColor: colors.cardSoft,
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
+    borderWidth: 1,
     gap: 4,
     padding: 10
   },

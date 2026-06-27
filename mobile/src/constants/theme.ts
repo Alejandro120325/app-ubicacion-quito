@@ -4,6 +4,11 @@ export const colors = {
   card: "#0f172a",
   cardSoft: "#111827",
   cardElevated: "#152033",
+  glass: "rgba(15, 23, 42, 0.62)",
+  glassSoft: "rgba(17, 24, 39, 0.42)",
+  glassStrong: "rgba(21, 32, 51, 0.76)",
+  glassBorder: "rgba(255, 255, 255, 0.12)",
+  glassHighlight: "rgba(255, 255, 255, 0.2)",
   border: "#1e293b",
   borderStrong: "#334155",
   text: "#f8fafc",
@@ -29,5 +34,8 @@ export const radii = {
 export const shadows = {
   soft: {
     boxShadow: "0 18px 40px rgba(0, 0, 0, 0.28)"
+  },
+  glass: {
+    boxShadow: "0 22px 48px rgba(0, 0, 0, 0.34)"
   }
 };

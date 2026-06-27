@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   serverHint: {
     alignItems: "center",
-    borderColor: colors.border,
+    borderColor: colors.glassBorder,
     borderTopWidth: 1,
     flexDirection: "row",
     gap: 8,
@@ -292,8 +292,8 @@ const styles = StyleSheet.create({
   },
   demoItem: {
     alignItems: "center",
-    backgroundColor: colors.cardSoft,
-    borderColor: colors.border,
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
@@ -319,8 +319,10 @@ const styles = StyleSheet.create({
   },
   demoAction: {
     alignItems: "center",
-    backgroundColor: "rgba(20, 184, 166, 0.12)",
+    backgroundColor: "rgba(20, 184, 166, 0.18)",
+    borderColor: "rgba(153, 246, 228, 0.2)",
     borderRadius: 8,
+    borderWidth: 1,
     height: 34,
     justifyContent: "center",
     width: 34

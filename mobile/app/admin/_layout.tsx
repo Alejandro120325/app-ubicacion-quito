@@ -28,8 +28,10 @@ export default function AdminLayout() {
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontSize: 10, fontWeight: "800" },
         tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
+          backgroundColor: "rgba(15, 23, 42, 0.88)",
+          borderTopColor: colors.glassBorder,
+          borderTopWidth: 1,
+          boxShadow: "0 -16px 36px rgba(0, 0, 0, 0.28)",
           minHeight: 64,
           paddingBottom: 7,
           paddingTop: 7

@@ -27,8 +27,10 @@ export function DetailRow({ icon: Icon, label, value }: DetailRowProps) {
 const styles = StyleSheet.create({
   row: {
     alignItems: "flex-start",
-    backgroundColor: colors.cardSoft,
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
+    borderWidth: 1,
     flexDirection: "row",
     gap: 9,
     padding: 12

@@ -257,13 +257,13 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   meter: {
-    backgroundColor: colors.border,
+    backgroundColor: "rgba(255, 255, 255, 0.09)",
     borderRadius: 999,
     height: 8,
     overflow: "hidden"
   },
   meterFill: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.secondary,
     borderRadius: 999,
     height: "100%"
   },
@@ -273,13 +273,16 @@ const styles = StyleSheet.create({
     gap: 8
   },
   rule: {
-    backgroundColor: colors.card,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
+    borderWidth: 1,
     paddingHorizontal: 9,
     paddingVertical: 5
   },
   rulePass: {
-    backgroundColor: "rgba(34, 197, 94, 0.18)"
+    backgroundColor: "rgba(34, 197, 94, 0.2)",
+    borderColor: "rgba(187, 247, 208, 0.22)"
   },
   ruleText: {
     color: colors.muted,
@@ -302,8 +305,8 @@ const styles = StyleSheet.create({
     gap: 10
   },
   languageButton: {
-    backgroundColor: colors.cardSoft,
-    borderColor: colors.border,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,

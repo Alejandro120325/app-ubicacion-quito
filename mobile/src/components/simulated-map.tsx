@@ -49,6 +49,7 @@ export function SimulatedMap({
 }: SimulatedMapProps) {
   return (
     <View style={[styles.map, { minHeight: height }, style]}>
+      <View pointerEvents="none" style={styles.mapGlass} />
       <View pointerEvents="none" style={styles.mapGrid}>
         {Array.from({ length: 8 }).map((_, index) => (
           <View key={`mv-${index}`} style={[styles.vLine, { left: `${index * 14}%` }]} />
@@ -138,13 +139,22 @@ export function SimulatedMap({
 
 const styles = StyleSheet.create({
   map: {
-    backgroundColor: colors.cardSoft,
-    borderColor: colors.border,
+    backgroundColor: "rgba(2, 6, 23, 0.38)",
+    borderColor: colors.glassBorder,
     borderCurve: "continuous",
     borderRadius: radii.md,
     borderWidth: 1,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
     overflow: "hidden",
     position: "relative"
+  },
+  mapGlass: {
+    backgroundColor: "rgba(255, 255, 255, 0.035)",
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0
   },
   mapGrid: {
     bottom: 0,
@@ -200,7 +210,9 @@ const styles = StyleSheet.create({
     width: "24%"
   },
   badge: {
-    backgroundColor: "rgba(2, 6, 23, 0.9)",
+    backgroundColor: "rgba(2, 6, 23, 0.72)",
+    borderColor: colors.glassBorder,
+    borderWidth: 1,
     borderRadius: 8,
     left: 14,
     paddingHorizontal: 10,
@@ -235,8 +247,8 @@ const styles = StyleSheet.create({
     width: 44
   },
   markerLabel: {
-    backgroundColor: "rgba(15, 23, 42, 0.94)",
-    borderColor: colors.border,
+    backgroundColor: "rgba(15, 23, 42, 0.78)",
+    borderColor: colors.glassBorder,
     borderRadius: 8,
     borderWidth: 1,
     fontSize: 11,
