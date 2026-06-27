@@ -18,28 +18,28 @@ type ActionButtonProps = {
 
 const variantStyles: Record<Variant, { backgroundColor: string; borderColor: string; color: string }> = {
   primary: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: "rgba(29, 78, 216, 0.88)",
+    borderColor: "rgba(147, 197, 253, 0.32)",
     color: colors.white
   },
   secondary: {
-    backgroundColor: colors.cardSoft,
-    borderColor: colors.borderStrong,
+    backgroundColor: "rgba(255, 255, 255, 0.075)",
+    borderColor: colors.glassBorder,
     color: colors.text
   },
   success: {
-    backgroundColor: colors.secondary,
-    borderColor: colors.secondary,
+    backgroundColor: "rgba(20, 184, 166, 0.9)",
+    borderColor: "rgba(153, 246, 228, 0.34)",
     color: colors.background
   },
   dark: {
-    backgroundColor: "#050b18",
-    borderColor: colors.borderStrong,
+    backgroundColor: "rgba(2, 6, 23, 0.54)",
+    borderColor: colors.glassBorder,
     color: colors.text
   },
   warning: {
-    backgroundColor: colors.alert,
-    borderColor: colors.alert,
+    backgroundColor: "rgba(245, 158, 11, 0.92)",
+    borderColor: "rgba(253, 230, 138, 0.36)",
     color: colors.background
   }
 };
@@ -81,6 +81,7 @@ export function ActionButton({
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
+    boxShadow: "0 10px 26px rgba(0, 0, 0, 0.22)",
     borderCurve: "continuous",
     borderRadius: radii.sm,
     borderWidth: 1,
