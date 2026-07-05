@@ -9,7 +9,7 @@ const UserCard = ({ onView, user }) => {
 
   return (
     <motion.article
-      className="flex min-h-[210px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm transition hover:border-[var(--color-primary)]"
+      className="glass-card flex min-h-[210px] flex-col p-4 transition hover:!border-[var(--color-primary)]"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3 }}

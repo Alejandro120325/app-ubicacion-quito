@@ -1,7 +1,7 @@
 import React from "react";
 
 const ApiInfoCard = ({ icon: Icon, label, value }) => (
-  <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)]">
+  <article className="glass-card p-5 transition hover:-translate-y-1 hover:!border-[var(--color-primary)]">
     {Icon ? (
       <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--color-soft)] text-[var(--color-primary)]">
         <Icon className="h-5 w-5" aria-hidden="true" />

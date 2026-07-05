@@ -66,7 +66,7 @@ const AdminPeople = () => {
         </div>
       ) : null}
 
-      <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
+      <section className="glass-card p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <InputField
             icon={Search}
@@ -106,7 +106,7 @@ const AdminPeople = () => {
           ))}
         </section>
 
-        <aside className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm xl:sticky xl:top-8">
+        <aside className="glass-card p-6 xl:sticky xl:top-8">
           {selectedPerson ? (
             <>
               <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">

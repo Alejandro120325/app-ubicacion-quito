@@ -185,7 +185,7 @@ const Home = () => {
                       {t("home.active")}
                     </span>
                   </div>
-                  <SimulatedMap className="border-white/10" large />
+                  <SimulatedMap className="border-white/10" variant="home" />
                 </div>
               </div>
             </motion.div>
@@ -206,7 +206,7 @@ const Home = () => {
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {benefits.map((benefit, index) => (
                 <motion.article
-                  className="flex min-h-[185px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)]"
+                  className="glass-card flex min-h-[185px] flex-col p-5 transition hover:-translate-y-1 hover:!border-[var(--color-primary)]"
                   key={benefit.title}
                   initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -245,7 +245,7 @@ const Home = () => {
             <div className="grid gap-4">
               {steps.map((step, index) => (
                 <motion.article
-                  className="flex min-h-[94px] gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm"
+                  className="glass-card flex min-h-[94px] gap-4 p-5"
                   key={step.title}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -289,10 +289,10 @@ const Home = () => {
                 [t("api.company"), t("api.companyValue")],
                 [t("api.cost"), t("api.costValue")],
                 [t("api.why"), t("api.whyValue")],
-                [t("api.env"), "VITE_MAP_API_KEY"]
+                [t("api.env"), "GEOAPIFY_API_KEY (backend)"]
               ].map(([label, value]) => (
                 <article
-                  className="min-h-[150px] rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-5"
+                  className="glass-card min-h-[150px] p-5"
                   key={label}
                 >
                   <Code2 className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />

@@ -94,7 +94,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+        <section className="glass-card p-6">
           <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
             {t("admin.quickTitle")}
           </p>
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+        <section className="glass-card p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-secondary)]">

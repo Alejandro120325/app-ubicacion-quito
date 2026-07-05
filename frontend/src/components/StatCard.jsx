@@ -12,7 +12,7 @@ const StatCard = ({ title, value, detail, icon: Icon, tone = "blue" }) => {
 
   return (
     <motion.article
-      className="flex min-h-[150px] flex-col justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition hover:border-[var(--color-primary)]"
+      className="glass-card flex min-h-[150px] flex-col justify-between p-5 transition hover:!border-[var(--color-primary)]"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}

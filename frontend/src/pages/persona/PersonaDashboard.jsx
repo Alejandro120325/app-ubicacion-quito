@@ -85,7 +85,7 @@ const PersonaDashboard = () => {
         />
       </div>
 
-      <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+      <section className="glass-card p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">

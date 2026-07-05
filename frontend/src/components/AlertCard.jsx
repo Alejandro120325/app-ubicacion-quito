@@ -19,7 +19,7 @@ const AlertCard = ({ alert }) => {
   const Icon = iconByType[alert.type] || BellRing;
 
   return (
-    <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition hover:border-[var(--color-primary)]">
+    <article className="glass-card p-5 transition hover:-translate-y-1 hover:!border-[var(--color-primary)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex gap-3">
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${toneClasses[alert.type] || toneClasses.info}`}>

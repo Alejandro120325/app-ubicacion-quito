@@ -12,6 +12,7 @@ import {
 import ApiInfoCard from "../../components/ApiInfoCard.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
+import { useMapsStatus } from "../../hooks/useMapsStatus.js";
 
 const endpointKeys = [
   "api.endpoint.geocode",
@@ -25,12 +26,13 @@ const riskKeys = ["api.risk.cost", "api.risk.privacy", "api.risk.internet"];
 
 const AdminApi = () => {
   const { t } = useLanguage();
+  const mapsStatus = useMapsStatus();
 
   const cards = [
     { icon: Building2, label: t("api.company"), value: t("api.companyValue") },
     { icon: MapPinned, label: t("api.type"), value: t("api.typeValue") },
     { icon: CircleDollarSign, label: t("api.cost"), value: t("api.costValue") },
-    { icon: KeyRound, label: t("api.env"), value: "VITE_MAP_API_KEY" }
+    { icon: KeyRound, label: t("api.env"), value: "GEOAPIFY_API_KEY (backend)" }
   ];
 
   return (
@@ -53,7 +55,7 @@ const AdminApi = () => {
             {t("api.summary")}
           </p>
         </div>
-        <HeaderActions badges={[{ icon: Globe2, label: t("sidebar.api") }]} />
+        <HeaderActions badges={[{ icon: Globe2, label: t(`api.mode.${mapsStatus.mode}`) }]} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -63,7 +65,7 @@ const AdminApi = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+        <section className="glass-card p-6">
           <h2 className="flex items-center gap-2 text-xl font-bold text-[var(--color-text)]">
             <Code2 className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />
             {t("api.endpoints")}
@@ -81,13 +83,13 @@ const AdminApi = () => {
         </section>
 
         <section className="grid gap-6">
-          <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+          <article className="glass-card p-6">
             <h2 className="text-xl font-bold text-[var(--color-text)]">{t("api.why")}</h2>
             <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
               {t("api.whyValue")}
             </p>
           </article>
-          <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+          <article className="glass-card p-6">
             <h2 className="flex items-center gap-2 text-xl font-bold text-[var(--color-text)]">
               <ShieldAlert className="h-5 w-5 text-amber-500" aria-hidden="true" />
               {t("api.risks")}
@@ -103,7 +105,7 @@ const AdminApi = () => {
         </section>
       </div>
 
-      <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-6">
+      <section className="glass-card-subtle p-6">
         <h2 className="text-xl font-bold text-[var(--color-text)]">
           {t("api.recommendation")}
         </h2>

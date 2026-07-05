@@ -1,67 +1,62 @@
 # Backend - Quito Ubicacion Segura
 
-API basica con Node.js y Express para probar login, registro, roles, ubicacion simulada y grupos familiares/amigos sin base de datos real.
+API Express para autenticacion academica, grupos, GPS consentido y proxy seguro de Geoapify. Funciona en memoria sin servicios externos.
 
-## Instalacion
+## Configuracion
 
-```bash
+```powershell
+Copy-Item .env.example .env
 npm install
-```
-
-## Ejecucion
-
-```bash
 npm run dev
 ```
 
-URL por defecto:
+Variables:
 
-```txt
-http://localhost:4000
+```env
+PORT=4000
+FRONTEND_URL=http://localhost:5173
+GEOAPIFY_API_KEY=tu_api_key_aqui
+SUPABASE_URL=tu_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+SUPABASE_ANON_KEY=tu_anon_key
 ```
 
-## Credenciales de prueba
-
-- Admin: `admin@quitoapp.com` / `Admin123`
-- Persona: `persona@quitoapp.com` / `Persona123`
+No se debe enviar `GEOAPIFY_API_KEY` ni `SUPABASE_SERVICE_ROLE_KEY` al frontend.
 
 ## Endpoints
 
-Autenticacion:
+Auth y usuarios:
 
 - `POST /api/auth/login`
 - `POST /api/auth/register`
-
-Usuarios:
-
 - `GET /api/users`
 - `GET /api/users/me`
 
-Ubicacion:
+Grupos:
 
-- `GET /api/location/:userId`
-- `PATCH /api/location/share`
-
-Grupos simulados:
-
-- `GET /api/groups`
 - `POST /api/groups`
+- `GET /api/groups`
 - `GET /api/groups/:groupId`
 - `POST /api/groups/:groupId/members`
+- `DELETE /api/groups/:groupId/members/:userId`
 - `PATCH /api/groups/:groupId/members/:memberId/location-status`
 
-## Datos
+Ubicacion:
 
-Los datos viven en `src/data/mockData.js`.
+- `POST /api/location/share/start`
+- `POST /api/location/share/stop`
+- `POST /api/location/update`
+- `GET /api/location/group/:groupId`
+- `GET /api/location/user/:userId`
+- Compatibilidad: `GET /api/location/:userId` y `PATCH /api/location/share`
 
-No se devuelven contrasenas desde los controladores. Los grupos, integrantes y ubicaciones son simulados y se reinician al reiniciar el servidor.
+Mapas:
 
-## Autenticacion
+- `GET /api/maps/status` (publico)
+- `GET /api/maps/geocode?text=La Carolina Quito`
+- `GET /api/maps/reverse?lat=-0.1807&lon=-78.4678`
+- `GET /api/maps/routing?from=-0.1807,-78.4678&to=-0.2299,-78.5249`
+- `GET /api/maps/places?lat=-0.1807&lon=-78.4678&category=healthcare`
+- `GET /api/maps/isoline?lat=-0.1807&lon=-78.4678&type=time&mode=walk&range=600`
 
-Las rutas protegidas esperan:
-
-```txt
-Authorization: Bearer token-simulado-1
-```
-
-El token se recibe al iniciar sesion.
+Las rutas protegidas requieren `Authorization: Bearer token-simulado-<id>`. Sin clave Geoapify, los endpoints del proveedor responden `503` con `GEOAPIFY_NOT_CONFIGURED`; el resto de la API sigue disponible.

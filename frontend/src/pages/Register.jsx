@@ -89,7 +89,7 @@ const Register = () => {
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.28 }}
       >
-        <section className="w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] shadow-soft">
+        <section className="glass-card w-full overflow-hidden text-[var(--color-text)]">
           <div className="grid lg:grid-cols-[0.74fr_1fr]">
             <div className="hidden bg-slate-950 p-8 text-white lg:block">
               <p className="inline-flex rounded-lg bg-teal-400/15 px-3 py-2 text-sm font-bold text-teal-100">

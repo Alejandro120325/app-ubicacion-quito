@@ -96,11 +96,11 @@ const Login = () => {
           </div>
 
           <div className="rounded-lg border border-white/20 bg-white/10 p-3 shadow-soft backdrop-blur">
-            <SimulatedMap className="border-white/10" large />
+            <SimulatedMap className="border-white/10" variant="login" />
           </div>
         </section>
 
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 text-[var(--color-text)] shadow-soft sm:p-8">
+        <section className="glass-card p-5 text-[var(--color-text)] sm:p-8">
           <div className="mb-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-primary)]">

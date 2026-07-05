@@ -6,6 +6,7 @@ import LoadingScreen from "../../components/LoadingScreen.jsx";
 import SimulatedMap from "../../components/SimulatedMap.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useAdminWorkspace } from "../../hooks/useAdminWorkspace.js";
+import { useGroupLocations } from "../../hooks/useGroupLocations.js";
 
 const getStatus = (person) => {
   if (person.sharingLocation) return "sharing";
@@ -15,8 +16,25 @@ const getStatus = (person) => {
 
 const AdminMap = () => {
   const { t } = useLanguage();
-  const { error, loading, mapPoints, people, selectedPerson, setSelectedPerson } =
-    useAdminWorkspace();
+  const {
+    error,
+    groups,
+    loading,
+    mapPoints,
+    people,
+    selectedGroup,
+    selectedPerson,
+    setSelectedGroup,
+    setSelectedPerson
+  } = useAdminWorkspace();
+  const { error: pollingError, locations } = useGroupLocations(selectedGroup?.id);
+  const visiblePeople = selectedGroup
+    ? people.filter((person) =>
+        selectedGroup.members?.some(
+          (member) => member.userId === person.id || member.email === person.email
+        )
+      )
+    : people;
 
   if (loading) {
     return <LoadingScreen message={t("admin.loading")} />;
@@ -50,19 +68,23 @@ const AdminMap = () => {
           {error}
         </div>
       ) : null}
+      {pollingError ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{pollingError}</div> : null}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-soft">
+        <section className="glass-card min-w-0 p-4 sm:p-5">
           <SimulatedMap
+            locations={locations}
             mainLabel="Quito"
             points={mapPoints}
-            selectedLabel={selectedPerson?.lastLocation?.sector}
+            polling
+            selectedGroup={selectedGroup}
+            selectedLabel={selectedPerson?.fullName || selectedPerson?.lastLocation?.sector}
             showConnections
             variant="large"
           />
         </section>
 
-        <aside className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm xl:sticky xl:top-8">
+        <aside className="glass-card p-5 xl:sticky xl:top-8">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
@@ -77,8 +99,30 @@ const AdminMap = () => {
             </span>
           </div>
 
+          <label className="mb-4 block">
+            <span className="mb-2 block text-xs font-bold uppercase text-[var(--color-muted)]">
+              {t("groups.groupLabel")}
+            </span>
+            <select
+              className="glass-input h-12 w-full rounded-lg border px-3 text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-ring)]"
+              value={selectedGroup?.id || ""}
+              onChange={(event) => {
+                const group = groups.find((item) => item.id === Number(event.target.value));
+                setSelectedGroup(group || null);
+                const firstMember = group?.members?.[0];
+                setSelectedPerson(
+                  people.find(
+                    (person) => person.id === firstMember?.userId || person.email === firstMember?.email
+                  ) || null
+                );
+              }}
+            >
+              {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
+            </select>
+          </label>
+
           <div className="grid gap-3">
-            {people.map((person) => (
+            {visiblePeople.map((person) => (
               <button
                 className={`rounded-lg border p-4 text-left transition focus-ring ${
                   selectedPerson?.id === person.id

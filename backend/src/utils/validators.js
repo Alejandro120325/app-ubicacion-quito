@@ -1,6 +1,82 @@
+import { HttpError } from "./httpError.js";
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const onlyLettersAndSpacesRegex = /^[\p{L}\s]+$/u;
 const ecuadorPhoneRegex = /^09\d{8}$/;
+
+export const requireQueryParam = (value, name) => {
+  const normalized = String(value || "").trim();
+  if (!normalized) {
+    throw new HttpError(400, `El parametro ${name} es obligatorio.`, "INVALID_QUERY");
+  }
+  return normalized;
+};
+
+export const parseNumberParam = (value, name, min, max) => {
+  const normalized = requireQueryParam(value, name);
+  const number = Number(normalized);
+
+  if (!Number.isFinite(number) || number < min || number > max) {
+    throw new HttpError(
+      400,
+      `El parametro ${name} debe ser un numero entre ${min} y ${max}.`,
+      "INVALID_QUERY"
+    );
+  }
+
+  return number;
+};
+
+export const parseCoordinates = (value, name) => {
+  const normalized = requireQueryParam(value, name);
+  const [latValue, lonValue, ...extra] = normalized.split(",");
+
+  if (extra.length || latValue === undefined || lonValue === undefined) {
+    throw new HttpError(400, `${name} debe tener el formato lat,lon.`, "INVALID_QUERY");
+  }
+
+  const lat = parseNumberParam(latValue, `${name}.lat`, -90, 90);
+  const lon = parseNumberParam(lonValue, `${name}.lon`, -180, 180);
+  return `${lat},${lon}`;
+};
+
+export const validateLocationPayload = (payload = {}) => {
+  const errors = {};
+  const latitude = Number(payload.latitude);
+  const longitude = Number(payload.longitude);
+  const accuracy = payload.accuracy == null ? null : Number(payload.accuracy);
+  const heading = payload.heading == null ? null : Number(payload.heading);
+  const speed = payload.speed == null ? null : Number(payload.speed);
+  const groupId = payload.groupId == null ? null : Number(payload.groupId);
+
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+    errors.latitude = "La latitud debe estar entre -90 y 90.";
+  }
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    errors.longitude = "La longitud debe estar entre -180 y 180.";
+  }
+  if (accuracy != null && (!Number.isFinite(accuracy) || accuracy < 0)) {
+    errors.accuracy = "La precision debe ser un numero positivo.";
+  }
+  if (groupId != null && (!Number.isInteger(groupId) || groupId < 1)) {
+    errors.groupId = "El grupo no es valido.";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+    data: {
+      latitude,
+      longitude,
+      accuracy,
+      heading: Number.isFinite(heading) ? heading : null,
+      speed: Number.isFinite(speed) ? speed : null,
+      groupId,
+      address: String(payload.address || "").trim(),
+      sector: String(payload.sector || "Ubicacion GPS").trim()
+    }
+  };
+};
 
 export const sanitizeUser = (user) => {
   const { password, ...safeUser } = user;

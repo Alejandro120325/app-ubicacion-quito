@@ -21,8 +21,10 @@ const HeaderActions = ({ badges = [], children }) => (
       );
     })}
     {children}
-    <LanguageSelector compact />
-    <ThemeToggle compact />
+    <span className="hidden items-center gap-2 lg:flex">
+      <LanguageSelector compact />
+      <ThemeToggle compact />
+    </span>
   </div>
 );
 

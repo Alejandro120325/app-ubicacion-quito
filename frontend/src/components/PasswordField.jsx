@@ -13,7 +13,7 @@ const PasswordField = ({ label, name, value, error, ...props }) => {
         {label}
       </span>
       <div
-        className={`flex items-center gap-3 rounded-lg border bg-[var(--color-card)] px-3 transition ${
+        className={`glass-input flex items-center gap-3 rounded-lg border px-3 transition ${
           error
             ? "border-red-300 ring-4 ring-red-50"
             : "border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-4 focus-within:ring-[var(--color-ring)]"

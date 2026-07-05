@@ -21,7 +21,7 @@ const MobileNav = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-card)]/95 backdrop-blur lg:hidden">
+    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--glass-background)] backdrop-blur-xl lg:hidden">
       <div className="flex min-h-16 items-center justify-between gap-3 px-4">
         <button
           aria-label={open ? t("common.closeMenu") : t("common.openMenu")}
@@ -63,7 +63,7 @@ const MobileNav = () => {
               onClick={() => setOpen(false)}
             />
             <motion.aside
-              className="fixed bottom-0 left-0 top-0 z-50 flex w-[min(88vw,340px)] flex-col border-r border-[var(--color-border)] bg-[var(--color-card)] p-4 text-[var(--color-text)] shadow-soft"
+              className="fixed bottom-0 left-0 top-0 z-50 flex w-[min(88vw,340px)] flex-col border-r border-[var(--color-border)] bg-[var(--glass-background)] p-4 text-[var(--color-text)] shadow-soft backdrop-blur-xl"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}

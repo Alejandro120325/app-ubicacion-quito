@@ -63,7 +63,7 @@ const PersonaPrivacy = () => {
       <section className="grid gap-4 md:grid-cols-3">
         {controls.map((control) => (
           <article
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm"
+            className="glass-card p-6"
             key={control.title}
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--color-soft)] text-[var(--color-primary)]">
@@ -79,7 +79,7 @@ const PersonaPrivacy = () => {
         ))}
       </section>
 
-      <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+      <section className="glass-card p-6">
         <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <h2 className="text-2xl font-bold text-[var(--color-text)]">

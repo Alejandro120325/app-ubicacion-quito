@@ -1,9 +1,20 @@
 import {
+  getGroupById,
   getLocationByUserId,
+  getLocationsByGroupId,
+  getVisibleGroups,
   updateLocationSharing,
+  updateLiveLocation,
   users
 } from "../data/mockData.js";
-import { sanitizeUser } from "../utils/validators.js";
+import { sanitizeUser, validateLocationPayload } from "../utils/validators.js";
+
+const canAccessGroup = (user, group) =>
+  user.role === "admin" ||
+  group.createdBy === user.id ||
+  group.members.some(
+    (member) => member.userId === user.id || member.email === user.email
+  );
 
 export const getLocation = (req, res) => {
   const userId = Number(req.params.userId);
@@ -23,7 +34,7 @@ export const getLocation = (req, res) => {
     location: {
       ...location,
       sharing: user.sharingLocation,
-      simulated: true
+      simulated: location.simulated ?? true
     }
   });
 };
@@ -55,4 +66,87 @@ export const shareLocation = (req, res) => {
     sharing,
     user: sanitizeUser(updatedUser)
   });
+};
+
+export const startLocationSharing = (req, res) => {
+  req.body.sharing = true;
+  return shareLocation(req, res);
+};
+
+export const stopLocationSharing = (req, res) => {
+  req.body.sharing = false;
+  return shareLocation(req, res);
+};
+
+export const updateLocation = (req, res) => {
+  if (req.user.role !== "persona") {
+    return res.status(403).json({
+      ok: false,
+      message: "Solo una cuenta tipo persona puede compartir su ubicacion."
+    });
+  }
+
+  if (!req.user.sharingLocation) {
+    return res.status(409).json({
+      ok: false,
+      message: "Activa Compartir ubicacion antes de enviar coordenadas."
+    });
+  }
+
+  const validation = validateLocationPayload(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({
+      ok: false,
+      message: "Revisa las coordenadas enviadas.",
+      errors: validation.errors
+    });
+  }
+
+  if (validation.data.groupId) {
+    const group = getGroupById(validation.data.groupId);
+    if (!group || !canAccessGroup(req.user, group)) {
+      return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+    }
+  }
+
+  const location = updateLiveLocation(req.user.id, validation.data);
+  return res.json({
+    ok: true,
+    message: "Ubicacion compartida.",
+    location
+  });
+};
+
+export const getGroupLocations = (req, res) => {
+  const group = getGroupById(req.params.groupId);
+  if (!group || !canAccessGroup(req.user, group)) {
+    return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+  }
+
+  return res.json({
+    ok: true,
+    message: "Ultimas ubicaciones del grupo obtenidas correctamente.",
+    pollingInterval: 5000,
+    groupId: group.id,
+    locations: getLocationsByGroupId(group.id)
+  });
+};
+
+export const getUserLocation = (req, res) => {
+  const userId = Number(req.params.userId);
+  const canView =
+    req.user.role === "admin" ||
+    req.user.id === userId ||
+    getVisibleGroups(req.user).some((group) =>
+      group.members.some((member) => member.userId === userId)
+    );
+
+  if (!canView) {
+    return res.status(403).json({
+      ok: false,
+      message: "No tienes acceso a la ubicacion de esta persona."
+    });
+  }
+
+  return getLocation(req, res);
 };

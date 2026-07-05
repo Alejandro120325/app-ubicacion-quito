@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { UsersRound } from "lucide-react";
 import Button from "./Button.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -7,12 +8,13 @@ const GroupCard = ({ active = false, group, onAddMember, onSelect }) => {
   const { t } = useLanguage();
 
   return (
-    <article
-      className={`rounded-lg border p-4 shadow-sm transition ${
+    <motion.article
+      className={`glass-card p-4 transition ${
         active
-          ? "border-[var(--color-primary)] bg-[var(--color-soft)]"
-          : "border-[var(--color-border)] bg-[var(--color-card)] hover:border-[var(--color-primary)]"
+          ? "!border-[var(--color-primary)]"
+          : "hover:!border-[var(--color-primary)]"
       }`}
+      whileHover={{ y: -3 }}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -46,7 +48,7 @@ const GroupCard = ({ active = false, group, onAddMember, onSelect }) => {
           {t("groups.addMember")}
         </Button>
       </div>
-    </article>
+    </motion.article>
   );
 };
 

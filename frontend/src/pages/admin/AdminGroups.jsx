@@ -10,6 +10,7 @@ import GroupMemberCard from "../../components/GroupMemberCard.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
+import { useGroupLocations } from "../../hooks/useGroupLocations.js";
 import { useAdminWorkspace } from "../../hooks/useAdminWorkspace.js";
 
 const AdminGroups = () => {
@@ -29,6 +30,20 @@ const AdminGroups = () => {
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [groupForMember, setGroupForMember] = useState(null);
+  const { error: pollingError, locations } = useGroupLocations(selectedGroup?.id);
+  const displayMembers = (selectedGroup?.members || []).map((member) => {
+    const liveLocation = locations.find(
+      (item) => item.userId === member.userId || item.fullName === member.fullName
+    );
+    return liveLocation
+      ? {
+          ...member,
+          locationStatus: liveLocation.locationStatus,
+          lastLocation: liveLocation.address || liveLocation.sector || member.lastLocation,
+          lastUpdate: liveLocation.updatedAt || member.lastUpdate
+        }
+      : member;
+  });
 
   const submitGroup = async (payload) => {
     const success = await handleCreateGroup(payload);
@@ -88,6 +103,7 @@ const AdminGroups = () => {
           {groupMessage}
         </div>
       ) : null}
+      {pollingError ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{pollingError}</div> : null}
 
       <div className="grid items-start gap-6 xl:grid-cols-[0.78fr_1.22fr]">
         <section className="grid gap-4">
@@ -112,9 +128,9 @@ const AdminGroups = () => {
         </section>
 
         <section className="grid gap-5">
-          <GroupMapPanel group={selectedGroup} selectedMember={selectedMember} variant="large" />
+          <GroupMapPanel group={selectedGroup} locations={locations} polling selectedMember={selectedMember} variant="group" />
           <div className="grid gap-4 md:grid-cols-2">
-            {(selectedGroup?.members || []).map((member) => (
+            {displayMembers.map((member) => (
               <GroupMemberCard key={member.id} member={member} onView={setSelectedMember} />
             ))}
           </div>

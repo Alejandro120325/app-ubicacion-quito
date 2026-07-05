@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import Button from "./Button.jsx";
 import InputField from "./InputField.jsx";
@@ -43,15 +44,22 @@ const AddMemberModal = ({ group, onClose, onSubmit, open }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm">
-      <form
-        className="w-full max-w-2xl rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 text-[var(--color-text)] shadow-soft"
+    <motion.div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <motion.form
+        className="glass-card w-full max-w-2xl p-5 text-[var(--color-text)]"
+        initial={{ opacity: 0, scale: 0.97, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
         onSubmit={handleSubmit}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold">{t("groups.addMember")}</h2>
             <p className="mt-1 text-sm text-[var(--color-muted)]">{group.name}</p>
+            <p className="mt-2 text-xs text-[var(--color-muted)]">{t("groups.emailHint")}</p>
           </div>
           <button
             className="rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-soft)] focus-ring"
@@ -142,8 +150,8 @@ const AddMemberModal = ({ group, onClose, onSubmit, open }) => {
           </Button>
           <Button type="submit">{t("groups.addMember")}</Button>
         </div>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 };
 

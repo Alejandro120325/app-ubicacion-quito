@@ -1,111 +1,152 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck, MapPin, Power } from "lucide-react";
+import { BadgeCheck, Crosshair, MapPin, Power, ShieldCheck } from "lucide-react";
+import { getReverseAddress, mapsApi } from "../../api/mapsApi.js";
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
 import SimulatedMap from "../../components/SimulatedMap.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
+import { useLiveLocation } from "../../hooks/useLiveLocation.js";
 import { usePersonaWorkspace } from "../../hooks/usePersonaWorkspace.js";
+import { pageTransition } from "../../utils/animations.js";
 
 const PersonaLocation = () => {
   const { t } = useLanguage();
+  const { error: workspaceError, loading, location, selectedGroup } = usePersonaWorkspace();
+  const [address, setAddress] = useState("");
+  const [addressStatus, setAddressStatus] = useState("");
   const {
-    error,
-    handleToggleSharing,
-    loading,
-    location,
-    locationPoints,
-    saving,
-    sharing
-  } = usePersonaWorkspace();
+    currentLocation,
+    error: gpsError,
+    isTracking,
+    lastSentAt,
+    startTracking,
+    status,
+    stopTracking
+  } = useLiveLocation({ groupId: selectedGroup?.id || null });
 
-  if (loading) {
-    return <LoadingScreen message={t("persona.loading")} />;
-  }
+  useEffect(() => {
+    if (!currentLocation) return;
+
+    let active = true;
+    mapsApi
+      .reverse(currentLocation.latitude, currentLocation.longitude)
+      .then((payload) => {
+        if (active) {
+          setAddress(getReverseAddress(payload));
+          setAddressStatus("");
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setAddressStatus(
+            requestError.response?.data?.code === "GEOAPIFY_NOT_CONFIGURED"
+              ? t("gps.apiFallback")
+              : t("gps.addressUnavailable")
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [lastSentAt, t]);
+
+  if (loading) return <LoadingScreen message={t("persona.loading")} />;
+
+  const displayLocation = currentLocation || location;
+  const error = gpsError || workspaceError;
 
   return (
-    <motion.section
-      className="mx-auto grid max-w-7xl gap-8"
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.25 }}
-    >
+    <motion.section className="mx-auto grid max-w-7xl gap-8" {...pageTransition}>
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
             {t("sidebar.myLocation")}
           </p>
           <h1 className="mt-2 text-3xl font-bold text-[var(--color-text)]">
-            {t("persona.locationTitle")}
+            {t("gps.title")}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-            {t("persona.locationText")}
+            {t("gps.privacyNotice")}
           </p>
         </div>
         <HeaderActions
           badges={[
             {
-              className: sharing
+              className: isTracking
                 ? "border-green-200 bg-green-50 text-green-700"
                 : "border-[var(--color-border)] bg-[var(--color-soft)] text-[var(--color-muted)]",
               icon: BadgeCheck,
-              label: sharing ? t("persona.shared") : t("persona.paused")
+              label: t(`gps.status.${status}`)
             }
           ]}
         />
       </div>
 
-      {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div> : null}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-soft">
+        <section className="glass-card min-w-0 p-4 sm:p-5">
           <SimulatedMap
-            lastUpdate={location?.lastUpdate}
-            points={locationPoints}
-            selectedLabel={location?.sector || t("persona.noSector")}
+            currentUserLocation={currentLocation}
+            lastUpdate={lastSentAt?.toLocaleString() || displayLocation?.lastUpdate}
+            mode={currentLocation ? "live" : "simulated"}
+            points={currentLocation ? [] : [{ ...location, label: location?.sector || t("persona.noSector"), locationStatus: "paused" }]}
+            selectedLabel={currentLocation ? undefined : location?.sector}
             variant="large"
           />
         </section>
 
         <aside className="grid gap-5">
-          <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+          <article className="glass-card p-6">
             <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
               {t("persona.currentStatus")}
             </p>
             <h2 className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-              {sharing ? t("persona.shared") : t("persona.paused")}
+              {t(`gps.status.${status}`)}
             </h2>
             <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-              {sharing ? t("persona.sharedText") : t("persona.pausedText")}
+              {isTracking ? t("gps.shared") : t("gps.paused")}
             </p>
             <Button
               className="mt-6 w-full"
-              disabled={saving}
-              icon={Power}
+              icon={isTracking ? Power : Crosshair}
               size="lg"
-              variant={sharing ? "dark" : "success"}
-              onClick={handleToggleSharing}
+              variant={isTracking ? "dark" : "success"}
+              onClick={isTracking ? stopTracking : startTracking}
             >
-              {saving ? t("persona.updating") : sharing ? t("persona.pause") : t("persona.share")}
+              {status === "requesting"
+                ? t("gps.requesting")
+                : isTracking
+                  ? t("persona.pause")
+                  : t("gps.activate")}
             </Button>
           </article>
 
-          <article className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-sm">
+          <article className="glass-card p-6">
             <p className="flex items-center gap-2 text-sm font-bold text-[var(--color-text)]">
               <MapPin className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
-              {t("persona.lastSimulated")}
+              {currentLocation ? t("gps.coordinates") : t("persona.lastSimulated")}
             </p>
-            <p className="mt-3 text-sm text-[var(--color-muted)]">
-              {location?.sector || t("persona.noSector")} - Quito
-            </p>
-            <p className="mt-2 text-sm text-[var(--color-muted)]">
-              {t("persona.updatedAt", { value: location?.lastUpdate || t("persona.noData") })}
+            {currentLocation ? (
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div><dt className="text-[var(--color-muted)]">Latitud</dt><dd className="mt-1 font-semibold">{currentLocation.latitude.toFixed(6)}</dd></div>
+                <div><dt className="text-[var(--color-muted)]">Longitud</dt><dd className="mt-1 font-semibold">{currentLocation.longitude.toFixed(6)}</dd></div>
+                <div><dt className="text-[var(--color-muted)]">{t("gps.accuracy")}</dt><dd className="mt-1 font-semibold">{Math.round(currentLocation.accuracy)} m</dd></div>
+                <div><dt className="text-[var(--color-muted)]">{t("gps.updated")}</dt><dd className="mt-1 font-semibold">{lastSentAt?.toLocaleTimeString() || "-"}</dd></div>
+              </dl>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--color-muted)]">{location?.sector || t("persona.noSector")} - Quito</p>
+            )}
+            {address || addressStatus ? <p className="mt-4 text-sm text-[var(--color-muted)]">{address || addressStatus}</p> : null}
+          </article>
+
+          <article className="glass-card-subtle p-4 text-sm text-[var(--color-muted)]">
+            <p className="flex items-start gap-2 leading-6">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-secondary)]" />
+              {t("gps.groupOnly")}
             </p>
           </article>
         </aside>

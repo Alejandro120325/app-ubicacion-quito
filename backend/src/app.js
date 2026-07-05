@@ -4,7 +4,9 @@ import express from "express";
 import authRoutes from "./routes/auth.routes.js";
 import groupsRoutes from "./routes/groups.routes.js";
 import locationRoutes from "./routes/location.routes.js";
+import mapsRoutes from "./routes/maps.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import { errorHandler, notFoundHandler } from "./utils/httpError.js";
 
 dotenv.config();
 
@@ -28,12 +30,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/groups", groupsRoutes);
+app.use("/api/maps", mapsRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    ok: false,
-    message: "Ruta no encontrada"
-  });
-});
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;

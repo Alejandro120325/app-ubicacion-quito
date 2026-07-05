@@ -7,7 +7,7 @@ const LoadingScreen = ({ message }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-card)]">
+    <div className="glass-card flex min-h-[320px] items-center justify-center">
       <div className="text-center">
         <motion.span
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-[var(--color-soft)] text-[var(--color-primary)]"

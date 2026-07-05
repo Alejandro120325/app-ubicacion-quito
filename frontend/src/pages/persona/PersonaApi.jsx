@@ -4,15 +4,17 @@ import { Globe2, KeyRound, MapPinned, Route, ShieldCheck } from "lucide-react";
 import ApiInfoCard from "../../components/ApiInfoCard.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
+import { useMapsStatus } from "../../hooks/useMapsStatus.js";
 
 const PersonaApi = () => {
   const { t } = useLanguage();
+  const mapsStatus = useMapsStatus();
 
   const cards = [
     { icon: MapPinned, label: t("api.persona.realMap"), value: t("api.persona.realMapText") },
     { icon: Route, label: t("api.persona.routes"), value: t("api.persona.routesText") },
     { icon: ShieldCheck, label: t("api.persona.consent"), value: t("api.persona.consentText") },
-    { icon: KeyRound, label: t("api.env"), value: "VITE_MAP_API_KEY" }
+    { icon: KeyRound, label: t("api.env"), value: "GEOAPIFY_API_KEY (backend)" }
   ];
 
   return (
@@ -35,7 +37,7 @@ const PersonaApi = () => {
             {t("api.persona.subtitle")}
           </p>
         </div>
-        <HeaderActions badges={[{ icon: Globe2, label: t("api.title") }]} />
+        <HeaderActions badges={[{ icon: Globe2, label: t(`api.mode.${mapsStatus.mode}`) }]} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -44,7 +46,7 @@ const PersonaApi = () => {
         ))}
       </div>
 
-      <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-6">
+      <section className="glass-card-subtle p-6">
         <h2 className="text-xl font-bold text-[var(--color-text)]">
           {t("api.recommendation")}
         </h2>

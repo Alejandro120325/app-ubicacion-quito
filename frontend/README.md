@@ -1,38 +1,29 @@
-# Frontend - App Ubicacion Quito
+# Frontend - Quito Ubicacion Segura
 
-Interfaz React con Vite y Tailwind CSS para probar login, registro, rutas protegidas, panel admin y panel persona.
+Aplicacion React/Vite responsive con autenticacion por rol, grupos, GPS web consentido, polling y mapa visual con fallback simulado.
 
-## Instalacion
+## Ejecutar
 
-```bash
+```powershell
 npm install
-```
-
-## Ejecucion
-
-```bash
+npm run build
 npm run dev
 ```
 
-El frontend usa por defecto `http://localhost:5173`.
+Variable opcional:
 
-## Variables de entorno
-
-Copia `.env.example` a `.env` si necesitas cambiar la URL del backend.
-
-```txt
+```env
 VITE_API_URL=http://localhost:4000/api
 ```
 
-## Rutas
+Las claves Geoapify y Supabase no pertenecen al frontend.
 
-- `/`
-- `/login`
-- `/register`
-- `/admin/dashboard`
-- `/persona/dashboard`
-- `/unauthorized`
+## GPS
 
-## Nota
+- El permiso se solicita solo al pulsar **Activar ubicacion GPS**.
+- `useLiveLocation` usa `watchPosition`, throttle de cinco segundos y limpieza al pausar/salir.
+- Los grupos actualizan ubicaciones mediante polling cada cinco segundos.
+- El mapa admite coordenadas reales y conserva marcadores simulados si no existen.
+- En produccion se requiere HTTPS.
 
-El mapa es visual y simulado. No usa API externa todavia.
+Consulta `docs/gps-real.md` para arquitectura y despliegue.

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import Button from "./Button.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -14,7 +15,11 @@ const GroupMemberCard = ({ member, onView }) => {
   const status = member.locationStatus || "paused";
 
   return (
-    <article className="flex min-h-[210px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
+    <motion.article
+      className="glass-card flex min-h-[210px] flex-col p-4"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-bold text-[var(--color-text)]">{member.fullName}</p>
@@ -49,7 +54,7 @@ const GroupMemberCard = ({ member, onView }) => {
           {t("groups.viewLocation")}
         </Button>
       ) : null}
-    </article>
+    </motion.article>
   );
 };
 

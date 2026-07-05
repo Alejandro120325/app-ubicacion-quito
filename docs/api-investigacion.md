@@ -57,22 +57,22 @@ La app actualmente usa ubicacion simulada. Geoapify permitiria evolucionar hacia
 - Buscar lugares cercanos utiles, por ejemplo hospitales, UPC, estaciones o puntos seguros.
 - Mantener la ubicacion bajo consentimiento: solo cuando el usuario active compartir ubicacion.
 
-## 5. Endpoints que se utilizarian
+## 5. Endpoints implementados
 
-Base URL:
+El navegador consume el backend propio y nunca recibe la clave del proveedor:
 
 ```txt
-https://api.geoapify.com
+http://localhost:4000/api/maps
 ```
 
 Endpoints propuestos:
 
 ```txt
-GET /v1/geocode/search
-GET /v1/geocode/reverse
-GET /v1/routing
-GET /v2/places
-GET /v1/isoline
+GET /api/maps/geocode
+GET /api/maps/reverse
+GET /api/maps/routing
+GET /api/maps/places
+GET /api/maps/isoline
 ```
 
 ## 6. Ejemplos de uso
@@ -80,47 +80,41 @@ GET /v1/isoline
 Buscar coordenadas de un sector en Quito:
 
 ```txt
-GET https://api.geoapify.com/v1/geocode/search?text=La%20Carolina%20Quito%20Ecuador&format=json&apiKey=VITE_MAP_API_KEY
+GET http://localhost:4000/api/maps/geocode?text=La%20Carolina%20Quito
 ```
 
 Obtener direccion a partir de coordenadas:
 
 ```txt
-GET https://api.geoapify.com/v1/geocode/reverse?lat=-0.1807&lon=-78.4678&format=json&apiKey=VITE_MAP_API_KEY
+GET http://localhost:4000/api/maps/reverse?lat=-0.1807&lon=-78.4678
 ```
 
 Calcular ruta entre dos puntos:
 
 ```txt
-GET https://api.geoapify.com/v1/routing?waypoints=-0.1807,-78.4678|-0.2202,-78.5127&mode=drive&apiKey=VITE_MAP_API_KEY
+GET http://localhost:4000/api/maps/routing?from=-0.1807,-78.4678&to=-0.2202,-78.5127
 ```
 
 Buscar lugares cercanos:
 
 ```txt
-GET https://api.geoapify.com/v2/places?categories=healthcare.hospital&filter=circle:-78.4678,-0.1807,5000&limit=20&apiKey=VITE_MAP_API_KEY
+GET http://localhost:4000/api/maps/places?lat=-0.1807&lon=-78.4678&category=healthcare
 ```
 
 Calcular area alcanzable:
 
 ```txt
-GET https://api.geoapify.com/v1/isoline?lat=-0.1807&lon=-78.4678&type=time&mode=walk&range=900&apiKey=VITE_MAP_API_KEY
+GET http://localhost:4000/api/maps/isoline?lat=-0.1807&lon=-78.4678&type=time&mode=walk&range=900
 ```
 
 ## 7. Variables de entorno necesarias
 
 No se debe quemar ninguna API key en el codigo.
 
-Frontend:
+Backend:
 
 ```env
-VITE_MAP_API_KEY=tu_api_key_aqui
-```
-
-Opcional:
-
-```env
-VITE_MAP_PROVIDER=geoapify
+GEOAPIFY_API_KEY=tu_api_key_aqui
 ```
 
 ## 8. Riesgos y limites
@@ -134,7 +128,7 @@ VITE_MAP_PROVIDER=geoapify
 
 ## 9. Recomendacion final
 
-Para esta etapa academica conviene mantener la ubicacion simulada y documentar la integracion futura con Geoapify. En una siguiente version se podria activar:
+La primera integracion ya deja disponible reverse geocoding para coordenadas GPS consentidas y los cinco endpoints internos. Mientras no exista clave, la interfaz conserva el mapa simulado. Una siguiente version puede incorporar tiles reales:
 
 1. Geocoding de sectores de Quito.
 2. Reverse geocoding para coordenadas reales autorizadas.

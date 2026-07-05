@@ -22,7 +22,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="hidden border-r border-[var(--color-border)] bg-[var(--color-card)] lg:sticky lg:top-0 lg:flex lg:min-h-screen lg:w-72">
+    <aside className="hidden border-r border-[var(--color-border)] bg-[var(--glass-background)] backdrop-blur-xl lg:sticky lg:top-0 lg:flex lg:min-h-screen lg:w-72">
       <div className="flex h-full w-full flex-col p-5">
         <div className="flex items-center gap-3 rounded-lg bg-slate-950 p-4 text-white shadow-soft">
           <span className="rounded-lg bg-[var(--color-primary)] p-2 shadow-glow">
