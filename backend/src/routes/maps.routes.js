@@ -3,6 +3,7 @@ import {
   geocode,
   getMapsStatus,
   isoline,
+  mockRoute,
   places,
   reverse,
   routing
@@ -17,5 +18,6 @@ router.get("/reverse", authMiddleware, reverse);
 router.get("/routing", authMiddleware, routing);
 router.get("/places", authMiddleware, places);
 router.get("/isoline", authMiddleware, isoline);
+router.post("/mock-route", authMiddleware, mockRoute);
 
 export default router;

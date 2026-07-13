@@ -1,6 +1,6 @@
 # Investigacion de API aplicable al proyecto
 
-Proyecto: `Quito Ubicacion Segura`
+Proyecto: `GeoKipu`
 
 Fuente inicial solicitada por la docente: https://apilandscape.apiscene.io/
 
@@ -46,7 +46,7 @@ Segun la pagina oficial de precios de Geoapify consultada el 24 de junio de 2026
 
 Nota: los precios pueden cambiar. Antes de entregar o integrar en produccion se debe validar nuevamente la pagina oficial de Geoapify.
 
-## 4. Por que aplica a Quito Ubicacion Segura
+## 4. Por que aplica a GeoKipu
 
 La app actualmente usa ubicacion simulada. Geoapify permitiria evolucionar hacia una version real sin cambiar el enfoque principal del proyecto:
 
@@ -114,7 +114,7 @@ No se debe quemar ninguna API key en el codigo.
 Backend:
 
 ```env
-GEOAPIFY_API_KEY=tu_api_key_aqui
+GEOAPIFY_API_KEY=tu_geoapify_api_key
 ```
 
 ## 8. Riesgos y limites

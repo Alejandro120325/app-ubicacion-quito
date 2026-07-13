@@ -1,31 +1,40 @@
 {
   "expo": {
-    "name": "Quito Ubicacion Segura",
-    "slug": "quito-ubicacion-segura",
+    "name": "GeoKipu",
+    "slug": "geokipu",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "quito-segura",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "backgroundColor": "#020617"
-    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#020617"
-      }
+      },
+      "package": "com.alejandro_ojeda.geokipu"
     },
     "web": {
       "bundler": "metro"
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "37cb51b2-67de-48f2-a533-4159cb4178ef"
+      }
     }
   }
 }

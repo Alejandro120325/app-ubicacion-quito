@@ -1,6 +1,7 @@
-import { getUserFromToken } from "../data/mockData.js";
+import { TOKEN_PREFIX } from "../data/mockData.js";
+import { databaseService } from "../services/database.service.js";
 
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -11,16 +12,32 @@ export const authMiddleware = (req, res, next) => {
   }
 
   const token = authHeader.replace("Bearer ", "").trim();
-  const user = getUserFromToken(token);
+  const userId =
+    token === TOKEN_PREFIX
+      ? 1
+      : token.startsWith(`${TOKEN_PREFIX}-`)
+        ? Number(token.replace(`${TOKEN_PREFIX}-`, ""))
+        : null;
 
-  if (!user) {
+  if (!Number.isInteger(userId) || userId < 1) {
     return res.status(401).json({
       ok: false,
       message: "Token simulado invalido o expirado."
     });
   }
 
-  req.user = user;
-  req.token = token;
-  next();
+  try {
+    const user = await databaseService.getUserById(userId);
+    if (!user) {
+      return res.status(401).json({
+        ok: false,
+        message: "Token simulado invalido o expirado."
+      });
+    }
+    req.user = user;
+    req.token = token;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 };

@@ -54,8 +54,8 @@ export const locations = [
 export const users = [
   {
     id: 1,
-    fullName: "Administrador Quito",
-    email: "admin@quitoapp.com",
+    fullName: "Administrador GeoKipu",
+    email: "admin@geokipu.com",
     password: "Admin123",
     role: "admin",
     language: "es",
@@ -67,8 +67,8 @@ export const users = [
   },
   {
     id: 2,
-    fullName: "Persona Demo Quito",
-    email: "persona@quitoapp.com",
+    fullName: "Persona Demo GeoKipu",
+    email: "persona@geokipu.com",
     password: "Persona123",
     role: "persona",
     language: "es",
@@ -116,8 +116,8 @@ export const groups = [
       {
         id: 1,
         userId: 2,
-        fullName: "Persona Demo Quito",
-        email: "persona@quitoapp.com",
+        fullName: "Persona Demo GeoKipu",
+        email: "persona@geokipu.com",
         phone: "0987654321",
         cedula: "0926687856",
         relation: "Yo",

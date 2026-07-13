@@ -5,7 +5,7 @@ import {
   geocodeAddress,
   getGeoapifyStatus,
   reverseGeocode
-} from "../services/geoapify.service.js";
+} from "../services/maps.service.js";
 import {
   parseCoordinates,
   parseNumberParam,
@@ -17,6 +17,55 @@ const sendProviderResponse = (res, data) =>
 
 export const getMapsStatus = (req, res) => {
   res.json({ ok: true, ...getGeoapifyStatus() });
+};
+
+const validateMockPoint = (point, name) => {
+  const latitude = Number(point?.latitude);
+  const longitude = Number(point?.longitude);
+  if (
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return { error: `${name} debe incluir latitude y longitude validas.` };
+  }
+  return { latitude, longitude };
+};
+
+export const mockRoute = (req, res) => {
+  const from = validateMockPoint(req.body.from, "from");
+  const to = validateMockPoint(req.body.to, "to");
+  if (from.error || to.error) {
+    return res.status(400).json({
+      ok: false,
+      message: from.error || to.error
+    });
+  }
+
+  const middle = {
+    latitude: Number(((from.latitude + to.latitude) / 2).toFixed(6)),
+    longitude: Number(((from.longitude + to.longitude) / 2).toFixed(6))
+  };
+  const distanceKm = Number(
+    (Math.hypot(from.latitude - to.latitude, from.longitude - to.longitude) * 111).toFixed(2)
+  );
+
+  return res.status(201).json({
+    ok: true,
+    message: "Ruta simulada generada correctamente",
+    provider: "simulated",
+    simulated: true,
+    route: {
+      from,
+      to,
+      points: [from, middle, to],
+      distanceKm,
+      estimatedMinutes: Math.max(1, Math.round((distanceKm / 30) * 60))
+    }
+  });
 };
 
 export const geocode = async (req, res, next) => {

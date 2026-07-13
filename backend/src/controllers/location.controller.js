@@ -1,13 +1,14 @@
+import { databaseService } from "../services/database.service.js";
+import { groupsService } from "../services/groups.service.js";
+import { locationSharingService } from "../services/locationSharing.service.js";
+import { locationsService } from "../services/locations.service.js";
+import { usersService } from "../services/users.service.js";
 import {
-  getGroupById,
-  getLocationByUserId,
-  getLocationsByGroupId,
-  getVisibleGroups,
-  updateLocationSharing,
-  updateLiveLocation,
-  users
-} from "../data/mockData.js";
-import { sanitizeUser, validateLocationPayload } from "../utils/validators.js";
+  sanitizeUser,
+  validateLocationPayload,
+  validateLocationUpdatePayload,
+  validateStoredLocationPayload
+} from "../utils/validators.js";
 
 const canAccessGroup = (user, group) =>
   user.role === "admin" ||
@@ -16,76 +17,83 @@ const canAccessGroup = (user, group) =>
     (member) => member.userId === user.id || member.email === user.email
   );
 
-export const getLocation = (req, res) => {
-  const userId = Number(req.params.userId);
-  const user = users.find((item) => item.id === userId);
-  const location = getLocationByUserId(userId);
-
-  if (!user || !location) {
-    return res.status(404).json({
-      ok: false,
-      message: "No existe una ubicacion simulada para este usuario."
-    });
-  }
-
-  return res.json({
-    ok: true,
-    message: "Ubicacion simulada obtenida correctamente",
-    location: {
-      ...location,
-      sharing: user.sharingLocation,
-      simulated: location.simulated ?? true
-    }
-  });
+const canViewUser = async (requester, userId) => {
+  if (requester.role === "admin" || requester.id === Number(userId)) return true;
+  const visibleGroups = await groupsService.list(requester);
+  return visibleGroups.some((group) =>
+    group.members.some((member) => member.userId === Number(userId))
+  );
 };
 
-export const shareLocation = (req, res) => {
-  const { sharing } = req.body;
+export const getLocation = async (req, res, next) => {
+  try {
+    const userId = Number(req.params.userId);
+    const [user, location] = await Promise.all([
+      usersService.getById(userId),
+      locationsService.getByUser(userId)
+    ]);
+    if (!user || !location) {
+      return res.status(404).json({
+        ok: false,
+        message: "No existe una ubicacion para este usuario."
+      });
+    }
+    return res.json({
+      ok: true,
+      message: "Ubicacion obtenida correctamente",
+      location: {
+        ...location,
+        sharing: user.sharingLocation,
+        simulated: location.simulated ?? databaseService.mode === "memory"
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 
+export const shareLocation = async (req, res, next) => {
+  const { sharing } = req.body;
   if (req.user.role !== "persona") {
     return res.status(403).json({
       ok: false,
       message: "Solo las cuentas tipo persona pueden cambiar este estado."
     });
   }
-
   if (typeof sharing !== "boolean") {
-    return res.status(400).json({
-      ok: false,
-      message: "El campo sharing debe ser true o false."
-    });
+    return res.status(400).json({ ok: false, message: "El campo sharing debe ser true o false." });
   }
 
-  const updatedUser = updateLocationSharing(req.user.id, sharing);
-
-  return res.json({
-    ok: true,
-    message: sharing
-      ? "Uso compartido de ubicacion activado"
-      : "Uso compartido de ubicacion desactivado",
-    sharing,
-    user: sanitizeUser(updatedUser)
-  });
+  try {
+    const updatedUser = await locationSharingService.setSharing(req.user.id, sharing);
+    return res.json({
+      ok: true,
+      message: sharing ? "Ubicacion compartida" : "Ubicacion pausada",
+      sharing,
+      user: sanitizeUser(updatedUser)
+    });
+  } catch (error) {
+    return next(error);
+  }
 };
 
-export const startLocationSharing = (req, res) => {
+export const startLocationSharing = (req, res, next) => {
   req.body.sharing = true;
-  return shareLocation(req, res);
+  return shareLocation(req, res, next);
 };
 
-export const stopLocationSharing = (req, res) => {
+export const stopLocationSharing = (req, res, next) => {
   req.body.sharing = false;
-  return shareLocation(req, res);
+  return shareLocation(req, res, next);
 };
 
-export const updateLocation = (req, res) => {
+export const updateLocation = async (req, res, next) => {
   if (req.user.role !== "persona") {
     return res.status(403).json({
       ok: false,
       message: "Solo una cuenta tipo persona puede compartir su ubicacion."
     });
   }
-
   if (!req.user.sharingLocation) {
     return res.status(409).json({
       ok: false,
@@ -102,51 +110,179 @@ export const updateLocation = (req, res) => {
     });
   }
 
-  if (validation.data.groupId) {
-    const group = getGroupById(validation.data.groupId);
-    if (!group || !canAccessGroup(req.user, group)) {
-      return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+  try {
+    if (validation.data.groupId) {
+      const group = await groupsService.getById(validation.data.groupId);
+      if (!group || !canAccessGroup(req.user, group)) {
+        return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+      }
     }
+    const location = await locationSharingService.updateCoordinates({
+      ...validation.data,
+      userId: req.user.id,
+      sharing: true
+    });
+    return res.json({ ok: true, message: "Ubicacion compartida", location });
+  } catch (error) {
+    return next(error);
   }
-
-  const location = updateLiveLocation(req.user.id, validation.data);
-  return res.json({
-    ok: true,
-    message: "Ubicacion compartida.",
-    location
-  });
 };
 
-export const getGroupLocations = (req, res) => {
-  const group = getGroupById(req.params.groupId);
-  if (!group || !canAccessGroup(req.user, group)) {
-    return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+export const listLocations = async (req, res, next) => {
+  try {
+    const locations = await locationsService.list(req.user);
+    return res.json({
+      ok: true,
+      message: "Ubicaciones obtenidas correctamente",
+      storage: databaseService.mode,
+      count: locations.length,
+      locations
+    });
+  } catch (error) {
+    return next(error);
   }
-
-  return res.json({
-    ok: true,
-    message: "Ultimas ubicaciones del grupo obtenidas correctamente.",
-    pollingInterval: 5000,
-    groupId: group.id,
-    locations: getLocationsByGroupId(group.id)
-  });
 };
 
-export const getUserLocation = (req, res) => {
-  const userId = Number(req.params.userId);
-  const canView =
-    req.user.role === "admin" ||
-    req.user.id === userId ||
-    getVisibleGroups(req.user).some((group) =>
-      group.members.some((member) => member.userId === userId)
-    );
-
-  if (!canView) {
-    return res.status(403).json({
+export const postLocation = async (req, res, next) => {
+  const validation = validateStoredLocationPayload(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({
       ok: false,
-      message: "No tienes acceso a la ubicacion de esta persona."
+      message: "Revisa los datos de ubicacion.",
+      errors: validation.errors
     });
   }
 
-  return getLocation(req, res);
+  if (req.user.role !== "admin" && req.user.id !== validation.data.userId) {
+    return res.status(403).json({ ok: false, message: "No puedes actualizar otro usuario." });
+  }
+
+  try {
+    const [user, group] = await Promise.all([
+      usersService.getById(validation.data.userId),
+      groupsService.getById(validation.data.groupId)
+    ]);
+    if (!user) return res.status(404).json({ ok: false, message: "Usuario no encontrado." });
+    if (!group || !canAccessGroup(req.user, group)) {
+      return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+    }
+    const location = await locationsService.save(validation.data);
+    return res.status(201).json({
+      ok: true,
+      message: "Ubicacion guardada correctamente",
+      location
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getGroupLocations = async (req, res, next) => {
+  try {
+    const group = await groupsService.getById(req.params.groupId);
+    if (!group || !canAccessGroup(req.user, group)) {
+      return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
+    }
+    const locations = await locationsService.getByGroup(group.id);
+    return res.json({
+      ok: true,
+      message: "Ubicaciones del grupo obtenidas correctamente",
+      pollingInterval: 5000,
+      groupId: group.id,
+      locations
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getUserLocation = async (req, res, next) => {
+  try {
+    const allowed = await canViewUser(req.user, req.params.userId);
+    if (!allowed) {
+      return res.status(403).json({
+        ok: false,
+        message: "No tienes acceso a la ubicacion de esta persona."
+      });
+    }
+    return getLocation(req, res, next);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const patchUserLocationStatus = async (req, res, next) => {
+  const userId = Number(req.params.userId);
+  if (typeof req.body.sharing !== "boolean") {
+    return res.status(400).json({ ok: false, message: "El campo sharing debe ser booleano." });
+  }
+  if (req.user.role !== "admin" && req.user.id !== userId) {
+    return res.status(403).json({ ok: false, message: "No puedes modificar otro usuario." });
+  }
+
+  try {
+    const user = await locationSharingService.setSharing(userId, req.body.sharing);
+    if (!user) return res.status(404).json({ ok: false, message: "Usuario no encontrado." });
+    return res.json({
+      ok: true,
+      message: req.body.sharing ? "Ubicacion compartida" : "Ubicacion pausada",
+      sharing: req.body.sharing,
+      user: sanitizeUser(user)
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getStoredLocation = async (req, res, next) => {
+  try {
+    const location = await locationsService.getById(req.params.id);
+    if (!location) return res.status(404).json({ ok: false, message: "Ubicacion no encontrada." });
+    if (!(await canViewUser(req.user, location.userId))) {
+      return res.status(403).json({ ok: false, message: "No tienes acceso a esta ubicacion." });
+    }
+    return res.json({ ok: true, message: "Ubicacion obtenida correctamente", location });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const patchStoredLocation = async (req, res, next) => {
+  const validation = validateLocationUpdatePayload(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({
+      ok: false,
+      message: "Revisa los datos de ubicacion.",
+      errors: validation.errors
+    });
+  }
+
+  try {
+    const current = await locationsService.getById(req.params.id);
+    if (!current) return res.status(404).json({ ok: false, message: "Ubicacion no encontrada." });
+    if (req.user.role !== "admin" && req.user.id !== current.userId) {
+      return res.status(403).json({ ok: false, message: "No puedes modificar esta ubicacion." });
+    }
+    const location = await locationsService.update(req.params.id, validation.data);
+    if (validation.data.sharing !== undefined) {
+      await locationSharingService.setSharing(current.userId, validation.data.sharing);
+    }
+    return res.json({ ok: true, message: "Ubicacion actualizada correctamente", location });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteStoredLocation = async (req, res, next) => {
+  try {
+    const current = await locationsService.getById(req.params.id);
+    if (!current) return res.status(404).json({ ok: false, message: "Ubicacion no encontrada." });
+    if (req.user.role !== "admin" && req.user.id !== current.userId) {
+      return res.status(403).json({ ok: false, message: "No puedes eliminar esta ubicacion." });
+    }
+    const location = await locationsService.remove(req.params.id);
+    return res.json({ ok: true, message: "Ubicacion eliminada correctamente", location });
+  } catch (error) {
+    return next(error);
+  }
 };

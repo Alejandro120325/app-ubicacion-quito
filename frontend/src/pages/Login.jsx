@@ -15,12 +15,12 @@ import { validateLoginForm } from "../utils/validators.js";
 const demoCredentials = [
   {
     role: "Admin",
-    email: "admin@quitoapp.com",
+    email: "admin@geokipu.com",
     password: "Admin123"
   },
   {
     role: "Persona",
-    email: "persona@quitoapp.com",
+    email: "persona@geokipu.com",
     password: "Persona123"
   }
 ];

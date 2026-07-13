@@ -1,37 +1,49 @@
-# Quito Ubicacion Segura
+# GeoKipu
 
-Aplicacion academica full-stack para compartir ubicacion con consentimiento entre grupos familiares o de confianza. Incluye frontend React, backend Express, GPS web, fallback simulado y proxy Geoapify.
+GeoKipu es una aplicacion academica para compartir ubicacion de forma consentida entre familiares, amigos y contactos de confianza.
 
-## Funcionalidades
+## Arquitectura
 
-- Login y registro por roles `admin` y `persona`.
-- Dashboards separados y responsive.
-- Creacion de grupos y alta de usuarios registrados por correo.
-- GPS web manual mediante `navigator.geolocation.watchPosition`.
-- Activacion, actualizacion y pausa de ubicacion.
-- Polling de ubicaciones de grupo cada cinco segundos.
-- Mapa visual preparado para coordenadas reales, sin Google Maps, Leaflet ni Mapbox.
-- Geoapify consumida exclusivamente desde endpoints propios del backend.
-- Fallback completo sin Geoapify ni Supabase configurados.
-- Temas claro/oscuro, selector visual e idiomas ES/EN.
+```txt
+Frontend React/Vite -> AWS Amplify
+Backend Express/Node.js -> AWS Elastic Beanstalk
+Base PostgreSQL -> Supabase
+Servicios de mapas -> Geoapify mediante /api/maps/*
+Mobile Expo/React Native -> Expo Go o APK
+```
 
-La carpeta `/mobile` pertenece a otro equipo y no forma parte de estos cambios.
+El proyecto no usa Firebase. Sin Supabase funciona en memoria y sin Geoapify conserva mapa y datos simulados.
 
-## Inicio local
+## Modulos
 
-Terminal 1:
+- `/frontend`: Home, Login, Register, dashboards admin/persona, grupos, mapas, alertas, API, privacidad y GPS web.
+- `/backend`: autenticacion academica, CRUD de grupos, integrantes, ubicaciones y proxy Geoapify.
+- `/mobile`: cliente Expo existente, mantenido por otro integrante.
+- `/docs`: esquema, Postman y preparacion de servicios externos.
+
+## Privacidad
+
+- Tu ubicacion solo se comparte cuando tu la activas.
+- Puedes pausar el seguimiento en cualquier momento.
+- GeoKipu no rastrea tu ubicacion sin consentimiento.
+- Solo los integrantes de tu grupo pueden ver tu ultima ubicacion compartida.
+
+## Ejecutar localmente
+
+Backend:
 
 ```powershell
 cd backend
-Copy-Item .env.example .env
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 npm install
 npm run dev
 ```
 
-Terminal 2:
+Frontend:
 
 ```powershell
 cd frontend
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 npm install
 npm run build
 npm run dev
@@ -40,41 +52,56 @@ npm run dev
 - Backend: `http://localhost:4000`
 - Frontend: `http://localhost:5173`
 
-## Credenciales
-
-- Admin: `admin@quitoapp.com` / `Admin123`
-- Persona: `persona@quitoapp.com` / `Persona123`
-- Segunda persona: `camila.torres@example.com` / `Camila123`
-
 ## Variables
-
-Backend:
-
-```env
-PORT=4000
-FRONTEND_URL=http://localhost:5173
-GEOAPIFY_API_KEY=tu_api_key_aqui
-SUPABASE_URL=tu_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
-SUPABASE_ANON_KEY=tu_anon_key
-```
 
 Frontend:
 
 ```env
 VITE_API_URL=http://localhost:4000/api
+VITE_APP_NAME=GeoKipu
 ```
 
-## Endpoints nuevos
+Backend:
 
-- Mapas: `/api/maps/status`, `/geocode`, `/reverse`, `/routing`, `/places`, `/isoline`.
-- GPS: `/api/location/share/start`, `/share/stop`, `/update`, `/group/:groupId`, `/user/:userId`.
-- Grupos: `DELETE /api/groups/:groupId/members/:userId` adicional a los endpoints existentes.
+```env
+PORT=4000
+APP_NAME=GeoKipu
+FRONTEND_URL=http://localhost:5173
+SUPABASE_URL=tu_supabase_url
+SUPABASE_ANON_KEY=tu_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=tu_supabase_service_role_key
+GEOAPIFY_API_KEY=tu_geoapify_api_key
+```
 
-Detalles y ejemplos: `backend/README.md`.
+Mobile:
 
-## Persistencia y despliegue
+```env
+EXPO_PUBLIC_API_URL=http://IP_DEL_PC:4000/api
+EXPO_PUBLIC_APP_NAME=GeoKipu
+```
 
-El entorno local persiste en memoria para funcionar sin cuentas externas. `docs/supabase-schema.sql` prepara PostgreSQL y `docs/gps-real.md` explica privacidad, Supabase, Railway y Vercel.
+## Credenciales principales
 
-No se incluyen claves reales en el repositorio.
+- Admin: `admin@geokipu.com` / `Admin123`
+- Persona 1: `persona@geokipu.com` / `Persona123`
+- Persona 2: `camila.torres@example.com` / `Camila123`
+
+Los correos antiguos `@quitoapp.com` siguen aceptados temporalmente por el backend.
+
+## Endpoints
+
+- Auth: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`.
+- Groups: CRUD `/api/groups` y `/api/groups/:groupId`.
+- Members: CRUD `/api/groups/:groupId/members`.
+- Locations: `GET/POST /api/locations` y rutas `/api/location/*` para GPS web.
+- Maps: `/api/maps/status`, `geocode`, `reverse`, `routing`, `places`, `isoline` y `mock-route`.
+
+## Documentacion
+
+- Postman: `docs/postman-pruebas.md`.
+- Supabase: `docs/supabase-setup.md` y `docs/supabase-schema.sql`.
+- AWS: `docs/aws-deploy.md`.
+- Expo Go: `docs/expo-go.md`.
+- GPS y privacidad: `docs/gps-real.md`.
+
+No se incluyen claves reales ni se realiza despliegue automatico.

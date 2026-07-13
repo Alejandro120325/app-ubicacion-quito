@@ -1,6 +1,6 @@
 ﻿# Mobile
 
-App movil Expo/React Native para Quito Ubicacion Segura. La interfaz adapta el
+App movil Expo/React Native para GeoKipu. La interfaz adapta el
 frontend web existente a una experiencia responsive/mobile con tema oscuro,
 tarjetas compactas, mapas simulados, navegacion por rol y conexion al backend
 para autenticacion, registro, usuarios, ubicacion y grupos.
@@ -31,6 +31,7 @@ Crea un archivo `.env` dentro de `/mobile` tomando como base `.env.example`:
 
 ```bash
 EXPO_PUBLIC_API_URL=http://localhost:4000/api
+EXPO_PUBLIC_APP_NAME=GeoKipu
 ```
 
 Si no creas `.env`, la app usa automaticamente:
@@ -68,8 +69,10 @@ npm run typecheck
 
 ## Credenciales de prueba
 
-- Admin: `admin@quitoapp.com` / `Admin123`
-- Persona: `persona@quitoapp.com` / `Persona123`
+- Admin: `admin@geokipu.com` / `Admin123`
+- Persona: `persona@geokipu.com` / `Persona123`
+
+Los correos anteriores `@quitoapp.com` siguen aceptados temporalmente por el backend.
 
 ## Pantallas implementadas
 

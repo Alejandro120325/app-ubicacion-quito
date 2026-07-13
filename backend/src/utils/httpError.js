@@ -21,7 +21,9 @@ export const errorHandler = (error, req, res, next) => {
     return next(error);
   }
 
-  const status = Number(error.status) || 500;
+  const isDuplicate = error?.code === 11000;
+  const isValidation = error?.name === "ValidationError" || error?.name === "CastError";
+  const status = isDuplicate ? 409 : isValidation ? 400 : Number(error.status) || 500;
 
   if (status >= 500 && error.code !== "GEOAPIFY_NOT_CONFIGURED") {
     console.error(error);
@@ -29,9 +31,17 @@ export const errorHandler = (error, req, res, next) => {
 
   return res.status(status).json({
     ok: false,
-    code: error.code || "INTERNAL_ERROR",
+    code: isDuplicate
+      ? "DUPLICATE_VALUE"
+      : isValidation
+        ? "VALIDATION_ERROR"
+        : error.code || "INTERNAL_ERROR",
     message:
-      status === 500
+      isDuplicate
+        ? "Ya existe un registro con uno de los valores enviados."
+        : isValidation
+          ? "Los datos enviados no cumplen el modelo requerido."
+          : status === 500
         ? "No se pudo completar la solicitud. Intenta nuevamente."
         : error.message,
     ...(error.details ? { details: error.details } : {})

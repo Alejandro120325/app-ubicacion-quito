@@ -31,31 +31,31 @@ El frontend maneja permiso denegado, GPS no disponible, timeout y errores de red
 
 ## Persistencia actual y Supabase
 
-La version local usa memoria para ser ejecutable sin servicios externos. Los datos se reinician al reiniciar Node. El contrato SQL de producción esta en `docs/supabase-schema.sql`.
+Sin variables reales, la version local usa memoria y los datos se reinician al reiniciar Node. Con variables validas, `database.service.js` usa Supabase REST. El contrato SQL esta en `docs/supabase-schema.sql`.
 
 Para conectar Supabase:
 
 1. Crear un proyecto y ejecutar `docs/supabase-schema.sql` en SQL Editor.
-2. Configurar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `SUPABASE_ANON_KEY` solo en Railway.
-3. Sustituir el repositorio en memoria de `backend/src/data/mockData.js` por un repositorio Supabase que mantenga los mismos contratos de controladores.
-4. Migrar la autenticacion simulada a Supabase Auth antes de habilitar politicas RLS para clientes.
+2. Configurar `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `SUPABASE_ANON_KEY` solo en el backend.
+3. Reiniciar el backend y verificar el mensaje `Supabase conectado`.
+4. Antes de produccion real, migrar las contrasenas academicas y tokens simulados a Supabase Auth.
 
 ## Despliegue
 
-### Railway
+### AWS Elastic Beanstalk
 
-- Root directory: `backend`
-- Start command: `npm start`
-- Variables: `PORT`, `FRONTEND_URL`, `GEOAPIFY_API_KEY` y las tres variables de Supabase.
+- Desplegar el contenido de `backend`.
+- Start command: `npm start`.
+- Configurar `FRONTEND_URL`, `GEOAPIFY_API_KEY` y las variables de Supabase.
 
-### Vercel
+### AWS Amplify
 
-- Root directory: `frontend`
+- App root: `frontend`
 - Build command: `npm run build`
 - Output directory: `dist`
 - Variable: `VITE_API_URL=https://tu-backend.railway.app/api`
 
-Vercel y Railway entregan HTTPS, requisito para `navigator.geolocation` fuera de localhost.
+El frontend y backend deben usar HTTPS, requisito para `navigator.geolocation` fuera de localhost.
 
 ## Diferencia con `/mobile`
 

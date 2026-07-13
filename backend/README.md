@@ -1,62 +1,132 @@
-# Backend - Quito Ubicacion Segura
+# Backend Express - GeoKipu
 
-API Express para autenticacion academica, grupos, GPS consentido y proxy seguro de Geoapify. Funciona en memoria sin servicios externos.
+API REST de GeoKipu para autenticacion, usuarios, grupos, miembros, ubicaciones consentidas y proxy seguro de Geoapify. MongoDB/Mongoose es la persistencia principal para el Taller 3. Supabase y memoria se conservan como alternativas para no romper el proyecto.
 
-## Configuracion
+## Requisitos
+
+- Node.js 18 o superior.
+- MongoDB Community Server ejecutandose localmente, o una URI de MongoDB Atlas.
+- Postman, Thunder Client o un cliente HTTP equivalente.
+
+## Instalacion en Windows
 
 ```powershell
-Copy-Item .env.example .env
+cd backend
 npm install
+Copy-Item .env.example .env
 npm run dev
 ```
 
-Variables:
+MongoDB local debe estar iniciado antes del backend:
+
+```powershell
+Get-Service MongoDB
+Start-Service MongoDB
+```
+
+Si MongoDB se ejecuta manualmente:
+
+```powershell
+mongod --dbpath C:\data\db
+```
+
+## Variables de entorno
 
 ```env
 PORT=4000
+APP_NAME=GeoKipu
 FRONTEND_URL=http://localhost:5173
-GEOAPIFY_API_KEY=tu_api_key_aqui
+MONGODB_URI=mongodb://127.0.0.1:27017/geokipu
 SUPABASE_URL=tu_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
-SUPABASE_ANON_KEY=tu_anon_key
+SUPABASE_ANON_KEY=tu_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=tu_supabase_service_role_key
+GEOAPIFY_API_KEY=tu_geoapify_api_key
 ```
 
-No se debe enviar `GEOAPIFY_API_KEY` ni `SUPABASE_SERVICE_ROLE_KEY` al frontend.
+Orden de persistencia: MongoDB, Supabase y memoria. Si MongoDB no responde en tres segundos, el backend intenta el almacenamiento alternativo y sigue disponible. Las claves privadas permanecen solo en backend.
 
-## Endpoints
+## Scripts
 
-Auth y usuarios:
+```json
+{
+  "dev": "nodemon src/server.js",
+  "start": "node src/server.js"
+}
+```
 
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/users`
-- `GET /api/users/me`
+## Verificacion rapida
 
-Grupos:
+```powershell
+Invoke-RestMethod http://localhost:4000/api/health
+```
 
-- `POST /api/groups`
-- `GET /api/groups`
-- `GET /api/groups/:groupId`
-- `POST /api/groups/:groupId/members`
-- `DELETE /api/groups/:groupId/members/:userId`
-- `PATCH /api/groups/:groupId/members/:memberId/location-status`
+Con MongoDB activo, la respuesta debe incluir:
 
-Ubicacion:
+```json
+{
+  "ok": true,
+  "storage": "mongodb",
+  "mongodb": "connected"
+}
+```
 
-- `POST /api/location/share/start`
-- `POST /api/location/share/stop`
-- `POST /api/location/update`
-- `GET /api/location/group/:groupId`
-- `GET /api/location/user/:userId`
-- Compatibilidad: `GET /api/location/:userId` y `PATCH /api/location/share`
+Tambien se puede verificar en `mongosh`:
 
-Mapas:
+```javascript
+use geokipu
+show collections
+db.users.find().limit(5)
+db.groups.find().limit(5)
+db.groupmembers.find().limit(5)
+db.locations.find().limit(5)
+```
 
-- `GET /api/maps/status` (publico)
-- `GET /api/maps/geocode?text=La Carolina Quito`
-- `GET /api/maps/reverse?lat=-0.1807&lon=-78.4678`
-- `GET /api/maps/routing?from=-0.1807,-78.4678&to=-0.2299,-78.5249`
-- `GET /api/maps/places?lat=-0.1807&lon=-78.4678&category=healthcare`
-- `GET /api/maps/isoline?lat=-0.1807&lon=-78.4678&type=time&mode=walk&range=600`
+## Autenticacion de prueba
 
-Las rutas protegidas requieren `Authorization: Bearer token-simulado-<id>`. Sin clave Geoapify, los endpoints del proveedor responden `503` con `GEOAPIFY_NOT_CONFIGURED`; el resto de la API sigue disponible.
+```text
+Admin:   admin@geokipu.com / Admin123
+Persona: persona@geokipu.com / Persona123
+```
+
+El login devuelve un token academico. En rutas protegidas usar:
+
+```http
+Authorization: Bearer token-simulado-1
+Content-Type: application/json
+```
+
+## Recursos REST
+
+- Health: `GET /api/health`.
+- Auth: registro, login y usuario autenticado.
+- Users: `GET`, `POST`, `GET /:id`, `PATCH /:id`, `DELETE /:id`.
+- Groups: CRUD completo.
+- Group Members: listar, crear, actualizar, eliminar y cambiar estado.
+- Locations: CRUD, consulta por grupo/usuario y estado.
+- Location Sharing: iniciar, actualizar y detener ubicacion.
+- Maps: status, geocode, reverse, routing, places, isoline y ruta simulada.
+
+La referencia completa, cuerpos y respuestas esperadas esta en `../docs/postman-pruebas.md`. La coleccion importable esta en `../docs/GeoKipu.postman_collection.json`.
+
+## Prueba con Postman
+
+1. Importar `docs/GeoKipu.postman_collection.json`.
+2. Ejecutar `Health` y comprobar `storage: mongodb`.
+3. Ejecutar `Login Admin`; la coleccion guarda el token.
+4. Ejecutar las carpetas Users, Groups, Group Members y Locations en orden.
+5. Ejecutar Login Persona y luego iniciar, actualizar y detener ubicacion.
+6. Probar Maps. Sin `GEOAPIFY_API_KEY`, status muestra modo simulado y las consultas externas devuelven un error controlado `503`.
+
+## Estructura tecnica
+
+```text
+src/config       Conexion MongoDB y Supabase
+src/models       Modelos Mongoose
+src/routes       Definicion de endpoints Express
+src/controllers  Validacion HTTP y respuestas
+src/services     Logica de negocio y persistencia
+src/middlewares  Autenticacion
+src/utils        Validaciones y errores
+```
+
+El backend supera el minimo del Taller 3: implementa mas de tres recursos, cada recurso principal dispone de al menos dos metodos HTTP y MongoDB/Mongoose almacena los datos NoSQL.

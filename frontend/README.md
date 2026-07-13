@@ -1,4 +1,4 @@
-# Frontend - Quito Ubicacion Segura
+# Frontend - GeoKipu
 
 Aplicacion React/Vite responsive con autenticacion por rol, grupos, GPS web consentido, polling y mapa visual con fallback simulado.
 
@@ -14,9 +14,10 @@ Variable opcional:
 
 ```env
 VITE_API_URL=http://localhost:4000/api
+VITE_APP_NAME=GeoKipu
 ```
 
-Las claves Geoapify y Supabase no pertenecen al frontend.
+Las claves Geoapify y Supabase no pertenecen al frontend. Para AWS Amplify usar root `frontend`, build `npm run build` y salida `dist`.
 
 ## GPS
 

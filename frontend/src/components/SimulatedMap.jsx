@@ -111,6 +111,13 @@ const SimulatedMap = ({
     locations.some((location) => location.simulated === false);
   const currentSelection =
     selectedMember?.userId || selectedMember?.relation || selectedMember?.fullName || selectedLabel;
+  const latestLocationUpdate =
+    lastUpdate ||
+    locations
+      .map((location) => location.updatedAt || location.lastUpdate)
+      .filter(Boolean)
+      .sort()
+      .at(-1);
 
   return (
     <motion.figure
@@ -147,7 +154,7 @@ const SimulatedMap = ({
               initial={{ opacity: 0, y: 10, scale: 0.88 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.06 * index }}
-              title={`${point.fullName || point.label}: ${t(`groups.status.${status}`)}`}
+              title={`${point.fullName || point.label}: ${t(`groups.status.${status}`)} - ${point.updatedAt || point.lastUpdate || t("map.defaultUpdate")}`}
             >
               <span className={`relative flex h-11 w-11 items-center justify-center rounded-lg shadow-soft sm:h-12 sm:w-12 ${isSelected ? "ring-4 ring-[var(--color-ring)]" : ""} ${getMarkerClass(status)}`}>
                 {status === "sharing" ? (
@@ -160,8 +167,9 @@ const SimulatedMap = ({
                 {isSelected ? <LocateFixed className="relative h-5 w-5" /> : <MapPin className="relative h-5 w-5" />}
               </span>
               {variant !== "compact" ? (
-                <span className={`${labelAbove ? "absolute bottom-[54px]" : "mt-2"} left-1/2 block max-w-[132px] -translate-x-1/2 whitespace-nowrap rounded-md border border-[var(--color-border)] bg-[var(--color-card)]/95 px-2 py-1 text-xs font-bold text-[var(--color-text)] shadow-sm backdrop-blur`}>
-                  {point.fullName || point.label}
+                <span className={`${labelAbove ? "absolute bottom-[54px]" : "mt-2"} left-1/2 flex max-w-[150px] -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-border)] bg-[var(--color-card)]/95 px-2 py-1 text-xs font-bold text-[var(--color-text)] shadow-sm backdrop-blur`}>
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${status === "sharing" ? "bg-[var(--color-secondary)]" : status === "paused" ? "bg-amber-400" : "bg-slate-500"}`} />
+                  <span className="truncate">{point.fullName || point.label}</span>
                 </span>
               ) : null}
             </motion.button>
@@ -170,7 +178,7 @@ const SimulatedMap = ({
 
         <Navigation className="absolute right-5 top-5 h-5 w-5 text-[var(--color-primary)] sm:right-7 sm:top-7" aria-hidden="true" />
       </div>
-      <MapStatusBar lastUpdate={lastUpdate} live={live} polling={polling} />
+      <MapStatusBar lastUpdate={latestLocationUpdate} live={live} polling={polling} />
     </motion.figure>
   );
 };

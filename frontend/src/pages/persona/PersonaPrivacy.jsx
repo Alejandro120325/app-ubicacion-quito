@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { EyeOff, LockKeyhole, Power, ShieldCheck } from "lucide-react";
+import { EyeOff, LockKeyhole, Power, ShieldCheck, UsersRound } from "lucide-react";
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
@@ -18,7 +18,8 @@ const PersonaPrivacy = () => {
   const controls = [
     { icon: ShieldCheck, title: t("privacy.consentTitle"), text: t("privacy.consentText") },
     { icon: LockKeyhole, title: t("privacy.dataTitle"), text: t("privacy.dataText") },
-    { icon: EyeOff, title: t("privacy.pauseTitle"), text: t("privacy.pauseText") }
+    { icon: EyeOff, title: t("privacy.pauseTitle"), text: t("privacy.pauseText") },
+    { icon: UsersRound, title: t("privacy.groupTitle"), text: t("privacy.groupText") }
   ];
 
   return (
@@ -60,7 +61,7 @@ const PersonaPrivacy = () => {
         </div>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {controls.map((control) => (
           <article
             className="glass-card p-6"

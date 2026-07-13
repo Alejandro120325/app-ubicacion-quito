@@ -1,7 +1,7 @@
 {
-  "name": "app-ubicacion-quito-backend",
+  "name": "geokipu-backend",
   "version": "1.0.0",
-  "description": "Backend basico para una app de ubicacion simulada en Quito.",
+  "description": "Backend Express de GeoKipu para grupos y ubicacion consentida.",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -18,7 +18,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "mongoose": "^8.24.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

@@ -3,10 +3,15 @@ import { HttpError } from "../utils/httpError.js";
 const GEOAPIFY_URL = "https://api.geoapify.com";
 const REQUEST_TIMEOUT_MS = 8000;
 
+const isConfiguredApiKey = (value = "") => {
+  const key = value.trim().toLowerCase();
+  return Boolean(key && !key.startsWith("tu_") && !key.startsWith("your_"));
+};
+
 const getApiKey = () => {
   const apiKey = process.env.GEOAPIFY_API_KEY?.trim();
 
-  if (!apiKey || apiKey === "tu_api_key_aqui") {
+  if (!isConfiguredApiKey(apiKey)) {
     throw new HttpError(
       503,
       "Geoapify no esta configurada. La aplicacion continua usando datos simulados.",
@@ -59,10 +64,7 @@ const requestGeoapify = async (path, params) => {
 };
 
 export const getGeoapifyStatus = () => {
-  const configured = Boolean(
-    process.env.GEOAPIFY_API_KEY?.trim() &&
-      process.env.GEOAPIFY_API_KEY.trim() !== "tu_api_key_aqui"
-  );
+  const configured = isConfiguredApiKey(process.env.GEOAPIFY_API_KEY);
 
   return {
     configured,

@@ -1,34 +1,58 @@
-import {
-  addMemberToGroup,
-  createGroup,
-  getGroupById,
-  getVisibleGroups,
-  removeMemberFromGroup,
-  users,
-  updateMemberLocationStatus
-} from "../data/mockData.js";
+import { groupMembersService } from "../services/groupMembers.service.js";
+import { groupsService } from "../services/groups.service.js";
+import { usersService } from "../services/users.service.js";
+import { databaseService } from "../services/database.service.js";
 import {
   validateGroupMemberPayload,
+  validateGroupMemberUpdatePayload,
   validateGroupPayload,
+  validateGroupUpdatePayload,
   validateLocationStatusPayload
 } from "../utils/validators.js";
 
 const canAccessGroup = (user, group) =>
   user.role === "admin" ||
   group.createdBy === user.id ||
-  group.members.some((member) => member.email === user.email);
+  group.members.some(
+    (member) => member.userId === user.id || member.email === user.email
+  );
 
-export const getGroups = (req, res) => {
-  return res.json({
-    ok: true,
-    message: "Grupos simulados obtenidos correctamente",
-    groups: getVisibleGroups(req.user)
-  });
+const canManageGroup = (user, group) =>
+  user.role === "admin" || group.createdBy === user.id;
+
+const loadAccessibleGroup = async (req, res, manage = false) => {
+  const group = await groupsService.getById(req.params.groupId);
+  const allowed = group && (manage ? canManageGroup(req.user, group) : canAccessGroup(req.user, group));
+
+  if (!allowed) {
+    res.status(group ? 403 : 404).json({
+      ok: false,
+      message: group
+        ? "No tienes permisos para modificar este grupo."
+        : "Grupo no encontrado."
+    });
+    return null;
+  }
+
+  return group;
 };
 
-export const postGroup = (req, res) => {
-  const validation = validateGroupPayload(req.body);
+export const getGroups = async (req, res, next) => {
+  try {
+    const groups = await groupsService.list(req.user);
+    return res.json({
+      ok: true,
+      message: "Grupos obtenidos correctamente",
+      storage: databaseService.mode,
+      groups
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 
+export const postGroup = async (req, res, next) => {
+  const validation = validateGroupPayload(req.body);
   if (!validation.isValid) {
     return res.status(400).json({
       ok: false,
@@ -37,67 +61,133 @@ export const postGroup = (req, res) => {
     });
   }
 
-  const group = createGroup({
-    ...validation.data,
-    createdBy: req.user.id
-  });
-
-  return res.status(201).json({
-    ok: true,
-    message: "Grupo simulado creado correctamente",
-    group
-  });
+  try {
+    const group = await groupsService.create({
+      ...validation.data,
+      createdBy: req.user.id
+    });
+    return res.status(201).json({
+      ok: true,
+      message: "Grupo creado correctamente",
+      group
+    });
+  } catch (error) {
+    return next(error);
+  }
 };
 
-export const getGroup = (req, res) => {
-  const group = getGroupById(req.params.groupId);
-
-  if (!group || !canAccessGroup(req.user, group)) {
-    return res.status(404).json({
-      ok: false,
-      message: "Grupo simulado no encontrado."
-    });
+export const getGroup = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res);
+    if (!group) return undefined;
+    return res.json({ ok: true, message: "Grupo obtenido correctamente", group });
+  } catch (error) {
+    return next(error);
   }
-
-  return res.json({
-    ok: true,
-    message: "Grupo simulado obtenido correctamente",
-    group
-  });
 };
 
-export const postGroupMember = (req, res) => {
-  const group = getGroupById(req.params.groupId);
-
-  if (!group) {
-    return res.status(404).json({
+export const patchGroup = async (req, res, next) => {
+  const validation = validateGroupUpdatePayload(req.body);
+  if (!validation.isValid) {
+    return res.status(400).json({
       ok: false,
-      message: "Grupo simulado no encontrado."
+      message: "Revisa los datos del grupo.",
+      errors: validation.errors
     });
   }
 
-  if (req.user.role !== "admin" && group.createdBy !== req.user.id) {
-    return res.status(403).json({
-      ok: false,
-      message: "Solo la persona creadora o un administrador puede agregar integrantes."
-    });
+  try {
+    const group = await loadAccessibleGroup(req, res, true);
+    if (!group) return undefined;
+    const updated = await groupsService.update(group.id, validation.data);
+    return res.json({ ok: true, message: "Grupo actualizado correctamente", group: updated });
+  } catch (error) {
+    return next(error);
   }
+};
 
-  const registeredUser = users.find(
-    (user) => user.email.toLowerCase() === req.body.email?.trim().toLowerCase()
-  );
-  const payload = registeredUser
-    ? {
-        ...req.body,
-        fullName: registeredUser.fullName,
-        email: registeredUser.email,
-        phone: registeredUser.phone,
-        cedula: registeredUser.cedula,
-        locationStatus: registeredUser.sharingLocation ? "sharing" : "paused"
-      }
-    : req.body;
-  const validation = validateGroupMemberPayload(payload);
+export const deleteGroup = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res, true);
+    if (!group) return undefined;
+    const deleted = await groupsService.remove(group.id);
+    return res.json({ ok: true, message: "Grupo eliminado correctamente", group: deleted });
+  } catch (error) {
+    return next(error);
+  }
+};
 
+export const getGroupMembers = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res);
+    if (!group) return undefined;
+    return res.json({
+      ok: true,
+      message: "Integrantes obtenidos correctamente",
+      groupId: group.id,
+      members: group.members
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const postGroupMember = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res, true);
+    if (!group) return undefined;
+
+    const email = req.body.email?.trim().toLowerCase() || "";
+    const registeredUser = email
+      ? await usersService.getByEmail(email)
+      : null;
+    const payload = registeredUser
+      ? {
+          ...req.body,
+          fullName: registeredUser.fullName,
+          email: registeredUser.email,
+          phone: registeredUser.phone,
+          cedula: registeredUser.cedula,
+          locationStatus: req.body.locationStatus ||
+            (registeredUser.sharingLocation ? "sharing" : "paused")
+        }
+      : req.body;
+    const validation = validateGroupMemberPayload(payload);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        ok: false,
+        message: "Revisa los datos del integrante.",
+        errors: validation.errors
+      });
+    }
+
+    if (
+      group.members.some(
+        (member) => member.email.toLowerCase() === validation.data.email.toLowerCase()
+      )
+    ) {
+      return res.status(409).json({ ok: false, message: "Esta persona ya pertenece al grupo." });
+    }
+
+    const member = await groupMembersService.create(group.id, {
+      ...validation.data,
+      userId: registeredUser?.id || null
+    });
+    const updatedGroup = await groupsService.getById(group.id);
+    return res.status(201).json({
+      ok: true,
+      message: "Integrante agregado correctamente",
+      member,
+      group: updatedGroup
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const patchGroupMember = async (req, res, next) => {
+  const validation = validateGroupMemberUpdatePayload(req.body);
   if (!validation.isValid) {
     return res.status(400).json({
       ok: false,
@@ -106,72 +196,58 @@ export const postGroupMember = (req, res) => {
     });
   }
 
-  if (
-    group.members.some(
-      (member) => member.email.toLowerCase() === validation.data.email.toLowerCase()
-    )
-  ) {
-    return res.status(409).json({
-      ok: false,
-      message: "Esta persona ya pertenece al grupo."
+  try {
+    const group = await loadAccessibleGroup(req, res, true);
+    if (!group) return undefined;
+    const member = await groupMembersService.update(
+      group.id,
+      req.params.memberId,
+      validation.data
+    );
+    if (!member) {
+      return res.status(404).json({ ok: false, message: "Integrante no encontrado." });
+    }
+    const updatedGroup = await groupsService.getById(group.id);
+    return res.json({
+      ok: true,
+      message: "Integrante actualizado correctamente",
+      member,
+      group: updatedGroup
     });
+  } catch (error) {
+    return next(error);
   }
-
-  const member = addMemberToGroup(group.id, {
-    ...validation.data,
-    userId: registeredUser?.id || null
-  });
-
-  return res.status(201).json({
-    ok: true,
-    message: "Integrante agregado correctamente",
-    member,
-    group
-  });
 };
 
-export const deleteGroupMember = (req, res) => {
-  const group = getGroupById(req.params.groupId);
-
-  if (!group || (req.user.role !== "admin" && group.createdBy !== req.user.id)) {
-    return res.status(404).json({
-      ok: false,
-      message: "Grupo no encontrado o sin permisos para editarlo."
+export const deleteGroupMember = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res, true);
+    if (!group) return undefined;
+    const target = group.members.find((member) => member.id === Number(req.params.memberId));
+    if (!target) {
+      return res.status(404).json({ ok: false, message: "Integrante no encontrado." });
+    }
+    if (target.userId === group.createdBy) {
+      return res.status(409).json({
+        ok: false,
+        message: "La persona creadora no puede eliminarse del grupo."
+      });
+    }
+    const member = await groupMembersService.remove(group.id, target.id);
+    const updatedGroup = await groupsService.getById(group.id);
+    return res.json({
+      ok: true,
+      message: "Integrante eliminado correctamente",
+      member,
+      group: updatedGroup
     });
+  } catch (error) {
+    return next(error);
   }
-
-  if (group.createdBy === Number(req.params.userId)) {
-    return res.status(409).json({
-      ok: false,
-      message: "La persona creadora no puede eliminarse del grupo."
-    });
-  }
-
-  const removedMember = removeMemberFromGroup(group.id, req.params.userId);
-  if (!removedMember) {
-    return res.status(404).json({ ok: false, message: "Integrante no encontrado." });
-  }
-
-  return res.json({
-    ok: true,
-    message: "Integrante eliminado correctamente.",
-    member: removedMember,
-    group
-  });
 };
 
-export const patchGroupMemberLocationStatus = (req, res) => {
-  const group = getGroupById(req.params.groupId);
-
-  if (!group || !canAccessGroup(req.user, group)) {
-    return res.status(404).json({
-      ok: false,
-      message: "Grupo simulado no encontrado."
-    });
-  }
-
+export const patchGroupMemberLocationStatus = async (req, res, next) => {
   const validation = validateLocationStatusPayload(req.body);
-
   if (!validation.isValid) {
     return res.status(400).json({
       ok: false,
@@ -179,24 +255,6 @@ export const patchGroupMemberLocationStatus = (req, res) => {
       errors: validation.errors
     });
   }
-
-  const member = updateMemberLocationStatus(
-    group.id,
-    req.params.memberId,
-    validation.data.locationStatus
-  );
-
-  if (!member) {
-    return res.status(404).json({
-      ok: false,
-      message: "Integrante no encontrado."
-    });
-  }
-
-  return res.json({
-    ok: true,
-    message: "Estado de ubicacion actualizado",
-    member,
-    group
-  });
+  req.body = validation.data;
+  return patchGroupMember(req, res, next);
 };

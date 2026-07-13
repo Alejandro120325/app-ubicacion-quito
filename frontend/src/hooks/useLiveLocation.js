@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../api/api.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 const THROTTLE_MS = 5000;
-
-const geolocationMessages = {
-  1: "Permiso de ubicacion requerido.",
-  2: "No se pudo obtener la ubicacion.",
-  3: "La solicitud de ubicacion excedio el tiempo de espera."
-};
 
 const toLocation = (position) => ({
   latitude: position.coords.latitude,
@@ -21,6 +16,7 @@ const toLocation = (position) => ({
 });
 
 export const useLiveLocation = ({ groupId = null, onSharingChange } = {}) => {
+  const { t } = useLanguage();
   const [status, setStatus] = useState("idle");
   const [currentLocation, setCurrentLocation] = useState(null);
   const [error, setError] = useState("");
@@ -43,21 +39,21 @@ export const useLiveLocation = ({ groupId = null, onSharingChange } = {}) => {
     try {
       await api.post("/location/share/stop");
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "No se pudo pausar la ubicacion.");
+      setError(requestError.response?.data?.message || t("gps.error.pause"));
     } finally {
       startedOnServerRef.current = false;
       startPromiseRef.current = null;
       setStatus("paused");
       onSharingChange?.(false);
     }
-  }, [clearBrowserWatch, onSharingChange]);
+  }, [clearBrowserWatch, onSharingChange, t]);
 
   const startTracking = useCallback(() => {
     setError("");
 
     if (!navigator.geolocation) {
       setStatus("unsupported");
-      setError("Este navegador no soporta geolocalizacion.");
+      setError(t("gps.error.unsupported"));
       return;
     }
 
@@ -108,13 +104,19 @@ export const useLiveLocation = ({ groupId = null, onSharingChange } = {}) => {
             onSharingChange?.(false);
           }
           setStatus("error");
-          setError(requestError.response?.data?.message || "No se pudo guardar la ubicacion.");
+          setError(requestError.response?.data?.message || t("gps.error.store"));
         }
       },
       (positionError) => {
         clearBrowserWatch();
         setStatus(positionError.code === 1 ? "denied" : "error");
-        setError(geolocationMessages[positionError.code] || "No se pudo obtener la ubicacion.");
+        const messageKey =
+          positionError.code === 1
+            ? "gps.error.denied"
+            : positionError.code === 3
+              ? "gps.error.timeout"
+              : "gps.error.unavailable";
+        setError(t(messageKey));
       },
       {
         enableHighAccuracy: true,
@@ -122,7 +124,7 @@ export const useLiveLocation = ({ groupId = null, onSharingChange } = {}) => {
         maximumAge: 5000
       }
     );
-  }, [clearBrowserWatch, groupId, onSharingChange]);
+  }, [clearBrowserWatch, groupId, onSharingChange, t]);
 
   useEffect(
     () => () => {
