@@ -30,10 +30,13 @@ export const login = async (req, res, next) => {
       });
     }
 
+    const token = createSimulatedToken(user.id);
+
     return res.json({
       ok: true,
       message: "Inicio de sesion correcto",
-      token: createSimulatedToken(user.id),
+      token,
+      accessToken: token,
       user: sanitizeUser(user)
     });
   } catch (error) {

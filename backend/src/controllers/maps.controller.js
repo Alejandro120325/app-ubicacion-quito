@@ -12,8 +12,15 @@ import {
   requireQueryParam
 } from "../utils/validators.js";
 
-const sendProviderResponse = (res, data) =>
-  res.json({ ok: true, provider: "geoapify", simulated: false, data });
+const sendProviderResponse = (res, payload) => {
+  const simulated = Boolean(payload?.simulated);
+  return res.json({
+    ok: true,
+    provider: simulated ? payload.provider : "geoapify",
+    simulated,
+    data: simulated ? payload.data : payload
+  });
+};
 
 export const getMapsStatus = (req, res) => {
   res.json({ ok: true, ...getGeoapifyStatus() });

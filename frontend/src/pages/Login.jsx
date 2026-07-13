@@ -69,7 +69,7 @@ const Login = () => {
       const user = await login(form);
       navigate(user.role === "admin" ? "/admin/dashboard" : "/persona/dashboard");
     } catch (error) {
-      setServerError(error.response?.data?.message || t("login.error"));
+      setServerError(error.normalizedMessage || error.message || t("login.error"));
     } finally {
       setLoading(false);
     }

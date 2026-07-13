@@ -1,23 +1,50 @@
 import React from "react";
 import { createContext, useContext, useMemo, useState } from "react";
-import api from "../api/api.js";
+import api, { SESSION_KEY } from "../api/api.js";
 
-const SESSION_KEY = "quito-location-session";
 const AuthContext = createContext(null);
 
 const getStoredSession = () => {
   const value = localStorage.getItem(SESSION_KEY);
 
-  if (!value) {
-    return { token: null, user: null };
+  if (value) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      localStorage.removeItem(SESSION_KEY);
+    }
   }
 
-  try {
-    return JSON.parse(value);
-  } catch {
-    localStorage.removeItem(SESSION_KEY);
-    return { token: null, user: null };
+  const token = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+
+  if (token && storedUser) {
+    try {
+      return { token, user: JSON.parse(storedUser) };
+    } catch {
+      localStorage.removeItem("user");
+    }
   }
+
+  return { token: null, user: null };
+};
+
+const normalizeLoginResponse = (payload) => {
+  const body = payload?.data || payload || {};
+  const token =
+    body.token ||
+    body.accessToken ||
+    body.authToken ||
+    body.data?.token ||
+    body.data?.accessToken ||
+    body.data?.authToken;
+  const user = body.user || body.data?.user || body.profile || body.data?.profile;
+
+  if (!token || !user) {
+    throw new Error("El backend no devolvio token y usuario.");
+  }
+
+  return { token, user };
 };
 
 export const AuthProvider = ({ children }) => {
@@ -25,16 +52,16 @@ export const AuthProvider = ({ children }) => {
 
   const saveSession = (nextSession) => {
     localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
-    localStorage.setItem("token", nextSession.token || "");
-    localStorage.setItem("user", JSON.stringify(nextSession.user || null));
+    localStorage.setItem("token", nextSession.token);
+    localStorage.setItem("user", JSON.stringify(nextSession.user));
     setSession(nextSession);
   };
 
   const login = async (credentials) => {
     const { data } = await api.post("/auth/login", credentials);
-    const nextSession = { token: data.token, user: data.user };
+    const nextSession = normalizeLoginResponse(data);
     saveSession(nextSession);
-    return data.user;
+    return nextSession.user;
   };
 
   const register = async (payload) => {

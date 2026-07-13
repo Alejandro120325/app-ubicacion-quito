@@ -14,17 +14,21 @@ dotenv.config();
 
 const app = express();
 const appName = process.env.APP_NAME || "GeoKipu";
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+const defaultLocalOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const configuredOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowedOrigins = new Set([...defaultLocalOrigins, ...configuredOrigins]);
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
       return callback(new Error("Origen no permitido por CORS."));
-    }
+    },
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
   })
 );
 app.use(express.json());

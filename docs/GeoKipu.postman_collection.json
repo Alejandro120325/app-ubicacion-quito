@@ -1,0 +1,507 @@
+{
+  "info": {
+    "_postman_id": "geokipu-local-collection",
+    "name": "GeoKipu - Local",
+    "description": "Coleccion local para probar GeoKipu con backend en http://localhost:4000/api y MongoDB local. Ejecutar primero Login Admin para guardar authToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api"
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "groupId",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    },
+    {
+      "key": "locationId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Health 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('MongoDB local conectado', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.app).to.eql('GeoKipu');",
+                  "  pm.expect(json.service).to.eql('backend');",
+                  "  pm.expect(json.storage).to.eql('mongodb');",
+                  "  pm.expect(json.mongodb).to.eql('connected');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@geokipu.com\",\n  \"password\": \"Admin123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login Admin 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const token = json.token || json.accessToken || (json.data && json.data.token);",
+                  "pm.test('Login devuelve token y user', () => {",
+                  "  pm.expect(token).to.be.a('string');",
+                  "  pm.expect(json.user).to.be.an('object');",
+                  "});",
+                  "pm.environment.set('authToken', token);",
+                  "pm.collectionVariables.set('authToken', token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Login Persona",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"persona@geokipu.com\",\n  \"password\": \"Persona123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login Persona 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Login devuelve token y user', () => {",
+                  "  pm.expect(json.token || json.accessToken).to.be.a('string');",
+                  "  pm.expect(json.user.role).to.eql('persona');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Auth Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Auth Me 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "POST Crear usuario",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now().toString().slice(-8);",
+                  "const firstNine = `171${suffix.padStart(6, '0').slice(-6)}`;",
+                  "const coefficients = [2,1,2,1,2,1,2,1,2];",
+                  "const sum = firstNine.split('').reduce((total, digit, index) => {",
+                  "  let value = Number(digit) * coefficients[index];",
+                  "  if (value >= 10) value -= 9;",
+                  "  return total + value;",
+                  "}, 0);",
+                  "const verifier = sum % 10 === 0 ? 0 : 10 - (sum % 10);",
+                  "const newUserEmail = `postman.${suffix}@geokipu.com`;",
+                  "const newUserPhone = `09${suffix}`;",
+                  "const newUserCedula = `${firstNine}${verifier}`;",
+                  "pm.variables.set('newUserEmail', newUserEmail);",
+                  "pm.variables.set('newUserPhone', newUserPhone);",
+                  "pm.variables.set('newUserCedula', newUserCedula);",
+                  "pm.environment.set('newUserEmail', newUserEmail);",
+                  "pm.environment.set('newUserPhone', newUserPhone);",
+                  "pm.environment.set('newUserCedula', newUserCedula);",
+                  "pm.collectionVariables.set('newUserEmail', newUserEmail);",
+                  "pm.collectionVariables.set('newUserPhone', newUserPhone);",
+                  "pm.collectionVariables.set('newUserCedula', newUserCedula);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Crear usuario 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('userId', json.user.id);",
+                  "pm.collectionVariables.set('userId', json.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Usuario Postman Local\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Postman123\",\n  \"language\": \"es\",\n  \"cedula\": \"{{newUserCedula}}\",\n  \"phone\": \"{{newUserPhone}}\",\n  \"role\": \"persona\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Listar usuarios 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Groups",
+      "item": [
+        {
+          "name": "POST Crear grupo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/groups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo Postman {{$timestamp}}\",\n  \"description\": \"Grupo local para revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Crear grupo 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('groupId', json.group.id);",
+                  "pm.collectionVariables.set('groupId', json.group.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Listar grupos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/groups"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Listar grupos 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Group Members",
+      "item": [
+        {
+          "name": "POST Agregar miembro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"relation\": \"Contacto seguro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Agregar miembro 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('memberId', json.member.id);",
+                  "pm.collectionVariables.set('memberId', json.member.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Listar miembros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Listar miembros 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "POST Crear ubicacion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/locations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"groupId\": {{groupId}},\n  \"latitude\": -0.1807,\n  \"longitude\": -78.4678,\n  \"accuracy\": 15,\n  \"address\": \"La Carolina, Quito\",\n  \"sector\": \"La Carolina\",\n  \"sharing\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Crear ubicacion 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('locationId', json.location.id);",
+                  "pm.collectionVariables.set('locationId', json.location.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Listar ubicaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/locations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Listar ubicaciones 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Maps",
+      "item": [
+        {
+          "name": "GET Maps Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/maps/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Maps Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Modo de mapas reportado', () => pm.expect(json.mode).to.be.oneOf(['ready', 'simulated']));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import AdminGroups from "../pages/admin/AdminGroups.jsx";
 import AdminMap from "../pages/admin/AdminMap.jsx";
 import AdminPeople from "../pages/admin/AdminPeople.jsx";
 import Home from "../pages/Home.jsx";
+import LocalEndpointsPanel from "../pages/LocalEndpointsPanel.jsx";
 import Login from "../pages/Login.jsx";
 import NotFound from "../pages/NotFound.jsx";
 import PersonaApi from "../pages/persona/PersonaApi.jsx";
@@ -40,6 +41,7 @@ const AppRoutes = () => {
             <Route path="/admin/mapa" element={<AdminMap />} />
             <Route path="/admin/alertas" element={<AdminAlerts />} />
             <Route path="/admin/api" element={<AdminApi />} />
+            <Route path="/admin/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>
         </Route>
 
@@ -51,6 +53,7 @@ const AppRoutes = () => {
             <Route path="/persona/grupos" element={<PersonaGroups />} />
             <Route path="/persona/privacidad" element={<PersonaPrivacy />} />
             <Route path="/persona/api" element={<PersonaApi />} />
+            <Route path="/persona/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>
         </Route>
 

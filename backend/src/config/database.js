@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const getMongoUri = () => String(process.env.MONGODB_URI || "").trim();
+const DEFAULT_MONGODB_URI = "mongodb://127.0.0.1:27017/geokipu";
+
+const getMongoUri = () => String(process.env.MONGODB_URI || DEFAULT_MONGODB_URI).trim();
 
 export const isMongoConfigured = () => Boolean(getMongoUri());
 

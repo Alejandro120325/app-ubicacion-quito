@@ -4,6 +4,7 @@ import {
   Home,
   LayoutDashboard,
   MapPin,
+  ServerCog,
   ShieldCheck,
   UsersRound,
   UserRound
@@ -18,7 +19,8 @@ export const getDashboardLinks = (role, t) => {
       { to: "/admin/grupos", label: t("sidebar.groups"), icon: UsersRound },
       { to: "/admin/mapa", label: t("sidebar.map"), icon: MapPin },
       { to: "/admin/alertas", label: t("sidebar.alerts"), icon: BellRing },
-      { to: "/admin/api", label: t("sidebar.api"), icon: Code2 }
+      { to: "/admin/api", label: t("sidebar.api"), icon: Code2 },
+      { to: "/admin/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
     ];
   }
 
@@ -28,6 +30,7 @@ export const getDashboardLinks = (role, t) => {
     { to: "/persona/ubicacion", label: t("sidebar.myLocation"), icon: MapPin },
     { to: "/persona/grupos", label: t("sidebar.groups"), icon: UsersRound },
     { to: "/persona/privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
-    { to: "/persona/api", label: t("sidebar.api"), icon: Code2 }
+    { to: "/persona/api", label: t("sidebar.api"), icon: Code2 },
+    { to: "/persona/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
   ];
 };

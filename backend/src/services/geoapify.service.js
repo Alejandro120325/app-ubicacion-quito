@@ -22,6 +22,21 @@ const getApiKey = () => {
   return apiKey;
 };
 
+const hasConfiguredApiKey = () => isConfiguredApiKey(process.env.GEOAPIFY_API_KEY);
+
+const simulatedPayload = (data) => ({
+  provider: "simulated",
+  simulated: true,
+  data
+});
+
+const parsePoint = (value) => {
+  const [latitude, longitude] = String(value)
+    .split(",")
+    .map((item) => Number(item));
+  return { latitude, longitude };
+};
+
 const requestGeoapify = async (path, params) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -64,7 +79,7 @@ const requestGeoapify = async (path, params) => {
 };
 
 export const getGeoapifyStatus = () => {
-  const configured = isConfiguredApiKey(process.env.GEOAPIFY_API_KEY);
+  const configured = hasConfiguredApiKey();
 
   return {
     configured,
@@ -74,44 +89,104 @@ export const getGeoapifyStatus = () => {
 };
 
 export const geocodeAddress = (text) =>
-  requestGeoapify("/v1/geocode/search", {
-    text,
-    lang: "es",
-    filter: "countrycode:ec",
-    bias: "proximity:-78.4678,-0.1807",
-    limit: "5",
-    format: "json"
-  });
+  hasConfiguredApiKey()
+    ? requestGeoapify("/v1/geocode/search", {
+        text,
+        lang: "es",
+        filter: "countrycode:ec",
+        bias: "proximity:-78.4678,-0.1807",
+        limit: "5",
+        format: "json"
+      })
+    : simulatedPayload({
+        results: [
+          {
+            formatted: `${text}, Quito, Ecuador`,
+            lat: -0.1807,
+            lon: -78.4678,
+            city: "Quito",
+            country: "Ecuador"
+          }
+        ]
+      });
 
 export const reverseGeocode = (lat, lon) =>
-  requestGeoapify("/v1/geocode/reverse", {
-    lat: String(lat),
-    lon: String(lon),
-    lang: "es",
-    format: "json"
-  });
+  hasConfiguredApiKey()
+    ? requestGeoapify("/v1/geocode/reverse", {
+        lat: String(lat),
+        lon: String(lon),
+        lang: "es",
+        format: "json"
+      })
+    : simulatedPayload({
+        results: [
+          {
+            formatted: `Coordenadas ${lat}, ${lon} - Quito, Ecuador`,
+            lat,
+            lon,
+            city: "Quito",
+            country: "Ecuador"
+          }
+        ]
+      });
 
 export const calculateRoute = (from, to, mode = "drive") =>
-  requestGeoapify("/v1/routing", {
-    waypoints: `${from}|${to}`,
-    mode,
-    details: "instruction_details",
-    format: "json"
-  });
+  hasConfiguredApiKey()
+    ? requestGeoapify("/v1/routing", {
+        waypoints: `${from}|${to}`,
+        mode,
+        details: "instruction_details",
+        format: "json"
+      })
+    : simulatedPayload({
+        mode,
+        waypoints: [parsePoint(from), parsePoint(to)],
+        distanceMeters: 4200,
+        timeSeconds: 780,
+        instructions: ["Salida simulada", "Ruta local de demostracion", "Llegada simulada"]
+      });
 
 export const findNearbyPlaces = (lat, lon, category) =>
-  requestGeoapify("/v2/places", {
-    categories: category,
-    filter: `circle:${lon},${lat},5000`,
-    bias: `proximity:${lon},${lat}`,
-    limit: "20"
-  });
+  hasConfiguredApiKey()
+    ? requestGeoapify("/v2/places", {
+        categories: category,
+        filter: `circle:${lon},${lat},5000`,
+        bias: `proximity:${lon},${lat}`,
+        limit: "20"
+      })
+    : simulatedPayload({
+        features: [
+          {
+            properties: {
+              name: "Punto seguro simulado",
+              categories: [category],
+              lat,
+              lon,
+              distance: 350
+            }
+          }
+        ]
+      });
 
 export const calculateIsoline = (lat, lon, type, mode, range) =>
-  requestGeoapify("/v1/isoline", {
-    lat: String(lat),
-    lon: String(lon),
-    type,
-    mode,
-    range: String(range)
-  });
+  hasConfiguredApiKey()
+    ? requestGeoapify("/v1/isoline", {
+        lat: String(lat),
+        lon: String(lon),
+        type,
+        mode,
+        range: String(range)
+      })
+    : simulatedPayload({
+        type,
+        mode,
+        range,
+        center: { lat, lon },
+        polygon: [
+          [lon - 0.01, lat - 0.01],
+          [lon + 0.01, lat - 0.01],
+          [lon + 0.01, lat + 0.01],
+          [lon - 0.01, lat + 0.01],
+          [lon - 0.01, lat - 0.01]
+        ]
+      });
