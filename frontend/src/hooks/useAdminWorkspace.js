@@ -27,28 +27,35 @@ export const useAdminWorkspace = () => {
   const [error, setError] = useState("");
   const [groupMessage, setGroupMessage] = useState("");
 
+  const loadWorkspace = async () => {
+    try {
+      setLoading(true);
+      const [usersResponse, groupsResponse] = await Promise.all([
+        api.get("/users"),
+        api.get("/groups")
+      ]);
+      const nextPeople = usersResponse.data.users || [];
+      const nextGroups = groupsResponse.data.groups || [];
+
+      setPeople(nextPeople);
+      setGroups(nextGroups);
+      setSelectedPerson((current) =>
+        current ? nextPeople.find((person) => person.id === current.id) || nextPeople[0] || null : nextPeople[0] || null
+      );
+      setSelectedGroup((current) =>
+        current ? nextGroups.find((group) => group.id === current.id) || nextGroups[0] || null : nextGroups[0] || null
+      );
+      setSelectedMember((current) =>
+        current ? current : nextGroups[0]?.members?.[0] || null
+      );
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || t("admin.loadError"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadWorkspace = async () => {
-      try {
-        const [usersResponse, groupsResponse] = await Promise.all([
-          api.get("/users"),
-          api.get("/groups")
-        ]);
-        const nextPeople = usersResponse.data.users || [];
-        const nextGroups = groupsResponse.data.groups || [];
-
-        setPeople(nextPeople);
-        setGroups(nextGroups);
-        setSelectedPerson(nextPeople[0] || null);
-        setSelectedGroup(nextGroups[0] || null);
-        setSelectedMember(nextGroups[0]?.members?.[0] || null);
-      } catch (requestError) {
-        setError(requestError.response?.data?.message || t("admin.loadError"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadWorkspace();
   }, [t]);
 
@@ -117,6 +124,39 @@ export const useAdminWorkspace = () => {
     }
   };
 
+  const handleUpdateGroup = async (groupId, payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.patch(`/groups/${groupId}`, payload);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setGroupMessage("Grupo actualizado correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo actualizar el grupo.");
+      return false;
+    }
+  };
+
+  const handleDeleteGroup = async (groupId) => {
+    try {
+      setGroupMessage("");
+      await api.delete(`/groups/${groupId}`);
+      const nextGroups = groups.filter((group) => group.id !== groupId);
+      setGroups(nextGroups);
+      setSelectedGroup(nextGroups[0] || null);
+      setSelectedMember(nextGroups[0]?.members?.[0] || null);
+      setGroupMessage("Grupo eliminado correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo eliminar el grupo.");
+      return false;
+    }
+  };
+
   const handleAddMember = async (groupId, payload) => {
     try {
       setGroupMessage("");
@@ -135,6 +175,42 @@ export const useAdminWorkspace = () => {
     }
   };
 
+  const handleUpdateMember = async (groupId, memberId, payload) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.patch(`/groups/${groupId}/members/${memberId}`, payload);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(data.member);
+      setGroupMessage("Integrante actualizado correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo actualizar el integrante.");
+      return false;
+    }
+  };
+
+  const handleDeleteMember = async (groupId, memberId) => {
+    try {
+      setGroupMessage("");
+      const { data } = await api.delete(`/groups/${groupId}/members/${memberId}`);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(data.group?.members?.[0] || null);
+      setGroupMessage("Integrante quitado correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo quitar el integrante.");
+      return false;
+    }
+  };
+
   return {
     alerts,
     error,
@@ -142,7 +218,12 @@ export const useAdminWorkspace = () => {
     groups,
     handleAddMember,
     handleCreateGroup,
+    handleDeleteGroup,
+    handleDeleteMember,
+    handleUpdateGroup,
+    handleUpdateMember,
     loading,
+    loadWorkspace,
     mapPoints,
     people,
     selectedGroup,

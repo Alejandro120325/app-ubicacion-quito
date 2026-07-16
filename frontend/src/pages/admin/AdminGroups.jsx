@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, UsersRound } from "lucide-react";
+import { Edit3, Plus, Trash2, UsersRound } from "lucide-react";
 import AddMemberModal from "../../components/AddMemberModal.jsx";
 import Button from "../../components/Button.jsx";
 import CreateGroupModal from "../../components/CreateGroupModal.jsx";
+import EditGroupModal from "../../components/EditGroupModal.jsx";
+import EditMemberModal from "../../components/EditMemberModal.jsx";
 import GroupCard from "../../components/GroupCard.jsx";
 import GroupMapPanel from "../../components/GroupMapPanel.jsx";
 import GroupMemberCard from "../../components/GroupMemberCard.jsx";
@@ -21,6 +23,10 @@ const AdminGroups = () => {
     groups,
     handleAddMember,
     handleCreateGroup,
+    handleDeleteGroup,
+    handleDeleteMember,
+    handleUpdateGroup,
+    handleUpdateMember,
     loading,
     selectedGroup,
     selectedMember,
@@ -30,6 +36,10 @@ const AdminGroups = () => {
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [groupForMember, setGroupForMember] = useState(null);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [groupForEdit, setGroupForEdit] = useState(null);
+  const [editMemberOpen, setEditMemberOpen] = useState(false);
+  const [memberForEdit, setMemberForEdit] = useState(null);
   const { error: pollingError, locations } = useGroupLocations(selectedGroup?.id);
   const displayMembers = (selectedGroup?.members || []).map((member) => {
     const liveLocation = locations.find(
@@ -60,6 +70,27 @@ const AdminGroups = () => {
   const openAddMember = (group) => {
     setGroupForMember(group);
     setAddMemberOpen(true);
+  };
+
+  const openEditGroup = (group) => {
+    setGroupForEdit(group);
+    setEditGroupOpen(true);
+  };
+
+  const confirmDeleteGroup = async (group) => {
+    const confirmed = window.confirm(`Eliminar el grupo "${group.name}"? Esta accion no elimina usuarios globales.`);
+    if (confirmed) await handleDeleteGroup(group.id);
+  };
+
+  const openEditMember = (member) => {
+    setMemberForEdit(member);
+    setEditMemberOpen(true);
+  };
+
+  const confirmDeleteMember = async (member) => {
+    if (!selectedGroup) return;
+    const confirmed = window.confirm(`Quitar a "${member.fullName}" del grupo "${selectedGroup.name}"?`);
+    if (confirmed) await handleDeleteMember(selectedGroup.id, member.id);
   };
 
   if (loading) {
@@ -114,6 +145,8 @@ const AdminGroups = () => {
                 group={group}
                 key={group.id}
                 onAddMember={openAddMember}
+                onDelete={confirmDeleteGroup}
+                onEdit={openEditGroup}
                 onSelect={(nextGroup) => {
                   setSelectedGroup(nextGroup);
                   setSelectedMember(nextGroup.members?.[0] || null);
@@ -131,7 +164,17 @@ const AdminGroups = () => {
           <GroupMapPanel group={selectedGroup} locations={locations} polling selectedMember={selectedMember} variant="group" />
           <div className="grid gap-4 md:grid-cols-2">
             {displayMembers.map((member) => (
-              <GroupMemberCard key={member.id} member={member} onView={setSelectedMember} />
+              <div className="grid gap-2" key={member.id}>
+                <GroupMemberCard member={member} onView={setSelectedMember} />
+                <div className="grid grid-cols-2 gap-2">
+                  <Button icon={Edit3} size="sm" variant="secondary" onClick={() => openEditMember(member)}>
+                    Editar
+                  </Button>
+                  <Button icon={Trash2} size="sm" variant="danger" onClick={() => confirmDeleteMember(member)}>
+                    Quitar
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -147,6 +190,19 @@ const AdminGroups = () => {
         open={addMemberOpen}
         onClose={() => setAddMemberOpen(false)}
         onSubmit={submitMember}
+      />
+      <EditGroupModal
+        group={groupForEdit}
+        open={editGroupOpen}
+        onClose={() => setEditGroupOpen(false)}
+        onSubmit={handleUpdateGroup}
+      />
+      <EditMemberModal
+        group={selectedGroup}
+        member={memberForEdit}
+        open={editMemberOpen}
+        onClose={() => setEditMemberOpen(false)}
+        onSubmit={handleUpdateMember}
       />
     </motion.section>
   );

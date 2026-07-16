@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 import { api } from "@/services/api";
-import { clearStoredSession, getStoredSession, saveStoredSession } from "@/services/storage";
+import { clearLocalPin, clearStoredSession, getStoredSession, saveStoredSession } from "@/services/storage";
 import type { RegisterPayload, Session, User } from "@/types";
 
 type AuthContextValue = {
@@ -63,9 +63,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    if (session.user) {
+      await api.post("/activity", {
+        type: "logout",
+        priority: "info",
+        message: `${session.user.fullName || session.user.email} cerro sesion.`,
+        userId: session.user.id,
+        userName: session.user.fullName || session.user.email
+      }).catch(() => undefined);
+    }
+
     await clearStoredSession();
+    await clearLocalPin();
     setSession(emptySession);
-  }, []);
+  }, [session.user]);
 
   const updateUser = useCallback(async (user: User) => {
     await persistSession({ token: session.token, user });

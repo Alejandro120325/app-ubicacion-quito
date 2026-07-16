@@ -21,6 +21,13 @@ El proyecto no usa Firebase. Sin Supabase funciona en memoria y sin Geoapify con
 - `/mobile`: cliente Expo existente, mantenido por otro integrante.
 - `/docs`: esquema, Postman y preparacion de servicios externos.
 
+## Seguridad, bitacora y soporte
+
+- Backend: endpoints `/api/activity` y alias `/api/alerts`.
+- Web React: mini tutorial, bitacora, alertas, soporte, perfil editable y bloqueo por PIN.
+- Mobile Expo: mini tutorial, PIN seguro, biometria, bloqueo al volver de segundo plano, bitacora, soporte y perfil.
+- Guia de pruebas: `docs/seguridad-bitacora-soporte.md`.
+
 ## Privacidad
 
 - Tu ubicacion solo se comparte cuando tu la activas.

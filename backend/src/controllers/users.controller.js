@@ -1,4 +1,5 @@
 import { databaseService } from "../services/database.service.js";
+import { activityService } from "../services/activity.service.js";
 import { usersService } from "../services/users.service.js";
 import {
   sanitizeUser,
@@ -101,6 +102,16 @@ export const patchUser = async (req, res, next) => {
       });
     }
     const user = await usersService.update(req.params.id, validation.data);
+    await activityService.create(
+      {
+        userId: user.id,
+        userName: user.fullName,
+        type: "profile_updated",
+        priority: "info",
+        message: `${user.fullName} actualizo su perfil.`
+      },
+      req.user
+    );
     return res.json({ ok: true, message: "Usuario actualizado correctamente", user: sanitizeUser(user) });
   } catch (error) {
     return next(error);

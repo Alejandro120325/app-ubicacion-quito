@@ -1,10 +1,14 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import MobileNav from "../components/MobileNav.jsx";
+import OnboardingModal from "../components/OnboardingModal.jsx";
+import SecurityLock from "../components/SecurityLock.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 
 const DashboardLayout = () => (
   <div className="min-h-screen overflow-x-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
+    <OnboardingModal />
+    <SecurityLock />
     <MobileNav />
     <div className="lg:flex">
       <Sidebar />

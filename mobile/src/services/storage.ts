@@ -3,6 +3,8 @@ import * as SecureStore from "expo-secure-store";
 import type { Session } from "@/types";
 
 const SESSION_KEY = "quito-location-session";
+const ONBOARDING_KEY = "geokipu_onboarding_done";
+const PIN_HASH_KEY = "geokipu_pin_hash";
 const isWeb = process.env.EXPO_OS === "web";
 
 function webStorage() {
@@ -42,4 +44,61 @@ export async function clearStoredSession() {
   }
 
   await SecureStore.deleteItemAsync(SESSION_KEY);
+}
+
+const hashPin = (pin: string) => {
+  let hash = 5381;
+  const value = `geokipu:${pin}`;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 33) ^ value.charCodeAt(index);
+  }
+
+  return String(hash >>> 0);
+};
+
+export async function hasCompletedOnboarding() {
+  const value = isWeb
+    ? webStorage()?.getItem(ONBOARDING_KEY)
+    : await SecureStore.getItemAsync(ONBOARDING_KEY);
+  return value === "true";
+}
+
+export async function markOnboardingComplete() {
+  if (isWeb) {
+    webStorage()?.setItem(ONBOARDING_KEY, "true");
+    return;
+  }
+  await SecureStore.setItemAsync(ONBOARDING_KEY, "true");
+}
+
+export async function hasLocalPin() {
+  const value = isWeb
+    ? webStorage()?.getItem(PIN_HASH_KEY)
+    : await SecureStore.getItemAsync(PIN_HASH_KEY);
+  return Boolean(value);
+}
+
+export async function saveLocalPin(pin: string) {
+  const value = hashPin(pin);
+  if (isWeb) {
+    webStorage()?.setItem(PIN_HASH_KEY, value);
+    return;
+  }
+  await SecureStore.setItemAsync(PIN_HASH_KEY, value);
+}
+
+export async function verifyLocalPin(pin: string) {
+  const stored = isWeb
+    ? webStorage()?.getItem(PIN_HASH_KEY)
+    : await SecureStore.getItemAsync(PIN_HASH_KEY);
+  return Boolean(stored && stored === hashPin(pin));
+}
+
+export async function clearLocalPin() {
+  if (isWeb) {
+    webStorage()?.removeItem(PIN_HASH_KEY);
+    return;
+  }
+  await SecureStore.deleteItemAsync(PIN_HASH_KEY);
 }

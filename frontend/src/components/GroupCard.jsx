@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { UsersRound } from "lucide-react";
+import { Edit3, Trash2, UserPlus, UsersRound } from "lucide-react";
 import Button from "./Button.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
-const GroupCard = ({ active = false, group, onAddMember, onSelect }) => {
+const GroupCard = ({ active = false, group, onAddMember, onDelete, onEdit, onSelect }) => {
   const { t } = useLanguage();
 
   return (
@@ -41,12 +41,31 @@ const GroupCard = ({ active = false, group, onAddMember, onSelect }) => {
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        <Button size="sm" variant={active ? "primary" : "secondary"} onClick={() => onSelect(group)}>
-          {t("common.details")}
-        </Button>
-        <Button size="sm" variant="secondary" onClick={() => onAddMember(group)}>
-          {t("groups.addMember")}
-        </Button>
+        {onSelect ? (
+          <Button size="sm" variant={active ? "primary" : "secondary"} onClick={() => onSelect(group)}>
+            Ver detalles
+          </Button>
+        ) : null}
+        {onEdit ? (
+          <Button icon={Edit3} size="sm" variant="secondary" onClick={() => onEdit(group)}>
+            Editar grupo
+          </Button>
+        ) : null}
+        {onAddMember ? (
+          <Button icon={UserPlus} size="sm" variant="secondary" onClick={() => onAddMember(group)}>
+            Agregar integrante
+          </Button>
+        ) : null}
+        {onDelete ? (
+          <Button icon={Trash2} size="sm" variant="danger" onClick={() => onDelete(group)}>
+            Eliminar grupo
+          </Button>
+        ) : null}
+        {!onSelect && !onEdit && !onAddMember && !onDelete ? (
+          <Button size="sm" variant={active ? "primary" : "secondary"}>
+          Ver detalles
+          </Button>
+        ) : null}
       </div>
     </motion.article>
   );

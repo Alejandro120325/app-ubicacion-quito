@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import { AlertTriangle, BellRing, Code2, LayoutDashboard, LogOut, MapPinned, UsersRound } from "lucide-react-native";
+import { BellRing, Code2, Headphones, LayoutDashboard, LogOut, MapPinned, ScrollText, UserRound, UsersRound } from "lucide-react-native";
 
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
@@ -74,10 +74,31 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="bitacora"
+        options={{
+          title: "Bitacora",
+          tabBarIcon: ({ color, size }) => <ScrollText color={color} size={size} />
+        }}
+      />
+      <Tabs.Screen
         name="api"
         options={{
           title: "API",
           tabBarIcon: ({ color, size }) => <Code2 color={color} size={size} />
+        }}
+      />
+      <Tabs.Screen
+        name="perfil"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color, size }) => <UserRound color={color} size={size} />
+        }}
+      />
+      <Tabs.Screen
+        name="soporte"
+        options={{
+          title: "Soporte",
+          tabBarIcon: ({ color, size }) => <Headphones color={color} size={size} />
         }}
       />
       <Tabs.Screen

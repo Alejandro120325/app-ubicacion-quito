@@ -2,6 +2,7 @@ import { groupMembersService } from "../services/groupMembers.service.js";
 import { groupsService } from "../services/groups.service.js";
 import { usersService } from "../services/users.service.js";
 import { databaseService } from "../services/database.service.js";
+import { activityService } from "../services/activity.service.js";
 import {
   validateGroupMemberPayload,
   validateGroupMemberUpdatePayload,
@@ -19,6 +20,21 @@ const canAccessGroup = (user, group) =>
 
 const canManageGroup = (user, group) =>
   user.role === "admin" || group.createdBy === user.id;
+
+const recordActivity = async (req, payload) => {
+  try {
+    await activityService.create(
+      {
+        userId: req.user.id,
+        userName: req.user.fullName,
+        ...payload
+      },
+      req.user
+    );
+  } catch (error) {
+    console.warn("No se pudo registrar actividad:", error.message);
+  }
+};
 
 const loadAccessibleGroup = async (req, res, manage = false) => {
   const group = await groupsService.getById(req.params.groupId);
@@ -66,6 +82,13 @@ export const postGroup = async (req, res, next) => {
       ...validation.data,
       createdBy: req.user.id
     });
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "group_created",
+      priority: "info",
+      message: `${req.user.fullName} creo el grupo ${group.name}.`
+    });
     return res.status(201).json({
       ok: true,
       message: "Grupo creado correctamente",
@@ -100,6 +123,13 @@ export const patchGroup = async (req, res, next) => {
     const group = await loadAccessibleGroup(req, res, true);
     if (!group) return undefined;
     const updated = await groupsService.update(group.id, validation.data);
+    await recordActivity(req, {
+      groupId: updated.id,
+      groupName: updated.name,
+      type: "group_updated",
+      priority: "info",
+      message: `${req.user.fullName} edito el grupo ${updated.name}.`
+    });
     return res.json({ ok: true, message: "Grupo actualizado correctamente", group: updated });
   } catch (error) {
     return next(error);
@@ -111,6 +141,13 @@ export const deleteGroup = async (req, res, next) => {
     const group = await loadAccessibleGroup(req, res, true);
     if (!group) return undefined;
     const deleted = await groupsService.remove(group.id);
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "group_deleted",
+      priority: "warning",
+      message: `${req.user.fullName} elimino el grupo ${group.name}.`
+    });
     return res.json({ ok: true, message: "Grupo eliminado correctamente", group: deleted });
   } catch (error) {
     return next(error);
@@ -175,6 +212,13 @@ export const postGroupMember = async (req, res, next) => {
       userId: registeredUser?.id || null
     });
     const updatedGroup = await groupsService.getById(group.id);
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "member_added",
+      priority: "info",
+      message: `${req.user.fullName} agrego a ${member.fullName} al grupo ${group.name}.`
+    });
     return res.status(201).json({
       ok: true,
       message: "Integrante agregado correctamente",
@@ -208,6 +252,13 @@ export const patchGroupMember = async (req, res, next) => {
       return res.status(404).json({ ok: false, message: "Integrante no encontrado." });
     }
     const updatedGroup = await groupsService.getById(group.id);
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "member_updated",
+      priority: "info",
+      message: `${req.user.fullName} edito a ${member.fullName} en el grupo ${group.name}.`
+    });
     return res.json({
       ok: true,
       message: "Integrante actualizado correctamente",
@@ -235,6 +286,13 @@ export const deleteGroupMember = async (req, res, next) => {
     }
     const member = await groupMembersService.remove(group.id, target.id);
     const updatedGroup = await groupsService.getById(group.id);
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "member_removed",
+      priority: "warning",
+      message: `${req.user.fullName} quito a ${target.fullName} del grupo ${group.name}.`
+    });
     return res.json({
       ok: true,
       message: "Integrante eliminado correctamente",

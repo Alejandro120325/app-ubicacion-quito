@@ -5,11 +5,13 @@ import { StatusBar } from "expo-status-bar";
 
 import { AuthProvider } from "@/context/auth-context";
 import { colors } from "@/constants/theme";
+import { SecurityGate } from "@/components/security-gate";
 
 export default function RootLayout() {
   return (
     <AuthProvider>
       <StatusBar style="light" />
+      <SecurityGate />
       <Stack
         screenOptions={{
           contentStyle: { backgroundColor: colors.background },

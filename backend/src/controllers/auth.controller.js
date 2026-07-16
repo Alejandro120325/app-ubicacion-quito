@@ -1,4 +1,5 @@
 import { createSimulatedToken } from "../data/mockData.js";
+import { activityService } from "../services/activity.service.js";
 import { authService } from "../services/auth.service.js";
 import { databaseService } from "../services/database.service.js";
 import { sanitizeUser, validateRegisterPayload } from "../utils/validators.js";
@@ -31,6 +32,21 @@ export const login = async (req, res, next) => {
     }
 
     const token = createSimulatedToken(user.id);
+
+    activityService
+      .create(
+        {
+          type: "login",
+          priority: "info",
+          message: `${user.fullName || user.email} inicio sesion.`,
+          userId: user.id,
+          userName: user.fullName || user.email
+        },
+        user
+      )
+      .catch((activityError) => {
+        console.warn("No se pudo registrar evento de login:", activityError.message);
+      });
 
     return res.json({
       ok: true,

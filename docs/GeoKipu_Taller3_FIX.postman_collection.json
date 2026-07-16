@@ -45,6 +45,14 @@
     {
       "key": "locationId",
       "value": ""
+    },
+    {
+      "key": "activityId",
+      "value": ""
+    },
+    {
+      "key": "alertId",
+      "value": ""
     }
   ],
   "item": [
@@ -1912,6 +1920,521 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Activity / Alerts",
+      "item": [
+        {
+          "name": "POST Crear evento bitacora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activity",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"disconnection\",\n  \"priority\": \"high\",\n  \"message\": \"Camila desactivo el GPS o dejo de compartir ubicacion.\",\n  \"userId\": {{userId}},\n  \"userName\": \"Persona Demo\",\n  \"sector\": \"La Carolina\",\n  \"latitude\": -0.1807,\n  \"longitude\": -78.4678\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Crear evento 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('activityId', json.event.id);",
+                  "pm.environment.set('activityId', json.event.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Listar bitacora",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activity"
+          }
+        },
+        {
+          "name": "GET Alertas por usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activity/user/{{userId}}"
+          }
+        },
+        {
+          "name": "PATCH Marcar alerta leida",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activity/{{activityId}}/read"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grupos e integrantes - gestion",
+      "item": [
+        {
+          "name": "GET Listar grupos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista grupos', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.groups && json.groups[0]) pm.collectionVariables.set('groupId', json.groups[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Crear grupo prueba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo Postman GeoKipu\",\n  \"description\": \"Grupo temporal para validar gestion de grupos.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Grupo creado', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('groupId', json.group.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Editar grupo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo Postman GeoKipu Editado\",\n  \"description\": \"Descripcion actualizada desde Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": []
+        },
+        {
+          "name": "GET Listar integrantes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members"
+          },
+          "event": []
+        },
+        {
+          "name": "POST Agregar integrante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Integrante Postman\",\n  \"email\": \"integrante.postman@geokipu.com\",\n  \"phone\": \"0990000000\",\n  \"cedula\": \"1717171717\",\n  \"relation\": \"Contacto\",\n  \"locationStatus\": \"sharing\",\n  \"lastLocation\": \"La Carolina\",\n  \"lastUpdate\": \"2026-07-15 10:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Integrante creado', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('memberId', json.member.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Editar integrante",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members/{{memberId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"relation\": \"Contacto actualizado\",\n  \"locationStatus\": \"paused\",\n  \"lastLocation\": \"Centro Historico\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": []
+        },
+        {
+          "name": "DELETE Quitar integrante",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/members/{{memberId}}"
+          },
+          "event": []
+        },
+        {
+          "name": "DELETE Eliminar grupo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}"
+          },
+          "event": []
+        }
+      ]
+    },
+    {
+      "name": "Alertas y bitacora",
+      "item": [
+        {
+          "name": "GET Bitacora",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/activity"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Bitacora responde', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.events && json.events[0]) pm.collectionVariables.set('activityId', json.events[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Crear evento bitacora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/activity",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"location_updated\",\n  \"priority\": \"info\",\n  \"message\": \"Evento normal creado desde Postman.\",\n  \"sector\": \"La Carolina\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Evento creado', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('activityId', json.event.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Marcar evento leido",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/activity/{{activityId}}/read",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": []
+        },
+        {
+          "name": "GET Alertas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Alertas responde', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.alerts && json.alerts[0]) pm.collectionVariables.set('alertId', json.alerts[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Crear alerta GPS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"gps_disabled\",\n  \"priority\": \"high\",\n  \"message\": \"GPS desactivado desde prueba Postman.\",\n  \"sector\": \"La Carolina\",\n  \"latitude\": -0.1807,\n  \"longitude\": -78.4678\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Alerta creada', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('alertId', json.alert.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH Marcar alerta leida",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts/{{alertId}}/read",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": []
+        },
+        {
+          "name": "DELETE Eliminar alerta",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/alerts/{{alertId}}"
+          },
+          "event": []
         }
       ]
     }

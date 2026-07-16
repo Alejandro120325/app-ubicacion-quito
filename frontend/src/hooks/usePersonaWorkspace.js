@@ -64,6 +64,17 @@ export const usePersonaWorkspace = () => {
         sharing: nextSharing
       });
 
+      await api.post("/activity", {
+        type: nextSharing ? "location_shared" : "disconnection",
+        priority: nextSharing ? "info" : "high",
+        message: nextSharing
+          ? `${user.fullName} activo compartir ubicacion.`
+          : `${user.fullName} pauso compartir ubicacion.`,
+        userId: user.id,
+        userName: user.fullName,
+        sector: location?.sector || "Quito"
+      });
+
       setSharing(data.sharing);
       setProfile(data.user);
       updateUser(data.user);

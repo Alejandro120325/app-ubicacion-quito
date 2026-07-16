@@ -1,6 +1,7 @@
-import { LocateFixed, PauseCircle, WifiOff } from "lucide-react-native";
+import { Edit3, LocateFixed, PauseCircle, Trash2, WifiOff } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { ActionButton } from "@/components/action-button";
 import { Card } from "@/components/card";
 import { Pill } from "@/components/pill";
 import { Text } from "@/components/text";
@@ -9,6 +10,8 @@ import type { GroupMember, LocationStatus } from "@/types";
 
 type MemberCardProps = {
   member: GroupMember;
+  onDelete?: (member: GroupMember) => void;
+  onEdit?: (member: GroupMember) => void;
   onPress?: (member: GroupMember) => void;
 };
 
@@ -24,7 +27,7 @@ function StatusIcon({ status }: { status: LocationStatus }) {
   return <WifiOff color={colors.muted} size={19} />;
 }
 
-export function MemberCard({ member, onPress }: MemberCardProps) {
+export function MemberCard({ member, onDelete, onEdit, onPress }: MemberCardProps) {
   const status = statusMeta[member.locationStatus];
 
   return (
@@ -53,6 +56,20 @@ export function MemberCard({ member, onPress }: MemberCardProps) {
           </Text>
         </View>
         <Text style={styles.action}>Ver ubicacion</Text>
+        {onEdit || onDelete ? (
+          <View style={styles.actions}>
+            {onEdit ? (
+              <ActionButton icon={Edit3} variant="secondary" onPress={() => onEdit(member)}>
+                Editar
+              </ActionButton>
+            ) : null}
+            {onDelete ? (
+              <ActionButton icon={Trash2} variant="secondary" onPress={() => onDelete(member)}>
+                Quitar
+              </ActionButton>
+            ) : null}
+          </View>
+        ) : null}
       </Card>
     </Pressable>
   );
@@ -98,5 +115,10 @@ const styles = StyleSheet.create({
     color: "#93c5fd",
     fontSize: 13,
     fontWeight: "900"
+  },
+  actions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8
   }
 });

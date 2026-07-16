@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import { BellRing, Home, LogOut, MapPinned, UserRound, UsersRound } from "lucide-react-native";
+import { BellRing, Headphones, Home, LogOut, MapPinned, ScrollText, UserRound, UsersRound } from "lucide-react-native";
 
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
@@ -67,10 +67,24 @@ export default function PersonaLayout() {
         }}
       />
       <Tabs.Screen
+        name="bitacora"
+        options={{
+          title: "Bitacora",
+          tabBarIcon: ({ color, size }) => <ScrollText color={color} size={size} />
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: "Perfil",
           tabBarIcon: ({ color, size }) => <UserRound color={color} size={size} />
+        }}
+      />
+      <Tabs.Screen
+        name="soporte"
+        options={{
+          title: "Soporte",
+          tabBarIcon: ({ color, size }) => <Headphones color={color} size={size} />
         }}
       />
       <Tabs.Screen

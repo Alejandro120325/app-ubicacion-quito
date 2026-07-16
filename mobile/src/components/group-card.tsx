@@ -1,4 +1,4 @@
-import { Plus, UsersRound } from "lucide-react-native";
+import { Edit3, Plus, Trash2, UsersRound } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ActionButton } from "@/components/action-button";
@@ -11,10 +11,12 @@ type GroupCardProps = {
   active?: boolean;
   group: Group;
   onAddMember?: (group: Group) => void;
+  onDelete?: (group: Group) => void;
+  onEdit?: (group: Group) => void;
   onPress?: (group: Group) => void;
 };
 
-export function GroupCard({ active = false, group, onAddMember, onPress }: GroupCardProps) {
+export function GroupCard({ active = false, group, onAddMember, onDelete, onEdit, onPress }: GroupCardProps) {
   return (
     <Card style={[styles.card, active ? styles.active : null]}>
       <Pressable accessibilityRole="button" onPress={() => onPress?.(group)} style={styles.press}>
@@ -32,12 +34,26 @@ export function GroupCard({ active = false, group, onAddMember, onPress }: Group
         </View>
       </Pressable>
       <View style={styles.actions}>
-        <ActionButton onPress={() => onPress?.(group)} variant="secondary">
-          Ver detalles
-        </ActionButton>
-        <ActionButton icon={Plus} onPress={() => onAddMember?.(group)} variant="dark">
-          Agregar
-        </ActionButton>
+        {onPress ? (
+          <ActionButton onPress={() => onPress(group)} variant="secondary">
+            Ver detalles
+          </ActionButton>
+        ) : null}
+        {onAddMember ? (
+          <ActionButton icon={Plus} onPress={() => onAddMember(group)} variant="dark">
+            Agregar
+          </ActionButton>
+        ) : null}
+        {onEdit ? (
+          <ActionButton icon={Edit3} onPress={() => onEdit(group)} variant="secondary">
+            Editar
+          </ActionButton>
+        ) : null}
+        {onDelete ? (
+          <ActionButton icon={Trash2} onPress={() => onDelete(group)} variant="secondary">
+            Eliminar
+          </ActionButton>
+        ) : null}
       </View>
     </Card>
   );
@@ -84,6 +100,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10
   }
 });

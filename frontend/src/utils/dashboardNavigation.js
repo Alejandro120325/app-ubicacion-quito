@@ -1,13 +1,15 @@
 import {
   BellRing,
   Code2,
+  Headphones,
   Home,
   LayoutDashboard,
   MapPin,
   ServerCog,
   ShieldCheck,
   UsersRound,
-  UserRound
+  UserRound,
+  ScrollText
 } from "lucide-react";
 
 export const getDashboardLinks = (role, t) => {
@@ -19,6 +21,9 @@ export const getDashboardLinks = (role, t) => {
       { to: "/admin/grupos", label: t("sidebar.groups"), icon: UsersRound },
       { to: "/admin/mapa", label: t("sidebar.map"), icon: MapPin },
       { to: "/admin/alertas", label: t("sidebar.alerts"), icon: BellRing },
+      { to: "/admin/bitacora", label: "Bitacora", icon: ScrollText },
+      { to: "/admin/perfil", label: "Perfil", icon: UserRound },
+      { to: "/admin/soporte", label: "Soporte", icon: Headphones },
       { to: "/admin/api", label: t("sidebar.api"), icon: Code2 },
       { to: "/admin/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
     ];
@@ -29,7 +34,11 @@ export const getDashboardLinks = (role, t) => {
     { to: "/persona/dashboard", label: t("sidebar.myPanel"), icon: UserRound },
     { to: "/persona/ubicacion", label: t("sidebar.myLocation"), icon: MapPin },
     { to: "/persona/grupos", label: t("sidebar.groups"), icon: UsersRound },
+    { to: "/persona/alertas", label: t("sidebar.alerts"), icon: BellRing },
+    { to: "/persona/bitacora", label: "Bitacora", icon: ScrollText },
     { to: "/persona/privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
+    { to: "/persona/perfil", label: "Perfil", icon: UserRound },
+    { to: "/persona/soporte", label: "Soporte", icon: Headphones },
     { to: "/persona/api", label: t("sidebar.api"), icon: Code2 },
     { to: "/persona/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
   ];

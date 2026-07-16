@@ -69,10 +69,21 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (session.user) {
+      await api.post("/activity", {
+        type: "logout",
+        priority: "info",
+        message: `${session.user.fullName || session.user.email} cerro sesion.`,
+        userId: session.user.id,
+        userName: session.user.fullName || session.user.email
+      }).catch(() => {});
+    }
+
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("geokipu_locked");
     setSession({ token: null, user: null });
   };
 

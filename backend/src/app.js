@@ -1,6 +1,8 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import activityRoutes from "./routes/activity.routes.js";
+import alertsRoutes from "./routes/alerts.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import groupsRoutes from "./routes/groups.routes.js";
 import healthRoutes from "./routes/health.routes.js";
@@ -14,7 +16,10 @@ dotenv.config();
 
 const app = express();
 const appName = process.env.APP_NAME || "GeoKipu";
-const defaultLocalOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const defaultLocalOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173"
+];
 const configuredOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
   .map((origin) => origin.trim())
@@ -31,6 +36,7 @@ app.use(
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
   })
 );
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -48,6 +54,8 @@ app.use("/api/location", locationRoutes);
 app.use("/api/locations", locationsRoutes);
 app.use("/api/groups", groupsRoutes);
 app.use("/api/maps", mapsRoutes);
+app.use("/api/activity", activityRoutes);
+app.use("/api/alerts", alertsRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

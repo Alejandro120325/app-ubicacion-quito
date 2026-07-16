@@ -19,6 +19,9 @@ import PersonaGroups from "../pages/persona/PersonaGroups.jsx";
 import PersonaLocation from "../pages/persona/PersonaLocation.jsx";
 import PersonaPrivacy from "../pages/persona/PersonaPrivacy.jsx";
 import Register from "../pages/Register.jsx";
+import ActivityCenter from "../pages/shared/ActivityCenter.jsx";
+import ProfileSettings from "../pages/shared/ProfileSettings.jsx";
+import Support from "../pages/shared/Support.jsx";
 import Unauthorized from "../pages/Unauthorized.jsx";
 
 const AppRoutes = () => {
@@ -40,6 +43,9 @@ const AppRoutes = () => {
             <Route path="/admin/grupos" element={<AdminGroups />} />
             <Route path="/admin/mapa" element={<AdminMap />} />
             <Route path="/admin/alertas" element={<AdminAlerts />} />
+            <Route path="/admin/bitacora" element={<ActivityCenter mode="activity" />} />
+            <Route path="/admin/perfil" element={<ProfileSettings />} />
+            <Route path="/admin/soporte" element={<Support />} />
             <Route path="/admin/api" element={<AdminApi />} />
             <Route path="/admin/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>
@@ -51,7 +57,11 @@ const AppRoutes = () => {
             <Route path="/persona/dashboard" element={<PersonaDashboard />} />
             <Route path="/persona/ubicacion" element={<PersonaLocation />} />
             <Route path="/persona/grupos" element={<PersonaGroups />} />
+            <Route path="/persona/alertas" element={<ActivityCenter mode="alerts" />} />
+            <Route path="/persona/bitacora" element={<ActivityCenter mode="activity" />} />
             <Route path="/persona/privacidad" element={<PersonaPrivacy />} />
+            <Route path="/persona/perfil" element={<ProfileSettings />} />
+            <Route path="/persona/soporte" element={<Support />} />
             <Route path="/persona/api" element={<PersonaApi />} />
             <Route path="/persona/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>
