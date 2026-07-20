@@ -21,6 +21,7 @@ export function PersonaHomeScreen() {
   const mainGroup = groups[0];
   const sharing = Boolean(profile?.sharingLocation);
   const realLocation = location?.simulated === false;
+  const locationSummary = location?.address || location?.sector || "ubicacion disponible";
 
   return (
     <GradientScreen>
@@ -64,7 +65,7 @@ export function PersonaHomeScreen() {
             <Text muted style={styles.statusBody}>
               {sharing
                 ? realLocation
-                  ? "Tu ubicacion GPS real esta disponible para tu grupo."
+                  ? `GPS real: ${locationSummary}.`
                   : "Tu ubicacion de referencia esta disponible para tu grupo."
                 : "El uso compartido esta pausado en este momento."}
             </Text>

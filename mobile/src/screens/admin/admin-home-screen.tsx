@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, CalendarDays, Mail, MapPin, Phone, UserCheck, UsersRound, UserX } from "lucide-react-native";
+import { Activity, AlertTriangle, CalendarDays, Crosshair, LocateFixed, Mail, MapPin, Phone, UserCheck, UsersRound, UserX } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -17,6 +17,12 @@ import { mapMarkers } from "@/data/mock-data";
 import { useAdminData } from "@/hooks/use-dashboard-data";
 import type { User } from "@/types";
 
+const getLocationText = (location?: User["lastLocation"]) =>
+  location?.address || location?.sector || "Sin datos";
+
+const formatAccuracy = (value?: number | null) =>
+  Number.isFinite(value) ? `${Math.round(Number(value))} m` : "Sin precision";
+
 export function AdminHomeScreen() {
   const { user } = useAuth();
   const { error, groups, loading, people } = useAdminData();
@@ -30,8 +36,9 @@ export function AdminHomeScreen() {
     const active = people.filter((person) => person.active).length;
     const inactive = people.filter((person) => !person.active).length;
     const alerts = people.filter((person) => !person.sharingLocation).length;
+    const gpsReal = people.filter((person) => person.lastLocation?.simulated === false).length;
 
-    return { active, alerts, groups: groups.length, inactive, total: people.length };
+    return { active, alerts, gpsReal, groups: groups.length, inactive, total: people.length };
   }, [groups.length, people]);
 
   const points = useMemo(
@@ -80,6 +87,7 @@ export function AdminHomeScreen() {
         <StatCard detail="Compartiendo ahora" icon={UserCheck} label="Personas activas" tone="green" value={loading ? "..." : stats.active} />
         <StatCard detail="Sin compartir" icon={UserX} label="Personas inactivas" tone="slate" value={loading ? "..." : stats.inactive} />
         <StatCard detail="Circulos visibles" icon={UsersRound} label="Grupos creados" value={loading ? "..." : stats.groups} />
+        <StatCard detail="Direcciones resueltas" icon={MapPin} label="GPS real" tone="green" value={loading ? "..." : stats.gpsReal} />
         <StatCard detail="Eventos por revisar" icon={Activity} label="Alertas pendientes" tone="amber" value={loading ? "..." : stats.alerts} />
       </View>
 
@@ -122,7 +130,17 @@ export function AdminHomeScreen() {
             <DetailRow
               icon={MapPin}
               label="Ultima ubicacion"
-              value={`${selectedPerson.lastLocation?.sector || "Sin datos"} - Quito`}
+              value={getLocationText(selectedPerson.lastLocation)}
+            />
+            <DetailRow
+              icon={LocateFixed}
+              label="Tipo de ubicacion"
+              value={selectedPerson.lastLocation?.simulated === false ? "GPS real" : "Modo demostracion"}
+            />
+            <DetailRow
+              icon={Crosshair}
+              label="Precision"
+              value={formatAccuracy(selectedPerson.lastLocation?.accuracy)}
             />
             <DetailRow
               icon={CalendarDays}

@@ -15,6 +15,9 @@ const getStatus = (person) => {
   return "offline";
 };
 
+const getLocationSummary = (location, fallback) =>
+  location?.address || location?.sector || fallback;
+
 const AdminMap = () => {
   const { t } = useLanguage();
   const {
@@ -148,11 +151,18 @@ const AdminMap = () => {
                 <p className="font-bold text-[var(--color-text)]">{person.fullName}</p>
                 <p className="mt-2 flex items-center gap-2 text-sm text-[var(--color-muted)]">
                   <MapPin className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
-                  {person.lastLocation?.sector || t("admin.noData")} - Quito
+                  <span className="line-clamp-2">{getLocationSummary(person.lastLocation, t("admin.noData"))}</span>
                 </p>
-                <span className="mt-3 inline-flex rounded-lg bg-[var(--color-soft)] px-2 py-1 text-xs font-bold text-[var(--color-muted)]">
-                  {t(`groups.status.${getStatus(person)}`)}
-                </span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex rounded-lg bg-[var(--color-soft)] px-2 py-1 text-xs font-bold text-[var(--color-muted)]">
+                    {t(`groups.status.${getStatus(person)}`)}
+                  </span>
+                  {person.lastLocation?.simulated === false ? (
+                    <span className="inline-flex rounded-lg bg-green-50 px-2 py-1 text-xs font-bold text-green-700">
+                      GPS real
+                    </span>
+                  ) : null}
+                </div>
               </button>
             ))}
           </div>

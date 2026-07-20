@@ -13,6 +13,10 @@ type PersonCardProps = {
 };
 
 export function PersonCard({ person, onPress }: PersonCardProps) {
+  const location = person.lastLocation;
+  const isGpsReal = location?.simulated === false;
+  const locationText = location?.address || location?.sector || "Sin ubicacion";
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -38,8 +42,13 @@ export function PersonCard({ person, onPress }: PersonCardProps) {
           <Info icon={Phone} value={person.phone} />
           <Info
             icon={MapPin}
-            value={`${person.lastLocation?.sector || "Sin ubicacion"} - Quito`}
+            value={locationText}
           />
+          {isGpsReal ? (
+            <Pill tone="green">
+              GPS real{location?.accuracy != null ? ` - ${Math.round(location.accuracy)} m` : ""}
+            </Pill>
+          ) : null}
         </View>
         <View style={styles.footer}>
           <Text style={styles.action}>Ver detalles</Text>

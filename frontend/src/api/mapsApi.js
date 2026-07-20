@@ -26,6 +26,10 @@ export const mapsApi = {
 };
 
 export const getReverseAddress = (payload) => {
-  const result = payload?.data?.results?.[0] || payload?.data?.features?.[0]?.properties;
+  if (payload?.address) return payload.address;
+  const result =
+    payload?.data?.raw ||
+    payload?.data?.results?.[0] ||
+    payload?.data?.features?.[0]?.properties;
   return result?.formatted || result?.address_line2 || result?.address_line1 || "";
 };

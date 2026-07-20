@@ -17,6 +17,9 @@ const getStatus = (person) => {
   return "offline";
 };
 
+const getLocationLabel = (location, fallback) =>
+  location?.address || location?.sector || fallback;
+
 const AdminPeople = () => {
   const { t } = useLanguage();
   const { error, loading, people, selectedPerson, setSelectedPerson } = useAdminWorkspace();
@@ -140,7 +143,20 @@ const AdminPeople = () => {
                   {
                     icon: MapPin,
                     label: t("admin.lastLocation"),
-                    value: `${selectedPerson.lastLocation?.sector || t("admin.noData")} - Quito`
+                    value: getLocationLabel(selectedPerson.lastLocation, t("admin.noData"))
+                  },
+                  {
+                    icon: MapPin,
+                    label: "Tipo de ubicacion",
+                    value:
+                      selectedPerson.lastLocation?.simulated === false
+                        ? `GPS real${selectedPerson.lastLocation?.accuracy != null ? ` - precision ${Math.round(selectedPerson.lastLocation.accuracy)} m` : ""}`
+                        : "Modo demostracion"
+                  },
+                  {
+                    icon: MapPin,
+                    label: "Sector",
+                    value: selectedPerson.lastLocation?.sector || t("admin.noData")
                   },
                   { icon: Clock3, label: t("admin.lastConnection"), value: selectedPerson.lastConnection }
                 ].map((item) => (

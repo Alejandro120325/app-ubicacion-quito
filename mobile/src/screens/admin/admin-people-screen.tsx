@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, Mail, MapPin, Phone } from "lucide-react-native";
+import { AlertTriangle, CalendarDays, Crosshair, LocateFixed, Mail, MapPin, Phone } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -12,6 +12,12 @@ import { SectionHelp } from "@/components/section-help";
 import { Text } from "@/components/text";
 import { useAdminData } from "@/hooks/use-dashboard-data";
 import type { User } from "@/types";
+
+const getLocationText = (location?: User["lastLocation"]) =>
+  location?.address || location?.sector || "Sin datos";
+
+const formatAccuracy = (value?: number | null) =>
+  Number.isFinite(value) ? `${Math.round(Number(value))} m` : "Sin precision";
 
 export function AdminPeopleScreen() {
   const { error, loading, people } = useAdminData();
@@ -71,7 +77,17 @@ export function AdminPeopleScreen() {
           <DetailRow
             icon={MapPin}
             label="Ultima ubicacion"
-            value={`${selectedPerson.lastLocation?.sector || "Sin datos"} - Quito`}
+            value={getLocationText(selectedPerson.lastLocation)}
+          />
+          <DetailRow
+            icon={LocateFixed}
+            label="Tipo de ubicacion"
+            value={selectedPerson.lastLocation?.simulated === false ? "GPS real" : "Modo demostracion"}
+          />
+          <DetailRow
+            icon={Crosshair}
+            label="Precision"
+            value={formatAccuracy(selectedPerson.lastLocation?.accuracy)}
           />
           <DetailRow
             icon={CalendarDays}

@@ -86,13 +86,15 @@ export const useAdminWorkspace = () => {
     const personas = people.filter((person) => person.role === "persona");
     const activePeople = personas.filter((person) => person.sharingLocation);
     const inactivePeople = personas.filter((person) => !person.sharingLocation);
+    const gpsReal = personas.filter((person) => person.lastLocation?.simulated === false);
 
     return {
       total: personas.length,
       active: activePeople.length,
       inactive: inactivePeople.length,
       groups: groups.length,
-      alerts: inactivePeople.length
+      alerts: inactivePeople.length,
+      gpsReal: gpsReal.length
     };
   }, [groups.length, people]);
 
@@ -101,7 +103,7 @@ export const useAdminWorkspace = () => {
       people
         .filter((person) => person.role === "persona")
         .map((person, index) => ({
-          label: person.lastLocation?.sector || person.fullName,
+          label: person.lastLocation?.address || person.lastLocation?.sector || person.fullName,
           fullName: person.fullName,
           latitude: person.lastLocation?.latitude,
           longitude: person.lastLocation?.longitude,

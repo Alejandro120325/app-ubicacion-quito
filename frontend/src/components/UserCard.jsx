@@ -6,6 +6,9 @@ import Button from "./Button.jsx";
 
 const UserCard = ({ onView, user }) => {
   const { t } = useLanguage();
+  const location = user.lastLocation;
+  const isGpsReal = location?.simulated === false;
+  const locationLabel = location?.address || location?.sector || t("admin.noData");
 
   return (
     <motion.article
@@ -40,8 +43,13 @@ const UserCard = ({ onView, user }) => {
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
-          {user.lastLocation?.sector || t("admin.noData")} - Quito
+          <span className="line-clamp-2">{locationLabel}</span>
         </p>
+        {isGpsReal ? (
+          <p className="rounded-lg border border-green-200 bg-green-50 px-2 py-1 text-xs font-bold text-green-700">
+            GPS real{location?.accuracy != null ? ` - precision ${Math.round(location.accuracy)} m` : ""}
+          </p>
+        ) : null}
         <p className="text-xs">
           {t("admin.lastConnection")}: {user.lastConnection}
         </p>

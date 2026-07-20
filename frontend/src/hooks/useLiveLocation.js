@@ -100,8 +100,9 @@ export const useLiveLocation = ({ groupId = null, onSharingChange } = {}) => {
 
       setSending(true);
       await ensureSharingStarted();
-      await api.post("/location/update", payload);
+      const { data } = await api.post("/location/update", payload);
       lastSentRef.current = now;
+      setCurrentLocation(data.location || payload);
       setLastSentAt(new Date(now));
       setStatus("active");
       setError("");

@@ -8,8 +8,41 @@ No se implementa todavia rastreo en segundo plano, WebSocket ni notificaciones p
 ## GPS real vs Geoapify
 
 - GPS real: lo entrega el dispositivo o navegador con latitud, longitud, precision, rumbo, velocidad y timestamp.
-- Geoapify: se usa solo en backend para reverse geocoding si existe `GEOAPIFY_API_KEY`.
+- Geoapify: se usa solo en backend para reverse geocoding si existe la variable privada `GEOAPIFY_API_KEY`.
 - Si no existe `GEOAPIFY_API_KEY`, GeoKipu conserva las coordenadas reales y usa fallback de direccion sin exponer llaves al cliente.
+- Frontend web y mobile nunca reciben ni almacenan claves; solo consumen endpoints locales del backend.
+
+## Integracion Geoapify implementada
+
+Cuando `POST /api/location/update` recibe una ubicacion real con `simulated: false`, el backend llama a Geoapify desde `src/services/geoapify.service.js` para convertir latitud/longitud en:
+
+- `address`: direccion aproximada.
+- `sector`: barrio, sector o distrito detectado.
+- `city`: ciudad normalizada.
+- `raw`: respuesta original normalizada para auditoria tecnica interna.
+
+La respuesta de actualizacion incluye:
+
+```json
+{
+  "ok": true,
+  "message": "Ubicacion compartida",
+  "location": {
+    "latitude": -0.180653,
+    "longitude": -78.467834,
+    "address": "Direccion aproximada",
+    "sector": "Sector detectado",
+    "city": "Quito",
+    "simulated": false
+  },
+  "geoapify": {
+    "enabled": true,
+    "resolved": true
+  }
+}
+```
+
+Si Geoapify no esta configurado o falla temporalmente, el backend responde igualmente con `ok: true`, conserva las coordenadas reales y devuelve `geoapify.resolved: false`.
 
 ## Activacion en mobile
 
@@ -36,6 +69,7 @@ Todos requieren `Authorization: Bearer <token>`.
 - `GET /api/locations`: lista ubicaciones visibles para admin o usuario autorizado.
 - `GET /api/location/user/:userId`: obtiene la ubicacion de una persona.
 - `GET /api/location/group/:groupId`: obtiene ubicaciones visibles de un grupo.
+- `GET /api/maps/reverse?lat=<lat>&lon=<lon>`: resuelve coordenadas a direccion desde backend.
 
 Payload principal:
 
@@ -78,6 +112,7 @@ El backend registra:
 
 - `location_started`: info, cuando el usuario activa compartir ubicacion.
 - `location_updated`: info, con throttling para evitar spam.
+- `location_resolved`: info, cuando Geoapify resolvio direccion real, con throttling ampliado para evitar spam.
 - `location_paused`: warning, cuando el usuario pausa ubicacion.
 
 Mobile y web registran:
@@ -103,6 +138,38 @@ El administrador no pide GPS local; solo consulta ubicaciones ya guardadas por b
    `GET http://localhost:4000/api/locations`
 6. Pausar:
    `POST http://localhost:4000/api/location/share/stop`
+
+Prueba de reverse geocoding:
+
+`GET http://localhost:4000/api/maps/reverse?lat=-0.180653&lon=-78.467834`
+
+Resultado esperado con proveedor disponible:
+
+```json
+{
+  "ok": true,
+  "provider": "Geoapify",
+  "mode": "real",
+  "address": "Direccion aproximada",
+  "sector": "Sector detectado",
+  "city": "Quito",
+  "resolved": true
+}
+```
+
+Resultado esperado sin proveedor configurado:
+
+```json
+{
+  "ok": true,
+  "provider": "Geoapify",
+  "mode": "demo",
+  "address": "Coordenadas GPS disponibles: -0.180653, -78.467834",
+  "sector": "Ubicacion GPS",
+  "city": "Quito",
+  "resolved": false
+}
+```
 
 En cada request protegido usar:
 

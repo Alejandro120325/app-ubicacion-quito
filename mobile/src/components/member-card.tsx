@@ -29,6 +29,8 @@ function StatusIcon({ status }: { status: LocationStatus }) {
 
 export function MemberCard({ member, onDelete, onEdit, onPress }: MemberCardProps) {
   const status = statusMeta[member.locationStatus];
+  const isGpsReal = member.simulated === false;
+  const locationText = member.address || member.lastLocation;
 
   return (
     <Pressable
@@ -49,8 +51,13 @@ export function MemberCard({ member, onDelete, onEdit, onPress }: MemberCardProp
         </View>
         <View style={styles.meta}>
           <Text muted style={styles.metaText}>
-            {member.lastLocation}
+            {locationText}
           </Text>
+          {isGpsReal ? (
+            <Text style={styles.gpsText}>
+              GPS real{member.accuracy != null ? ` - ${Math.round(member.accuracy)} m` : ""}
+            </Text>
+          ) : null}
           <Text muted style={styles.metaText}>
             {member.lastUpdate}
           </Text>
@@ -109,6 +116,12 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
+    lineHeight: 17
+  },
+  gpsText: {
+    color: colors.secondary,
+    fontSize: 12,
+    fontWeight: "900",
     lineHeight: 17
   },
   action: {

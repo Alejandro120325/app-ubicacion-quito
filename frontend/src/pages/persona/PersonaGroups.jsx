@@ -39,9 +39,13 @@ const PersonaGroups = () => {
     return liveLocation
       ? {
           ...member,
+          accuracy: liveLocation.accuracy,
+          address: liveLocation.address,
           locationStatus: liveLocation.locationStatus,
           lastLocation: liveLocation.address || liveLocation.sector || member.lastLocation,
-          lastUpdate: liveLocation.updatedAt || member.lastUpdate
+          lastUpdate: liveLocation.updatedAt || member.lastUpdate,
+          sector: liveLocation.sector,
+          simulated: liveLocation.simulated
         }
       : member;
   });

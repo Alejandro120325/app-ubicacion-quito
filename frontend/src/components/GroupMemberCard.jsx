@@ -13,6 +13,8 @@ const statusClasses = {
 const GroupMemberCard = ({ member, onView }) => {
   const { t } = useLanguage();
   const status = member.locationStatus || "paused";
+  const isGpsReal = member.simulated === false;
+  const locationLabel = member.address || member.lastLocation || t("admin.noData");
 
   return (
     <motion.article
@@ -41,8 +43,14 @@ const GroupMemberCard = ({ member, onView }) => {
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-[var(--color-primary)]" aria-hidden="true" />
-          {member.lastLocation}
+          <span className="line-clamp-2">{locationLabel}</span>
         </p>
+        {isGpsReal ? (
+          <p className="flex items-center gap-2 text-xs font-bold text-[var(--color-secondary)]">
+            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+            GPS real{member.accuracy != null ? ` - precision ${Math.round(member.accuracy)} m` : ""}
+          </p>
+        ) : null}
         <p className="flex items-center gap-2 text-xs">
           <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-secondary)]" aria-hidden="true" />
           {member.lastUpdate}

@@ -124,12 +124,20 @@ export const updateLocation = async (req, res, next) => {
         return res.status(404).json({ ok: false, message: "Grupo no encontrado." });
       }
     }
-    const location = await locationSharingService.updateCoordinates({
+    const { geoapify, location } = await locationSharingService.updateCoordinates({
       ...validation.data,
       userId: req.user.id,
       sharing: true
     });
-    return res.json({ ok: true, message: "Ubicacion compartida", location });
+    return res.json({
+      ok: true,
+      message: "Ubicacion compartida",
+      location,
+      geoapify: {
+        enabled: Boolean(geoapify?.enabled),
+        resolved: Boolean(geoapify?.resolved)
+      }
+    });
   } catch (error) {
     return next(error);
   }

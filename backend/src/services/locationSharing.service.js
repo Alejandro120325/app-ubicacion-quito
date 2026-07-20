@@ -4,6 +4,7 @@ import { activityService } from "./activity.service.js";
 import { reverseGeocode } from "./geoapify.service.js";
 
 const LOCATION_UPDATE_EVENT_THROTTLE_MS = 60_000;
+const LOCATION_RESOLVED_EVENT_THROTTLE_MS = 5 * 60_000;
 
 const latestEventIsRecent = async (userId, type, throttleMs) => {
   if (!throttleMs) return false;
@@ -30,32 +31,36 @@ const safeCreateActivity = async (payload, user, throttleMs = 0) => {
   }
 };
 
-const getReverseResult = (payload) =>
-  payload?.data?.results?.[0] || payload?.data?.features?.[0]?.properties || null;
-
 const enrichWithAddress = async (data) => {
-  if (data.address && data.sector && data.sector !== "Ubicacion GPS") return data;
-
-  try {
-    const payload = await reverseGeocode(data.latitude, data.longitude);
-    const result = getReverseResult(payload);
-    if (!result) return data;
-
-    const realProvider = payload?.provider !== "simulated";
-
+  if (data.simulated !== false) {
     return {
+      data,
+      geoapify: {
+        enabled: false,
+        resolved: false
+      }
+    };
+  }
+
+  const resolved = await reverseGeocode(data.latitude, data.longitude);
+
+  return {
+    data: {
       ...data,
-      address: data.address || result.formatted || result.address_line2 || result.address_line1 || "",
+      address: data.address || resolved.address || "",
+      city: resolved.city || data.city || "Quito",
       sector:
         data.sector && data.sector !== "Ubicacion GPS"
           ? data.sector
-          : realProvider
-            ? result.suburb || result.district || result.city || "Ubicacion GPS"
-            : data.sector || "Ubicacion GPS"
-    };
-  } catch {
-    return data;
-  }
+          : resolved.sector || "Ubicacion GPS"
+    },
+    geoapify: {
+      enabled: Boolean(resolved.enabled),
+      mode: resolved.mode,
+      resolved: Boolean(resolved.resolved),
+      provider: resolved.provider || "Geoapify"
+    }
+  };
 };
 
 export const locationSharingService = {
@@ -84,7 +89,7 @@ export const locationSharingService = {
 
   async updateCoordinates(data) {
     const user = await databaseService.getUserById(data.userId);
-    const enrichedData = await enrichWithAddress(data);
+    const { data: enrichedData, geoapify } = await enrichWithAddress(data);
     const location = await databaseService.saveLocation(enrichedData);
 
     await safeCreateActivity(
@@ -102,6 +107,23 @@ export const locationSharingService = {
       LOCATION_UPDATE_EVENT_THROTTLE_MS
     );
 
-    return location;
+    if (geoapify.resolved) {
+      await safeCreateActivity(
+        {
+          type: "location_resolved",
+          priority: "info",
+          message: `Ubicacion actualizada en ${location?.sector || location?.address || "GPS"}.`,
+          userId: data.userId,
+          userName: user?.fullName,
+          latitude: enrichedData.latitude,
+          longitude: enrichedData.longitude,
+          sector: location?.sector || enrichedData.sector || "GPS"
+        },
+        user,
+        LOCATION_RESOLVED_EVENT_THROTTLE_MS
+      );
+    }
+
+    return { geoapify, location };
   }
 };

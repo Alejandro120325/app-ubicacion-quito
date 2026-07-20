@@ -49,9 +49,12 @@ const AdminGroups = () => {
     return liveLocation
       ? {
           ...member,
+          accuracy: liveLocation.accuracy,
+          address: liveLocation.address,
           locationStatus: liveLocation.locationStatus,
           lastLocation: liveLocation.address || liveLocation.sector || member.lastLocation,
-          lastUpdate: liveLocation.updatedAt || member.lastUpdate
+          lastUpdate: liveLocation.updatedAt || member.lastUpdate,
+          simulated: liveLocation.simulated
         }
       : member;
   });

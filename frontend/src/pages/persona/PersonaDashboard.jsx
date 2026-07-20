@@ -11,7 +11,11 @@ import { usePersonaWorkspace } from "../../hooks/usePersonaWorkspace.js";
 
 const PersonaDashboard = () => {
   const { t } = useLanguage();
-  const { error, groups, loading, profile, sharing } = usePersonaWorkspace();
+  const { error, groups, loading, location, profile, sharing } = usePersonaWorkspace();
+  const locationDetail =
+    location?.simulated === false
+      ? `${location.address || location.sector || "GPS real"}${location.accuracy != null ? ` - precision ${Math.round(location.accuracy)} m` : ""}`
+      : null;
 
   const quickLinks = [
     { to: "/persona/ubicacion", label: t("sidebar.myLocation"), text: t("persona.quick.location"), icon: MapPin },
@@ -75,7 +79,7 @@ const PersonaDashboard = () => {
 
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
-          detail={sharing ? t("persona.sharedText") : t("persona.pausedText")}
+          detail={sharing ? locationDetail || t("persona.sharedText") : t("persona.pausedText")}
           icon={MapPin}
           title={t("persona.currentStatus")}
           tone={sharing ? "mint" : "slate"}

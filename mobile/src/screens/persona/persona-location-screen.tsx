@@ -27,6 +27,19 @@ const formatUpdate = (value?: string | Date | null) => {
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
 };
 
+const getLocationAddress = (
+  location?: { address?: string; sector?: string; latitude?: number; longitude?: number } | null
+) => {
+  if (location?.address) return location.address;
+  if (location?.sector) return location.sector;
+
+  const latitude = location?.latitude;
+  const longitude = location?.longitude;
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? `${formatCoordinate(latitude)}, ${formatCoordinate(longitude)}`
+    : "Sin direccion disponible";
+};
+
 const statusLabel = {
   active: "Ubicacion real activa",
   demo: "Modo demostracion",
@@ -114,7 +127,12 @@ export function PersonaLocationScreen() {
         <DetailRow
           icon={MapPin}
           label="Ultima ubicacion"
-          value={`${displayLocation?.sector || "La Carolina"} - Quito`}
+          value={`${displayLocation?.sector || "Ubicacion GPS"} - ${displayLocation?.city || "Quito"}`}
+        />
+        <DetailRow
+          icon={MapPin}
+          label="Direccion aproximada"
+          value={getLocationAddress(displayLocation)}
         />
         <DetailRow
           icon={LocateFixed}

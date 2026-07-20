@@ -30,7 +30,12 @@ const PersonaLocation = () => {
   } = useLiveLocation({ groupId: selectedGroup?.id || null });
 
   useEffect(() => {
-    if (!currentLocation) return;
+    if (!Number.isFinite(currentLocation?.latitude) || !Number.isFinite(currentLocation?.longitude)) return;
+    if (currentLocation.address) {
+      setAddress(currentLocation.address);
+      setAddressStatus("");
+      return;
+    }
 
     let active = true;
     mapsApi
@@ -54,11 +59,12 @@ const PersonaLocation = () => {
     return () => {
       active = false;
     };
-  }, [lastSentAt, t]);
+  }, [currentLocation, t]);
 
   if (loading) return <LoadingScreen message={t("persona.loading")} />;
 
   const displayLocation = currentLocation || location;
+  const displayAddress = address || displayLocation?.address || "";
   const error = gpsError || workspaceError;
 
   return (
@@ -157,13 +163,18 @@ const PersonaLocation = () => {
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div><dt className="text-[var(--color-muted)]">Latitud</dt><dd className="mt-1 font-semibold">{currentLocation.latitude.toFixed(6)}</dd></div>
                 <div><dt className="text-[var(--color-muted)]">Longitud</dt><dd className="mt-1 font-semibold">{currentLocation.longitude.toFixed(6)}</dd></div>
+                <div><dt className="text-[var(--color-muted)]">Sector</dt><dd className="mt-1 font-semibold">{currentLocation.sector || "GPS"}</dd></div>
                 <div><dt className="text-[var(--color-muted)]">{t("gps.accuracy")}</dt><dd className="mt-1 font-semibold">{currentLocation.accuracy == null ? "-" : `${Math.round(currentLocation.accuracy)} m`}</dd></div>
                 <div><dt className="text-[var(--color-muted)]">{t("gps.updated")}</dt><dd className="mt-1 font-semibold">{lastSentAt?.toLocaleTimeString() || "-"}</dd></div>
               </dl>
             ) : (
               <p className="mt-3 text-sm text-[var(--color-muted)]">{location?.sector || t("persona.noSector")} - Quito</p>
             )}
-            {address || addressStatus ? <p className="mt-4 text-sm text-[var(--color-muted)]">{address || addressStatus}</p> : null}
+            {displayAddress || addressStatus ? (
+              <p className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] p-3 text-sm leading-6 text-[var(--color-muted)]">
+                Direccion aproximada: {displayAddress || addressStatus}
+              </p>
+            ) : null}
           </article>
 
           <article className="glass-card-subtle p-4 text-sm text-[var(--color-muted)]">

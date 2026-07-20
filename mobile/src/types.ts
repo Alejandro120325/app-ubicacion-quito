@@ -41,6 +41,10 @@ export type GroupMember = {
   locationStatus: LocationStatus;
   lastLocation: string;
   lastUpdate: string;
+  accuracy?: number | null;
+  address?: string;
+  sector?: string;
+  simulated?: boolean;
   top: string;
   left: string;
 };

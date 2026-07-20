@@ -1,4 +1,5 @@
 import { LocateFixed } from "lucide-react-native";
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Card } from "@/components/card";
@@ -7,8 +8,31 @@ import { Pill } from "@/components/pill";
 import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
+import { mapMarkers } from "@/data/mock-data";
+import { useAdminData } from "@/hooks/use-dashboard-data";
+import type { LocationStatus, User } from "@/types";
+
+const getLocationStatus = (person: User): LocationStatus => {
+  if (person.sharingLocation) return "sharing";
+  if (person.active) return "paused";
+  return "offline";
+};
 
 export function AdminMapScreen() {
+  const { people } = useAdminData();
+  const realCount = people.filter((person) => person.lastLocation?.simulated === false).length;
+  const points = useMemo(
+    () =>
+      people.map((person, index) => ({
+        label: person.lastLocation?.sector || person.fullName,
+        active: person.sharingLocation,
+        left: mapMarkers[index % mapMarkers.length].left,
+        locationStatus: getLocationStatus(person),
+        top: mapMarkers[index % mapMarkers.length].top
+      })),
+    [people]
+  );
+
   return (
     <GradientScreen>
       <View style={styles.header}>
@@ -32,12 +56,16 @@ export function AdminMapScreen() {
         ]}
       />
 
-      <SimulatedMap height={430} showConnections />
+      <SimulatedMap height={430} points={points} showConnections />
 
       <Card style={styles.status}>
         <Text style={styles.statusTitle}>Estado</Text>
         <View style={styles.statusRows}>
-          {["Modo demostracion activo", "Seguimiento activo", "Actualizado hace unos segundos"].map(
+          {[
+            realCount ? `GPS real: ${realCount}` : "Modo demostracion activo",
+            "Seguimiento activo",
+            "Actualizado hace unos segundos"
+          ].map(
             (item) => (
               <Pill key={item} tone={item === "Seguimiento activo" ? "green" : "muted"}>
                 {item}

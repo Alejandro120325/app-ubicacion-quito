@@ -88,7 +88,19 @@ export const reverse = async (req, res, next) => {
   try {
     const lat = parseNumberParam(req.query.lat, "lat", -90, 90);
     const lon = parseNumberParam(req.query.lon, "lon", -180, 180);
-    return sendProviderResponse(res, await reverseGeocode(lat, lon));
+    const resolved = await reverseGeocode(lat, lon);
+    return res.json({
+      ok: true,
+      provider: resolved.provider || "Geoapify",
+      mode: resolved.mode || (resolved.resolved ? "real" : "demo"),
+      address: resolved.address,
+      sector: resolved.sector,
+      city: resolved.city,
+      district: resolved.district,
+      neighborhood: resolved.neighborhood,
+      resolved: Boolean(resolved.resolved),
+      data: resolved
+    });
   } catch (error) {
     return next(error);
   }

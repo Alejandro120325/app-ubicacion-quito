@@ -24,10 +24,27 @@ const getApiKey = () => {
 
 const hasConfiguredApiKey = () => isConfiguredApiKey(process.env.GEOAPIFY_API_KEY);
 
+export const isGeoapifyEnabled = () => hasConfiguredApiKey();
+
 const simulatedPayload = (data) => ({
   provider: "simulated",
   simulated: true,
   data
+});
+
+const gpsFallback = (lat, lon) => ({
+  ok: false,
+  provider: "Geoapify",
+  mode: "demo",
+  enabled: false,
+  resolved: false,
+  address: `Coordenadas GPS disponibles: ${lat}, ${lon}`,
+  sector: "Ubicacion GPS",
+  city: "Quito",
+  district: "",
+  neighborhood: "",
+  formatted: `Coordenadas GPS disponibles: ${lat}, ${lon}`,
+  raw: null
 });
 
 const parsePoint = (value) => {
@@ -84,7 +101,49 @@ export const getGeoapifyStatus = () => {
   return {
     configured,
     provider: "Geoapify Location Platform",
-    mode: configured ? "ready" : "simulated"
+    mode: configured ? "real" : "demo"
+  };
+};
+
+const extractReverseResult = (payload) =>
+  payload?.results?.[0] || payload?.features?.[0]?.properties || null;
+
+const pickSector = (result = {}) =>
+  result.suburb ||
+  result.district ||
+  result.neighbourhood ||
+  result.neighborhood ||
+  result.city_district ||
+  result.county ||
+  result.city ||
+  "Ubicacion GPS";
+
+const normalizeReverseGeocode = ({ lat, lon, payload, enabled }) => {
+  const result = extractReverseResult(payload);
+  if (!result) {
+    return { ...gpsFallback(lat, lon), enabled, raw: payload || null };
+  }
+
+  const address =
+    result.formatted ||
+    result.address_line2 ||
+    result.address_line1 ||
+    `Coordenadas GPS disponibles: ${lat}, ${lon}`;
+  const sector = pickSector(result);
+
+  return {
+    ok: true,
+    provider: "Geoapify",
+    mode: enabled ? "real" : "demo",
+    enabled,
+    resolved: enabled,
+    address,
+    sector,
+    city: result.city || result.town || result.village || "Quito",
+    district: result.district || result.city_district || "",
+    neighborhood: result.neighbourhood || result.neighborhood || result.suburb || "",
+    formatted: result.formatted || address,
+    raw: result
   };
 };
 
@@ -110,25 +169,23 @@ export const geocodeAddress = (text) =>
         ]
       });
 
-export const reverseGeocode = (lat, lon) =>
-  hasConfiguredApiKey()
-    ? requestGeoapify("/v1/geocode/reverse", {
-        lat: String(lat),
-        lon: String(lon),
-        lang: "es",
-        format: "json"
-      })
-    : simulatedPayload({
-        results: [
-          {
-            formatted: `Coordenadas ${lat}, ${lon} - Quito, Ecuador`,
-            lat,
-            lon,
-            city: "Quito",
-            country: "Ecuador"
-          }
-        ]
-      });
+export const reverseGeocode = async (lat, lon) => {
+  const enabled = hasConfiguredApiKey();
+  if (!enabled) return gpsFallback(lat, lon);
+
+  try {
+    const payload = await requestGeoapify("/v1/geocode/reverse", {
+      lat: String(lat),
+      lon: String(lon),
+      lang: "es",
+      format: "json"
+    });
+
+    return normalizeReverseGeocode({ lat, lon, payload, enabled });
+  } catch {
+    return { ...gpsFallback(lat, lon), enabled: true };
+  }
+};
 
 export const calculateRoute = (from, to, mode = "drive") =>
   hasConfiguredApiKey()

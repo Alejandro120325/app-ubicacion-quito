@@ -71,7 +71,7 @@ const AdminDashboard = () => {
             {
               className: "border-amber-200 bg-amber-50 text-amber-800",
               icon: AlertTriangle,
-              label: t("admin.simulated")
+              label: stats.gpsReal ? t("admin.gpsActive") : t("admin.simulated")
             },
             { icon: CalendarDays, label: currentDate },
             { icon: Wifi, label: t("admin.systemActive") }
@@ -96,11 +96,12 @@ const AdminDashboard = () => {
         ]}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <StatCard detail={t("admin.stats.totalDetail")} icon={UsersRound} title={t("admin.stats.total")} tone="blue" value={stats.total} />
         <StatCard detail={t("admin.stats.activeDetail")} icon={UserCheck} title={t("admin.stats.active")} tone="mint" value={stats.active} />
         <StatCard detail={t("admin.stats.inactiveDetail")} icon={UserX} title={t("admin.stats.inactive")} tone="slate" value={stats.inactive} />
         <StatCard detail={t("admin.stats.groupsDetail")} icon={UsersRound} title={t("admin.stats.groups")} tone="blue" value={stats.groups} />
+        <StatCard detail={t("admin.stats.gpsRealDetail")} icon={MapPin} title={t("admin.stats.gpsReal")} tone="mint" value={stats.gpsReal} />
         <StatCard detail={t("admin.stats.alertsDetail")} icon={AlertTriangle} title={t("admin.stats.alerts")} tone="amber" value={stats.alerts} />
       </div>
 
