@@ -13,7 +13,7 @@ const InputField = ({
       {label}
     </span>
     <div
-      className={`glass-input flex items-center gap-3 rounded-lg border px-3 transition ${
+      className={`glass-input flex min-h-12 items-center gap-3 rounded-lg border px-3 transition ${
         error
           ? "border-red-300 ring-4 ring-red-50"
           : "border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:ring-4 focus-within:ring-[var(--color-ring)]"
@@ -21,7 +21,7 @@ const InputField = ({
     >
       {Icon ? <Icon className="h-5 w-5 text-[var(--color-muted)]" aria-hidden="true" /> : null}
       <input
-        className="h-12 w-full min-w-0 bg-transparent text-[var(--color-text)] outline-none placeholder:text-[var(--color-muted)]"
+        className="min-h-12 w-full min-w-0 bg-transparent text-[var(--color-text)] outline-none placeholder:text-[var(--color-muted)]"
         id={name}
         name={name}
         value={value}

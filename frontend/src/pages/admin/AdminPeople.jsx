@@ -4,6 +4,7 @@ import { Clock3, Mail, MapPin, Phone, Search, UsersRound } from "lucide-react";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import InputField from "../../components/InputField.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import UserCard from "../../components/UserCard.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useAdminWorkspace } from "../../hooks/useAdminWorkspace.js";
@@ -65,6 +66,17 @@ const AdminPeople = () => {
           {error}
         </div>
       ) : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_people_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes revisar las personas registradas y su informacion principal."
+        bullets={[
+          "Consulta nombre, correo, telefono y estado.",
+          "Revisa detalles de cada persona.",
+          "Usa esta informacion para contactar miembros de confianza."
+        ]}
+      />
 
       <section className="glass-card p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">

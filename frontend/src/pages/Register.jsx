@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck, Home, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Home, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AnimatedBackground from "../components/AnimatedBackground.jsx";
 import Button from "../components/Button.jsx";
 import InputField from "../components/InputField.jsx";
@@ -83,23 +83,26 @@ const Register = () => {
   return (
     <AnimatedBackground className="min-h-screen px-4 py-8" showThemeToggle>
       <motion.main
-        className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-5xl items-center"
+        className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-6xl items-center"
         initial={false}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.28 }}
       >
         <section className="glass-card w-full overflow-hidden text-[var(--color-text)]">
-          <div className="grid lg:grid-cols-[0.74fr_1fr]">
-            <div className="hidden bg-slate-950 p-8 text-white lg:block">
-              <p className="inline-flex rounded-lg bg-teal-400/15 px-3 py-2 text-sm font-bold text-teal-100">
-                {t("register.badge")}
-              </p>
-              <h1 className="mt-6 text-3xl font-bold">{t("register.sideTitle")}</h1>
-              <p className="mt-4 text-sm leading-6 text-slate-300">
-                {t("register.sideText")}
-              </p>
-              <div className="mt-8 grid gap-3">
+          <div className="grid lg:grid-cols-[0.88fr_1.12fr]">
+            <div className="hidden min-h-[680px] flex-col justify-between bg-slate-950 p-9 text-white lg:flex">
+              <div>
+                <p className="inline-flex rounded-lg bg-teal-400/15 px-3 py-2 text-sm font-bold text-teal-100">
+                  {t("register.badge")}
+                </p>
+                <h1 className="mt-7 max-w-sm text-3xl font-bold leading-tight">{t("register.sideTitle")}</h1>
+                <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">
+                  {t("register.sideText")}
+                </p>
+              </div>
+
+              <div className="grid gap-3">
                 {[
                   t("register.checkCedula"),
                   t("register.checkPhone"),
@@ -116,9 +119,9 @@ const Register = () => {
               </div>
             </div>
 
-            <form className="p-5 sm:p-8" onSubmit={handleSubmit}>
-              <div className="flex flex-col gap-4 border-b border-[var(--color-border)] pb-6 sm:flex-row sm:items-start sm:justify-between">
-                <div>
+            <form className="p-5 sm:p-8 lg:p-9" onSubmit={handleSubmit}>
+              <div className="grid gap-5 border-b border-[var(--color-border)] pb-6 xl:grid-cols-[1fr_auto] xl:items-start">
+                <div className="max-w-md">
                   <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-secondary)]">
                     {t("register.accountType")}
                   </p>
@@ -129,19 +132,14 @@ const Register = () => {
                     {t("register.subtitle")}
                   </p>
                 </div>
-                <Link
-                  className="inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-soft)] focus-ring"
-                  to="/login"
-                >
-                  {t("register.backLogin")}
-                </Link>
-                <Link
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-soft)] focus-ring"
-                  to="/"
-                >
-                  <Home className="h-4 w-4" aria-hidden="true" />
-                  {t("common.backHome")}
-                </Link>
+                <div className="grid gap-3 sm:grid-cols-2 xl:w-[260px]">
+                  <Button className="w-full" icon={ArrowLeft} to="/login" variant="secondary">
+                    {t("register.backLogin")}
+                  </Button>
+                  <Button className="w-full" icon={Home} to="/" variant="secondary">
+                    {t("common.backHome")}
+                  </Button>
+                </div>
               </div>
 
               <div className="mt-6 grid gap-5">
@@ -231,7 +229,7 @@ const Register = () => {
                       {t("register.language")}
                     </span>
                     <select
-                      className={`h-12 w-full rounded-lg border bg-[var(--color-card)] px-3 text-[var(--color-text)] outline-none transition ${
+                      className={`min-h-12 w-full rounded-lg border bg-[var(--color-card)] px-3 text-[var(--color-text)] outline-none transition ${
                         errors.language
                           ? "border-red-300 ring-4 ring-red-50"
                           : "border-[var(--color-border)] focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-ring)]"
@@ -287,11 +285,12 @@ const Register = () => {
                   </div>
                 ) : null}
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm leading-6 text-[var(--color-muted)]">
+                <div className="grid gap-4 border-t border-[var(--color-border)] pt-5 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <p className="max-w-xl text-sm leading-6 text-[var(--color-muted)]">
                     {t("register.privacy")}
                   </p>
                   <Button
+                    className="w-full sm:min-w-44"
                     disabled={loading}
                     icon={BadgeCheck}
                     size="lg"

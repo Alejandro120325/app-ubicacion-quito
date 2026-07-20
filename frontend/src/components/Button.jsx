@@ -15,13 +15,13 @@ const variants = {
 };
 
 const sizes = {
-  sm: "px-3 py-2 text-sm",
-  md: "px-4 py-3 text-sm",
-  lg: "px-5 py-3 text-base"
+  sm: "min-h-10 px-3 py-2 text-sm",
+  md: "min-h-11 px-4 py-3 text-sm",
+  lg: "min-h-12 px-5 py-3 text-base"
 };
 
 const baseClass =
-  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white focus-ring";
+  "inline-flex items-center justify-center gap-2 rounded-lg text-center font-semibold leading-tight transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white focus-ring";
 
 const Button = ({
   children,

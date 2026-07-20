@@ -4,6 +4,7 @@ import { ArrowRight, BadgeCheck, MapPin, ShieldCheck, UserRound, UsersRound } fr
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import StatCard from "../../components/StatCard.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { usePersonaWorkspace } from "../../hooks/usePersonaWorkspace.js";
@@ -60,6 +61,17 @@ const PersonaDashboard = () => {
           {error}
         </div>
       ) : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_persona_seen"
+        title="Que puedes hacer aqui?"
+        description="Este panel muestra tu estado personal, tus grupos y accesos rapidos de seguridad."
+        bullets={[
+          "Revisa si tu ubicacion esta compartida.",
+          "Accede a tus grupos y privacidad.",
+          "Entra al perfil para actualizar tus datos."
+        ]}
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard

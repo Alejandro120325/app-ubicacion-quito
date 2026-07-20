@@ -78,12 +78,12 @@ export const shareLocation = async (req, res, next) => {
 };
 
 export const startLocationSharing = (req, res, next) => {
-  req.body.sharing = true;
+  req.body = { ...(req.body || {}), sharing: true };
   return shareLocation(req, res, next);
 };
 
 export const stopLocationSharing = (req, res, next) => {
-  req.body.sharing = false;
+  req.body = { ...(req.body || {}), sharing: false };
   return shareLocation(req, res, next);
 };
 
@@ -98,6 +98,13 @@ export const updateLocation = async (req, res, next) => {
     return res.status(409).json({
       ok: false,
       message: "Activa Compartir ubicacion antes de enviar coordenadas."
+    });
+  }
+  const requestedUserId = req.body.userId == null ? req.user.id : Number(req.body.userId);
+  if (requestedUserId !== req.user.id) {
+    return res.status(403).json({
+      ok: false,
+      message: "No puedes enviar coordenadas de otra cuenta."
     });
   }
 

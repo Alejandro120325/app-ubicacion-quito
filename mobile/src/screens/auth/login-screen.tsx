@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   KeyRound,
   Mail,
-  Server,
   ShieldCheck,
   UserRound
 } from "lucide-react-native";
@@ -20,7 +19,6 @@ import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
 import { demoCredentials } from "@/data/mock-data";
-import { API_BASE_URL } from "@/services/api";
 import { validateLoginForm, type FieldErrors } from "@/utils/validators";
 
 export function LoginScreen() {
@@ -62,7 +60,7 @@ export function LoginScreen() {
       const user = await login(form);
       router.replace(user.role === "admin" ? "/admin" : "/persona");
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : "No fue posible iniciar sesion.");
+      setServerError(error instanceof Error ? error.message : "No fue posible iniciar sesión.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +72,7 @@ export function LoginScreen() {
         <Pill icon={ShieldCheck} tone="green">
           Acceso seguro
         </Pill>
-        <Text style={styles.title}>Quito Ubicacion Segura</Text>
+        <Text style={styles.title}>Quito Ubicación Segura</Text>
         <Text muted style={styles.subtitle}>
           Ingresa con una cuenta de administrador o persona para continuar.
         </Text>
@@ -86,9 +84,9 @@ export function LoginScreen() {
             <KeyRound color={colors.white} size={20} />
           </View>
           <View style={styles.formTitleBlock}>
-            <Text style={styles.formTitle}>Iniciar sesion</Text>
+            <Text style={styles.formTitle}>Iniciar sesión</Text>
             <Text muted style={styles.formSubtitle}>
-              Acceso validado por el backend local.
+              Acceso validado de forma segura.
             </Text>
           </View>
         </View>
@@ -106,10 +104,10 @@ export function LoginScreen() {
         />
         <FormField
           error={errors.password}
-          label="Contrasena"
+          label="Contraseña"
           onChangeText={(value) => updateField("password", value)}
           password
-          placeholder="Minimo 8 caracteres"
+          placeholder="Mínimo 8 caracteres"
           value={form.password}
         />
 
@@ -117,7 +115,7 @@ export function LoginScreen() {
           <View style={styles.errorBox}>
             <AlertCircle color="#fecaca" size={18} />
             <View style={styles.errorContent}>
-              <Text style={styles.errorTitle}>Servidor local no responde</Text>
+              <Text style={styles.errorTitle}>No se pudo iniciar sesión</Text>
               <Text style={styles.errorText}>{serverError}</Text>
             </View>
           </View>
@@ -129,17 +127,9 @@ export function LoginScreen() {
           loading={loading}
           onPress={submit}
         >
-          Iniciar sesion
+          Iniciar sesión
         </ActionButton>
 
-        {serverError ? (
-          <View style={styles.serverHint}>
-            <Server color={colors.secondary} size={15} />
-            <Text muted style={styles.serverHintText}>
-              Android emulator usa http://10.0.2.2:4000/api. API actual: {API_BASE_URL}
-            </Text>
-          </View>
-        ) : null}
       </Card>
 
       <Card style={styles.demoCard}>
@@ -252,19 +242,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 17
-  },
-  serverHint: {
-    alignItems: "center",
-    borderColor: colors.glassBorder,
-    borderTopWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    paddingTop: 12
-  },
-  serverHintText: {
-    flex: 1,
-    fontSize: 11,
-    lineHeight: 15
   },
   demoCard: {
     gap: 13,

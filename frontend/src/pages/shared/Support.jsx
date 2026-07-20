@@ -1,41 +1,46 @@
 import React, { useState } from "react";
-import { Github, HelpCircle, Instagram, Linkedin, PlayCircle } from "lucide-react";
+import { HelpCircle, Info, Mail, Phone, PlayCircle } from "lucide-react";
 import Button from "../../components/Button.jsx";
 import OnboardingModal from "../../components/OnboardingModal.jsx";
-
-const INSTAGRAM_URL = "https://instagram.com/";
-const GITHUB_URL = "https://github.com/Alejandro120325";
-const LINKEDIN_URL = "https://www.linkedin.com/in/jairo-alejandro-ojeda-herrera-9466543a6/";
-
-const links = [
-  { href: INSTAGRAM_URL, icon: Instagram, label: "Abrir Instagram" },
-  { href: GITHUB_URL, icon: Github, label: "Abrir GitHub" },
-  { href: LINKEDIN_URL, icon: Linkedin, label: "Abrir LinkedIn" }
-];
+import SectionHelp from "../../components/SectionHelp.jsx";
+import { geokipuContact } from "../../constants/contact.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 const Support = () => {
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const { user } = useAuth();
+  const aboutPath = user?.role === "admin" ? "/admin/acerca" : "/persona/acerca";
 
   return (
     <section className="mx-auto grid max-w-5xl gap-7">
       <header>
         <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
-          Soporte tecnico
+          Soporte técnico
         </p>
         <h1 className="mt-2 text-3xl font-bold text-[var(--color-text)]">
           Ayuda y canales oficiales
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-          GeoKipu es un proyecto academico de ubicacion segura con consentimiento, bitacora,
-          alertas, bloqueo local y contacto rapido.
+          Reporta problemas, vuelve a abrir el tutorial y accede a canales rápidos de ayuda.
         </p>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <SectionHelp
+        storageKey="geokipu_guide_support_seen"
+        title="Qué puedes hacer aquí?"
+        description="Aquí encuentras ayuda operativa para usar GeoKipu sin mezclar información institucional."
+        bullets={[
+          "Reporta problemas de la aplicación.",
+          "Abre correo o llamada rápida.",
+          "Vuelve a revisar el tutorial general cuando lo necesites."
+        ]}
+      />
+
+      <section className="grid gap-4 lg:grid-cols-3">
         <article className="glass-card p-6">
-          <h2 className="text-xl font-bold text-[var(--color-text)]">Equipo</h2>
+          <h2 className="text-xl font-bold text-[var(--color-text)]">Tutorial</h2>
           <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-            Desarrollo orientado a seguridad, privacidad y seguimiento simulado para grupos de confianza.
+            Revisa nuevamente la guía inicial para recordar el flujo general de uso.
           </p>
           <Button className="mt-5" icon={PlayCircle} variant="secondary" onClick={() => setTutorialOpen(true)}>
             Reabrir tutorial
@@ -51,28 +56,48 @@ const Support = () => {
             className="mt-5"
             icon={HelpCircle}
             onClick={() => {
-              window.location.href = "mailto:soporte@geokipu.local?subject=Reporte%20GeoKipu";
+              window.location.href = `mailto:${geokipuContact.email}?subject=Reporte%20GeoKipu`;
             }}
           >
             Reportar problema
           </Button>
         </article>
+
+        <article className="glass-card p-6">
+          <h2 className="text-xl font-bold text-[var(--color-text)]">Contacto rápido</h2>
+          <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
+            Usa correo o llamada para pedir ayuda sobre errores de acceso, perfil o navegación.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <a
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm font-bold text-[var(--color-text)] transition hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)] focus-ring"
+              href={`mailto:${geokipuContact.email}`}
+            >
+              <Mail className="h-5 w-5 text-[var(--color-secondary)]" />
+              Enviar correo
+            </a>
+            <a
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm font-bold text-[var(--color-text)] transition hover:border-[var(--color-primary)] hover:bg-[var(--color-soft)] focus-ring"
+              href={geokipuContact.phoneHref}
+            >
+              <Phone className="h-5 w-5 text-[var(--color-secondary)]" />
+              Llamar
+            </a>
+          </div>
+        </article>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        {links.map((link) => (
-          <a
-            className="glass-card flex min-h-24 items-center justify-center gap-3 p-5 text-center font-bold text-[var(--color-text)] transition hover:-translate-y-1 hover:border-[var(--color-primary)]"
-            href={link.href}
-            key={link.label}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <link.icon className="h-5 w-5 text-[var(--color-primary)]" />
-            {link.label}
-          </a>
-        ))}
-      </section>
+      <article className="glass-card grid gap-4 p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div>
+          <h2 className="text-xl font-bold text-[var(--color-text)]">Información institucional</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+            El equipo, redes sociales y oficinas ahora están separados en la sección Acerca de nosotros.
+          </p>
+        </div>
+        <Button icon={Info} to={aboutPath} variant="secondary">
+          Ver Acerca de nosotros
+        </Button>
+      </article>
 
       <OnboardingModal forceOpen={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </section>

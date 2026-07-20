@@ -56,11 +56,11 @@ export function validateLoginForm(values: { email: string; password: string }) {
   const errors: FieldErrors = {};
 
   if (!isValidEmail(values.email)) {
-    errors.email = "Ingresa un correo valido.";
+    errors.email = "Ingresa un correo válido.";
   }
 
   if (!values.password) {
-    errors.password = "Ingresa tu contrasena.";
+    errors.password = "Ingresa tu contraseña.";
   }
 
   return errors;
@@ -74,15 +74,15 @@ export function validateRegisterForm(values: RegisterPayload) {
   }
 
   if (!isValidEmail(values.email)) {
-    errors.email = "Ingresa un correo valido.";
+    errors.email = "Ingresa un correo válido.";
   }
 
   if (!isStrongPassword(values.password)) {
-    errors.password = "Usa 8 caracteres, mayuscula, minuscula y numero.";
+    errors.password = "Usa 8 caracteres, mayúscula, minúscula y número.";
   }
 
   if (values.confirmPassword !== values.password) {
-    errors.confirmPassword = "Las contrasenas no coinciden.";
+    errors.confirmPassword = "Las contraseñas no coinciden.";
   }
 
   if (!values.language) {
@@ -90,11 +90,11 @@ export function validateRegisterForm(values: RegisterPayload) {
   }
 
   if (!isValidEcuadorianCedula(values.cedula)) {
-    errors.cedula = "Ingresa una cedula ecuatoriana valida de 10 digitos.";
+    errors.cedula = "Ingresa una cédula ecuatoriana válida de 10 dígitos.";
   }
 
   if (!isValidEcuadorianPhone(values.phone)) {
-    errors.phone = "Usa un celular ecuatoriano de 10 digitos que empiece con 09.";
+    errors.phone = "Usa un celular ecuatoriano de 10 dígitos que empiece con 09.";
   }
 
   return errors;

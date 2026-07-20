@@ -19,6 +19,7 @@ import PersonaGroups from "../pages/persona/PersonaGroups.jsx";
 import PersonaLocation from "../pages/persona/PersonaLocation.jsx";
 import PersonaPrivacy from "../pages/persona/PersonaPrivacy.jsx";
 import Register from "../pages/Register.jsx";
+import About from "../pages/shared/About.jsx";
 import ActivityCenter from "../pages/shared/ActivityCenter.jsx";
 import ProfileSettings from "../pages/shared/ProfileSettings.jsx";
 import Support from "../pages/shared/Support.jsx";
@@ -46,6 +47,7 @@ const AppRoutes = () => {
             <Route path="/admin/bitacora" element={<ActivityCenter mode="activity" />} />
             <Route path="/admin/perfil" element={<ProfileSettings />} />
             <Route path="/admin/soporte" element={<Support />} />
+            <Route path="/admin/acerca" element={<About />} />
             <Route path="/admin/api" element={<AdminApi />} />
             <Route path="/admin/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>
@@ -62,6 +64,7 @@ const AppRoutes = () => {
             <Route path="/persona/privacidad" element={<PersonaPrivacy />} />
             <Route path="/persona/perfil" element={<ProfileSettings />} />
             <Route path="/persona/soporte" element={<Support />} />
+            <Route path="/persona/acerca" element={<About />} />
             <Route path="/persona/api" element={<PersonaApi />} />
             <Route path="/persona/endpoints-locales" element={<LocalEndpointsPanel />} />
           </Route>

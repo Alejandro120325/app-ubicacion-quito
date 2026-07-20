@@ -9,6 +9,7 @@ import { GroupCard } from "@/components/group-card";
 import { LoadingView } from "@/components/loading-view";
 import { MemberCard } from "@/components/member-card";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
@@ -185,9 +186,20 @@ export function AdminGroupsScreen() {
         <Pill tone="green">Grupos</Pill>
         <Text style={styles.title}>Grupos familiares y contactos</Text>
         <Text muted style={styles.subtitle}>
-          Gestiona grupos e integrantes usando el backend local de GeoKipu.
+          Gestiona circulos de confianza e integrantes.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_groups_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes organizar tus circulos de confianza y administrar integrantes."
+        bullets={[
+          "Crea, edita o elimina grupos.",
+          "Agrega o quita integrantes.",
+          "Revisa que personas pertenecen a cada grupo."
+        ]}
+      />
 
       {error ? (
         <Card soft style={styles.notice}>

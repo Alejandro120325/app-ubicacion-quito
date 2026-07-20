@@ -43,8 +43,8 @@ export function useAdminData() {
       setGroups(fallbackGroups);
       setError(
         requestError instanceof Error
-          ? `${requestError.message} Se muestran datos simulados.`
-          : "No fue posible cargar el backend. Se muestran datos simulados."
+          ? `${requestError.message} Se muestra informacion de demostracion.`
+          : "No fue posible cargar la informacion. Se muestra modo demostracion."
       );
     } finally {
       setLoading(false);
@@ -96,8 +96,8 @@ export function usePersonaData(user: User | null, updateUser?: (user: User) => P
       setLocation(fallbackPeople.find((item) => item.email === user.email)?.lastLocation || fallbackPeople[0].lastLocation || null);
       setError(
         requestError instanceof Error
-          ? `${requestError.message} Se muestran datos simulados.`
-          : "No fue posible cargar el backend. Se muestran datos simulados."
+          ? `${requestError.message} Se muestra informacion de demostracion.`
+          : "No fue posible cargar la informacion. Se muestra modo demostracion."
       );
     } finally {
       setLoading(false);

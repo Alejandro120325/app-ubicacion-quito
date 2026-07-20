@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BadgeCheck, Crosshair, MapPin, Power, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Crosshair, MapPin, Power, RefreshCw, ShieldCheck } from "lucide-react";
 import { getReverseAddress, mapsApi } from "../../api/mapsApi.js";
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import SimulatedMap from "../../components/SimulatedMap.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useLiveLocation } from "../../hooks/useLiveLocation.js";
@@ -21,6 +22,8 @@ const PersonaLocation = () => {
     error: gpsError,
     isTracking,
     lastSentAt,
+    refreshNow,
+    sending,
     startTracking,
     status,
     stopTracking
@@ -87,6 +90,17 @@ const PersonaLocation = () => {
 
       {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div> : null}
 
+      <SectionHelp
+        storageKey="geokipu_guide_map_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes visualizar la ubicacion compartida o el modo demostracion de GeoKipu."
+        bullets={[
+          "Revisa la ultima ubicacion disponible.",
+          "Identifica sectores importantes en el mapa.",
+          "Activa o pausa el seguimiento con consentimiento."
+        ]}
+      />
+
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="glass-card min-w-0 p-4 sm:p-5">
           <SimulatedMap
@@ -117,11 +131,20 @@ const PersonaLocation = () => {
               variant={isTracking ? "dark" : "success"}
               onClick={isTracking ? stopTracking : startTracking}
             >
-              {status === "requesting"
+              {status === "permission-pending"
                 ? t("gps.requesting")
                 : isTracking
                   ? t("persona.pause")
                   : t("gps.activate")}
+            </Button>
+            <Button
+              className="mt-3 w-full"
+              icon={RefreshCw}
+              size="lg"
+              variant="secondary"
+              onClick={refreshNow}
+            >
+              {sending ? t("gps.sending") : t("gps.refresh")}
             </Button>
           </article>
 
@@ -134,7 +157,7 @@ const PersonaLocation = () => {
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div><dt className="text-[var(--color-muted)]">Latitud</dt><dd className="mt-1 font-semibold">{currentLocation.latitude.toFixed(6)}</dd></div>
                 <div><dt className="text-[var(--color-muted)]">Longitud</dt><dd className="mt-1 font-semibold">{currentLocation.longitude.toFixed(6)}</dd></div>
-                <div><dt className="text-[var(--color-muted)]">{t("gps.accuracy")}</dt><dd className="mt-1 font-semibold">{Math.round(currentLocation.accuracy)} m</dd></div>
+                <div><dt className="text-[var(--color-muted)]">{t("gps.accuracy")}</dt><dd className="mt-1 font-semibold">{currentLocation.accuracy == null ? "-" : `${Math.round(currentLocation.accuracy)} m`}</dd></div>
                 <div><dt className="text-[var(--color-muted)]">{t("gps.updated")}</dt><dd className="mt-1 font-semibold">{lastSentAt?.toLocaleTimeString() || "-"}</dd></div>
               </dl>
             ) : (

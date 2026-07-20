@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   CalendarDays,
@@ -14,6 +13,7 @@ import {
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import StatCard from "../../components/StatCard.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     { to: "/admin/personas", label: t("sidebar.people"), text: t("admin.quick.people"), icon: UsersRound },
     { to: "/admin/grupos", label: t("sidebar.groups"), text: t("admin.quick.groups"), icon: UsersRound },
     { to: "/admin/mapa", label: t("sidebar.map"), text: t("admin.quick.map"), icon: MapPin },
-    { to: "/admin/api", label: t("sidebar.api"), text: t("admin.quick.api"), icon: Activity }
+    { to: "/admin/alertas", label: t("sidebar.alerts"), text: "Revisa eventos importantes y contactos rapidos.", icon: AlertTriangle }
   ];
 
   if (loading) {
@@ -85,12 +85,23 @@ const AdminDashboard = () => {
         </div>
       ) : null}
 
+      <SectionHelp
+        storageKey="geokipu_guide_admin_seen"
+        title="Que puedes hacer aqui?"
+        description="Este panel permite supervisar usuarios, grupos, ubicaciones y alertas de seguridad."
+        bullets={[
+          "Revisa cuantas personas y grupos estan registrados.",
+          "Entra a Personas o Grupos para administrar datos.",
+          "Usa Alertas y Bitacora para revisar eventos importantes."
+        ]}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard detail={t("admin.stats.totalDetail")} icon={UsersRound} title={t("admin.stats.total")} tone="blue" value={stats.total} />
         <StatCard detail={t("admin.stats.activeDetail")} icon={UserCheck} title={t("admin.stats.active")} tone="mint" value={stats.active} />
         <StatCard detail={t("admin.stats.inactiveDetail")} icon={UserX} title={t("admin.stats.inactive")} tone="slate" value={stats.inactive} />
         <StatCard detail={t("admin.stats.groupsDetail")} icon={UsersRound} title={t("admin.stats.groups")} tone="blue" value={stats.groups} />
-        <StatCard detail={t("admin.stats.alertsDetail")} icon={Activity} title={t("admin.stats.alerts")} tone="amber" value={stats.alerts} />
+        <StatCard detail={t("admin.stats.alertsDetail")} icon={AlertTriangle} title={t("admin.stats.alerts")} tone="amber" value={stats.alerts} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">

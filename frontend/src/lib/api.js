@@ -17,10 +17,10 @@ export const getApiErrorMessage = (error) => {
     401: "Sesion no autorizada. Inicia sesion nuevamente.",
     403: "No tienes permisos para esta accion.",
     404: "Recurso no encontrado.",
-    500: "Error interno del backend local."
+    500: "Error interno del servicio."
   };
 
-  return messages[status] || "No se pudo conectar con el backend local.";
+  return messages[status] || "No se pudo conectar con el servicio de GeoKipu.";
 };
 
 const readStoredToken = () => {

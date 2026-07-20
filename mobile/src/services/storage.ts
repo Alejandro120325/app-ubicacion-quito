@@ -5,6 +5,7 @@ import type { Session } from "@/types";
 const SESSION_KEY = "quito-location-session";
 const ONBOARDING_KEY = "geokipu_onboarding_done";
 const PIN_HASH_KEY = "geokipu_pin_hash";
+const guideKey = (key: string) => key.startsWith("geokipu_guide_") ? key : `geokipu_guide_${key}_seen`;
 const isWeb = process.env.EXPO_OS === "web";
 
 function webStorage() {
@@ -70,6 +71,21 @@ export async function markOnboardingComplete() {
     return;
   }
   await SecureStore.setItemAsync(ONBOARDING_KEY, "true");
+}
+
+export async function hasSeenSectionTutorial(key: string) {
+  const value = isWeb
+    ? webStorage()?.getItem(guideKey(key))
+    : await SecureStore.getItemAsync(guideKey(key));
+  return value === "true";
+}
+
+export async function markSectionTutorialSeen(key: string) {
+  if (isWeb) {
+    webStorage()?.setItem(guideKey(key), "true");
+    return;
+  }
+  await SecureStore.setItemAsync(guideKey(key), "true");
 }
 
 export async function hasLocalPin() {

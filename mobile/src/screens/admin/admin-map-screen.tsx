@@ -4,6 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { Card } from "@/components/card";
 import { GradientScreen } from "@/components/gradient-screen";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 
@@ -14,18 +15,29 @@ export function AdminMapScreen() {
         <Pill icon={LocateFixed} tone="blue">
           Mapa
         </Pill>
-        <Text style={styles.title}>Mapa simulado de Quito</Text>
+        <Text style={styles.title}>Mapa de ubicacion</Text>
         <Text muted style={styles.subtitle}>
-          Marcadores visuales para La Carolina, Cumbaya, Centro Historico, Universidad y Quitumbe.
+          Marcadores de referencia para La Carolina, Cumbaya, Centro Historico, Universidad y Quitumbe.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_map_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes visualizar la ubicacion compartida o el modo demostracion de GeoKipu."
+        bullets={[
+          "Revisa la ultima ubicacion disponible.",
+          "Identifica sectores importantes en el mapa.",
+          "Activa o pausa el seguimiento con consentimiento."
+        ]}
+      />
 
       <SimulatedMap height={430} showConnections />
 
       <Card style={styles.status}>
         <Text style={styles.statusTitle}>Estado</Text>
         <View style={styles.statusRows}>
-          {["Ubicacion simulada", "Seguimiento activo", "Actualizado hace unos segundos"].map(
+          {["Modo demostracion activo", "Seguimiento activo", "Actualizado hace unos segundos"].map(
             (item) => (
               <Pill key={item} tone={item === "Seguimiento activo" ? "green" : "muted"}>
                 {item}

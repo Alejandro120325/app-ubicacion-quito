@@ -6,6 +6,7 @@ import { ActionButton } from "@/components/action-button";
 import { Card } from "@/components/card";
 import { GradientScreen } from "@/components/gradient-screen";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
@@ -22,10 +23,21 @@ export function WelcomeScreen() {
           Comparte tu ubicacion de forma segura en Quito y alrededores.
         </Text>
         <Text muted style={styles.body}>
-          Un panel movil para personas y administradores con datos simulados,
-          grupos familiares y seguimiento visual inspirado en la version web.
+          Una experiencia movil para personas y administradores con grupos familiares,
+          alertas y seguimiento visual con consentimiento.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_home_seen"
+        title="Que puedes hacer aqui?"
+        description="Desde el inicio puedes revisar un resumen rapido de tu cuenta, ubicacion, grupos y alertas."
+        bullets={[
+          "Consulta el estado general de tu cuenta.",
+          "Accede rapido al mapa, grupos y alertas.",
+          "Revisa si compartes ubicacion con consentimiento."
+        ]}
+      />
 
       <View style={styles.actions}>
         <Link asChild href="/login">
@@ -41,7 +53,7 @@ export function WelcomeScreen() {
       <View style={styles.stats}>
         {[
           ["2", "roles"],
-          ["100%", "datos simulados"],
+          ["Demo", "modo activo"],
           ["Quito", "ciudad base"]
         ].map(([value, label]) => (
           <Card key={label} style={styles.statCard}>
@@ -57,7 +69,7 @@ export function WelcomeScreen() {
         <View style={styles.mapHeader}>
           <View>
             <Text muted style={styles.mapMeta}>
-              Circulo simulado
+              Circulo de confianza
             </Text>
             <Text style={styles.mapTitle}>Familia</Text>
           </View>
@@ -69,9 +81,9 @@ export function WelcomeScreen() {
       <Card style={styles.notice}>
         <MapPinned color={colors.secondary} size={22} />
         <View style={styles.noticeText}>
-          <Text style={styles.noticeTitle}>Sin mapas reales todavia</Text>
+          <Text style={styles.noticeTitle}>Modo demostracion activo</Text>
           <Text muted style={styles.noticeBody}>
-            La app usa marcadores visuales hasta integrar Geoapify u otra plataforma.
+            La app usa marcadores de referencia para explicar el seguimiento consentido.
           </Text>
         </View>
       </Card>

@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BellRing,
-  Code2,
-  Globe2,
   HeartHandshake,
   LogOut,
   LockKeyhole,
@@ -16,8 +14,10 @@ import {
   UsersRound
 } from "lucide-react";
 import AnimatedBackground from "../components/AnimatedBackground.jsx";
+import AppFooter from "../components/AppFooter.jsx";
 import Button from "../components/Button.jsx";
 import Navbar from "../components/Navbar.jsx";
+import SectionHelp from "../components/SectionHelp.jsx";
 import SimulatedMap from "../components/SimulatedMap.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -29,11 +29,6 @@ const Home = () => {
   const navigate = useNavigate();
 
   const dashboardPath = user?.role === "admin" ? "/admin/dashboard" : "/persona/dashboard";
-  const apiPath = isAuthenticated
-    ? user?.role === "admin"
-      ? "/admin/api"
-      : "/persona/api"
-    : "/login";
 
   const handleLogout = () => {
     logout();
@@ -192,6 +187,21 @@ const Home = () => {
           </section>
         </AnimatedBackground>
 
+        <section className="bg-[var(--color-card)] py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHelp
+              storageKey="geokipu_guide_home_seen"
+              title="Qué puedes hacer aquí?"
+              description="Desde el inicio puedes revisar un resumen rápido de tu cuenta, ubicación, grupos y alertas."
+              bullets={[
+                "Consulta el estado general de tu cuenta.",
+                "Accede rápido al mapa, grupos y alertas.",
+                "Revisa si estás compartiendo ubicación con consentimiento."
+              ]}
+            />
+          </div>
+        </section>
+
         <section className="bg-[var(--color-card)] py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
@@ -267,45 +277,6 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="border-t border-[var(--color-border)] bg-[var(--color-card)] py-14">
-          <div className="mx-auto grid max-w-7xl items-start gap-8 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">
-                {t("api.status")}
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-[var(--color-text)]">
-                {t("api.title")}
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
-                {t("api.summary")}
-              </p>
-              <Button className="mt-6" icon={Globe2} to={apiPath} variant="secondary">
-                {t("sidebar.api")}
-              </Button>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                [t("api.company"), t("api.companyValue")],
-                [t("api.cost"), t("api.costValue")],
-                [t("api.why"), t("api.whyValue")],
-                [t("api.env"), "GEOAPIFY_API_KEY (backend)"]
-              ].map(([label, value]) => (
-                <article
-                  className="glass-card min-h-[150px] p-5"
-                  key={label}
-                >
-                  <Code2 className="h-5 w-5 text-[var(--color-primary)]" aria-hidden="true" />
-                  <h3 className="mt-3 font-bold text-[var(--color-text)]">{label}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                    {value}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="bg-[var(--color-card)] py-12">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
             <div>
@@ -341,12 +312,7 @@ const Home = () => {
           </div>
         </section>
 
-        <footer className="border-t border-[var(--color-border)] bg-[var(--color-card)] px-4 py-6 text-sm text-[var(--color-muted)] sm:px-6 lg:px-8">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-semibold text-[var(--color-text)]">{t("home.title")}</p>
-            <p>{t("home.footer")}</p>
-          </div>
-        </footer>
+        {!isAuthenticated ? <AppFooter /> : null}
       </motion.main>
     </div>
   );

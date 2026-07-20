@@ -8,6 +8,7 @@ import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { PersonCard } from "@/components/person-card";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { Text } from "@/components/text";
 import { useAdminData } from "@/hooks/use-dashboard-data";
 import type { User } from "@/types";
@@ -29,6 +30,17 @@ export function AdminPeopleScreen() {
           Persona Demo Quito, Camila Torres y Mateo Andrade son perfiles base de prueba.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_people_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes revisar las personas registradas y su informacion principal."
+        bullets={[
+          "Consulta nombre, correo, telefono y estado.",
+          "Revisa detalles de cada persona.",
+          "Usa esta informacion para contactar miembros de confianza."
+        ]}
+      />
 
       {error ? (
         <Card soft style={styles.notice}>

@@ -4,6 +4,7 @@ import { EyeOff, LockKeyhole, Power, ShieldCheck, UsersRound } from "lucide-reac
 import Button from "../../components/Button.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { usePersonaWorkspace } from "../../hooks/usePersonaWorkspace.js";
 
@@ -60,6 +61,17 @@ const PersonaPrivacy = () => {
           {error}
         </div>
       ) : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_privacy_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes controlar opciones relacionadas con consentimiento, bloqueo y proteccion de datos."
+        bullets={[
+          "Revisa opciones de seguridad local.",
+          "Controla el uso de ubicacion compartida.",
+          "Protege datos personales y familiares."
+        ]}
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {controls.map((control) => (

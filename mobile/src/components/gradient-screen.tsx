@@ -38,7 +38,7 @@ export function GradientScreen({ children, padded = true }: GradientScreenProps)
         contentContainerStyle={[
           styles.content,
           padded ? styles.padded : null,
-          { paddingTop: Math.max(insets.top, 18), paddingBottom: Math.max(insets.bottom, 24) }
+          { paddingTop: Math.max(insets.top, 18), paddingBottom: Math.max(insets.bottom + 92, 116) }
         ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"

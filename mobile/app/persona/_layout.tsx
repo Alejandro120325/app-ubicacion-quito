@@ -41,14 +41,14 @@ export default function PersonaLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Inicio",
+          title: "Home",
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />
         }}
       />
       <Tabs.Screen
         name="ubicacion"
         options={{
-          title: "Ubicacion",
+          title: "Mapa",
           tabBarIcon: ({ color, size }) => <MapPinned color={color} size={size} />
         }}
       />
@@ -69,7 +69,7 @@ export default function PersonaLayout() {
       <Tabs.Screen
         name="bitacora"
         options={{
-          title: "Bitacora",
+          title: "Bita.",
           tabBarIcon: ({ color, size }) => <ScrollText color={color} size={size} />
         }}
       />
@@ -83,7 +83,7 @@ export default function PersonaLayout() {
       <Tabs.Screen
         name="soporte"
         options={{
-          title: "Soporte",
+          title: "Sop.",
           tabBarIcon: ({ color, size }) => <Headphones color={color} size={size} />
         }}
       />

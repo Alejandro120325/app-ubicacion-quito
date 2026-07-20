@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { BadgeCheck, IdCard, Mail, Phone, ShieldCheck, UserRound } from "lucide-react-native";
+import { BadgeCheck, Home, IdCard, LogIn, Mail, Phone, ShieldCheck, UserRound } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -28,7 +28,7 @@ const initialForm: RegisterPayload = {
   phone: ""
 };
 
-const strengthLabels = ["Sin datos", "Debil", "Basica", "Buena", "Fuerte"];
+const strengthLabels = ["Sin datos", "Débil", "Básica", "Buena", "Fuerte"];
 
 export function RegisterScreen() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export function RegisterScreen() {
     try {
       setLoading(true);
       await register(form);
-      setMessage("Cuenta creada correctamente. Ahora inicia sesion.");
+      setMessage("Cuenta creada correctamente. Ahora inicia sesión.");
       setTimeout(() => router.replace("/login"), 900);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No fue posible crear la cuenta.");
@@ -75,8 +75,19 @@ export function RegisterScreen() {
         </Pill>
         <Text style={styles.title}>Crear cuenta</Text>
         <Text muted style={styles.subtitle}>
-          El rol se asigna automaticamente como PERSONA para mantener el flujo del backend.
+          Completa tus datos para activar tu panel personal con una experiencia segura.
         </Text>
+      </View>
+
+      <View style={styles.navActions}>
+        <Pressable accessibilityRole="button" onPress={() => router.push("/login")} style={styles.navAction}>
+          <LogIn color={colors.text} size={18} />
+          <Text style={styles.navActionText}>Volver al login</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => router.push("/")} style={styles.navAction}>
+          <Home color={colors.text} size={18} />
+          <Text style={styles.navActionText}>Volver al inicio</Text>
+        </Pressable>
       </View>
 
       <Card elevated style={styles.formCard}>
@@ -100,18 +111,18 @@ export function RegisterScreen() {
         />
         <FormField
           error={errors.password}
-          label="Contrasena"
+          label="Contraseña"
           onChangeText={(value) => updateField("password", value)}
           password
-          placeholder="Minimo 8 caracteres"
+          placeholder="Mínimo 8 caracteres"
           value={form.password}
         />
         <FormField
           error={errors.confirmPassword}
-          label="Confirmar contrasena"
+          label="Confirmar contraseña"
           onChangeText={(value) => updateField("confirmPassword", value)}
           password
-          placeholder="Repite tu contrasena"
+          placeholder="Repite tu contraseña"
           value={form.confirmPassword}
         />
 
@@ -119,7 +130,7 @@ export function RegisterScreen() {
           <View style={styles.strengthTop}>
             <View style={styles.strengthLabel}>
               <ShieldCheck color={colors.primary} size={17} />
-              <Text style={styles.strengthTitle}>Seguridad de contrasena</Text>
+              <Text style={styles.strengthTitle}>Seguridad de contraseña</Text>
             </View>
             <Text muted style={styles.strengthText}>
               {strengthLabels[score]}
@@ -131,9 +142,9 @@ export function RegisterScreen() {
           <View style={styles.rules}>
             {[
               ["8 caracteres", score >= 1],
-              ["Mayuscula", /[A-Z]/.test(form.password)],
-              ["Minuscula", /[a-z]/.test(form.password)],
-              ["Numero", /\d/.test(form.password)]
+              ["Mayúscula", /[A-Z]/.test(form.password)],
+              ["Minúscula", /[a-z]/.test(form.password)],
+              ["Número", /\d/.test(form.password)]
             ].map(([label, passed]) => (
               <View key={String(label)} style={[styles.rule, passed ? styles.rulePass : null]}>
                 <Text selectable={false} style={[styles.ruleText, passed ? styles.ruleTextPass : null]}>
@@ -148,7 +159,7 @@ export function RegisterScreen() {
           <Text style={styles.languageLabel}>Idioma</Text>
           <View style={styles.languageOptions}>
             {[
-              ["es", "Espanol"],
+              ["es", "Español"],
               ["en", "English"]
             ].map(([value, label]) => (
               <Pressable
@@ -177,10 +188,10 @@ export function RegisterScreen() {
 
         <FormField
           error={errors.cedula}
-          helperText="Debe tener 10 digitos."
+          helperText="Debe tener 10 dígitos."
           icon={IdCard}
           keyboardType="number-pad"
-          label="Cedula ecuatoriana"
+          label="Cédula ecuatoriana"
           maxLength={10}
           onChangeText={(value) => updateField("cedula", value)}
           placeholder="1710000009"
@@ -188,10 +199,10 @@ export function RegisterScreen() {
         />
         <FormField
           error={errors.phone}
-          helperText="Debe iniciar con 09 y tener 10 digitos."
+          helperText="Debe iniciar con 09 y tener 10 dígitos."
           icon={Phone}
           keyboardType="phone-pad"
-          label="Telefono"
+          label="Teléfono"
           maxLength={10}
           onChangeText={(value) => updateField("phone", value)}
           placeholder="0991234567"
@@ -208,10 +219,6 @@ export function RegisterScreen() {
           Crear cuenta
         </ActionButton>
       </Card>
-
-      <ActionButton onPress={() => router.back()} variant="secondary">
-        Volver
-      </ActionButton>
     </GradientScreen>
   );
 }
@@ -230,8 +237,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22
   },
+  navActions: {
+    flexDirection: "row",
+    gap: 10
+  },
+  navAction: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.075)",
+    borderColor: colors.glassBorder,
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    minHeight: 52,
+    paddingHorizontal: 12,
+    paddingVertical: 12
+  },
+  navActionText: {
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 17,
+    textAlign: "center"
+  },
   formCard: {
-    gap: 16
+    gap: 16,
+    padding: 18
   },
   strength: {
     gap: 12,

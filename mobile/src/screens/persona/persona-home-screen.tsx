@@ -8,6 +8,7 @@ import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { MemberCard } from "@/components/member-card";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
@@ -19,6 +20,7 @@ export function PersonaHomeScreen() {
   const { error, groups, loading, location, profile } = usePersonaData(user, updateUser);
   const mainGroup = groups[0];
   const sharing = Boolean(profile?.sharingLocation);
+  const realLocation = location?.simulated === false;
 
   return (
     <GradientScreen>
@@ -28,9 +30,20 @@ export function PersonaHomeScreen() {
         </Pill>
         <Text style={styles.title}>Hola, {profile?.fullName || "Persona Demo Quito"}</Text>
         <Text muted style={styles.subtitle}>
-          Controla tu ubicacion simulada y revisa tu grupo familiar.
+          Controla tu ubicacion compartida y revisa tu grupo familiar.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_persona_seen"
+        title="Que puedes hacer aqui?"
+        description="Este panel muestra tu estado personal, tus grupos y accesos rapidos de seguridad."
+        bullets={[
+          "Revisa si tu ubicacion esta compartida.",
+          "Accede a tus grupos y privacidad.",
+          "Entra al perfil para actualizar tus datos."
+        ]}
+      />
 
       {error ? (
         <Card soft style={styles.notice}>
@@ -50,7 +63,9 @@ export function PersonaHomeScreen() {
             <Text style={styles.statusTitle}>{sharing ? "Compartiendo" : "Pausado"}</Text>
             <Text muted style={styles.statusBody}>
               {sharing
-                ? "Tu ubicacion simulada esta disponible para tu grupo."
+                ? realLocation
+                  ? "Tu ubicacion GPS real esta disponible para tu grupo."
+                  : "Tu ubicacion de referencia esta disponible para tu grupo."
                 : "El uso compartido esta pausado en este momento."}
             </Text>
           </View>

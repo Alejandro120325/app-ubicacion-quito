@@ -12,11 +12,14 @@ import {
 import Button from "../../components/Button.jsx";
 import InputField from "../../components/InputField.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import api, { getApiErrorMessage } from "../../api/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 
 const ALERT_TYPES = [
   "gps_disabled",
+  "gps_denied",
+  "gps_error",
   "disconnection",
   "emergency",
   "location_paused",
@@ -96,7 +99,7 @@ const matchesAlertFilter = (event, filter) => {
   if (filter === "unread") return !event.read;
   if (filter === "high") return event.priority === "high";
   if (filter === "gps") {
-    return ["gps_disabled", "disconnection", "device_offline", "location_paused"].includes(event.type);
+    return ["gps_disabled", "gps_denied", "gps_error", "disconnection", "device_offline", "location_paused"].includes(event.type);
   }
   return true;
 };
@@ -249,6 +252,29 @@ const ActivityCenter = ({ mode = "activity" }) => {
           {message}
         </div>
       ) : null}
+
+      <SectionHelp
+        storageKey={isAlerts ? "geokipu_guide_alerts_seen" : "geokipu_guide_activity_seen"}
+        title="Que puedes hacer aqui?"
+        description={
+          isAlerts
+            ? "Aqui aparecen eventos importantes que requieren atencion rapida."
+            : "La bitacora guarda el historial completo de acciones y eventos."
+        }
+        bullets={
+          isAlerts
+            ? [
+                "Revisa alertas de GPS, desconexion o ubicacion pausada.",
+                "Usa Llamar o Contactar si necesitas comunicarte.",
+                "Marca como leido lo que ya revisaste."
+              ]
+            : [
+                "Revisa inicios de sesion, cambios de perfil y eventos de grupos.",
+                "Consulta eventos de ubicacion y seguridad.",
+                "Usa filtros para encontrar informacion mas rapido."
+              ]
+        }
+      />
 
       <form className="glass-card grid gap-4 p-5 lg:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={createEvent}>
         <InputField

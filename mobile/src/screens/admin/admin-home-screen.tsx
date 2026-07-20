@@ -8,6 +8,7 @@ import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { PersonCard } from "@/components/person-card";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { StatCard } from "@/components/stat-card";
 import { Text } from "@/components/text";
@@ -52,9 +53,20 @@ export function AdminHomeScreen() {
         </Pill>
         <Text style={styles.title}>Hola, {user?.fullName || "Administrador Quito"}</Text>
         <Text muted style={styles.subtitle}>
-          Supervisa personas, grupos y alertas simuladas de ubicacion en Quito.
+          Supervisa personas, grupos, mapa y alertas de ubicacion en Quito.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_admin_seen"
+        title="Que puedes hacer aqui?"
+        description="Este panel permite supervisar usuarios, grupos, ubicaciones y alertas de seguridad."
+        bullets={[
+          "Revisa cuantas personas y grupos estan registrados.",
+          "Entra a Personas o Grupos para administrar datos.",
+          "Usa Alertas y Bitacora para revisar eventos importantes."
+        ]}
+      />
 
       {error ? (
         <Card soft style={styles.notice}>
@@ -68,7 +80,7 @@ export function AdminHomeScreen() {
         <StatCard detail="Compartiendo ahora" icon={UserCheck} label="Personas activas" tone="green" value={loading ? "..." : stats.active} />
         <StatCard detail="Sin compartir" icon={UserX} label="Personas inactivas" tone="slate" value={loading ? "..." : stats.inactive} />
         <StatCard detail="Circulos visibles" icon={UsersRound} label="Grupos creados" value={loading ? "..." : stats.groups} />
-        <StatCard detail="Eventos por revisar" icon={Activity} label="Alertas simuladas" tone="amber" value={loading ? "..." : stats.alerts} />
+        <StatCard detail="Eventos por revisar" icon={Activity} label="Alertas pendientes" tone="amber" value={loading ? "..." : stats.alerts} />
       </View>
 
       {loading ? <LoadingView message="Cargando panel admin..." /> : null}
@@ -86,9 +98,9 @@ export function AdminHomeScreen() {
       </Card>
 
       <Card style={styles.section}>
-        <Text style={styles.sectionTitle}>Mapa simulado de Quito</Text>
+        <Text style={styles.sectionTitle}>Mapa de ubicacion</Text>
         <Text muted style={styles.sectionText}>
-          Marcadores visuales basados en ubicaciones del backend o datos demo.
+          Marcadores de referencia basados en la ultima ubicacion compartida.
         </Text>
         <SimulatedMap
           height={340}

@@ -7,6 +7,7 @@ import { Card } from "@/components/card";
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
@@ -38,6 +39,8 @@ type ActivityResponse = {
 
 const ALERT_TYPES = [
   "gps_disabled",
+  "gps_denied",
+  "gps_error",
   "disconnection",
   "emergency",
   "location_paused",
@@ -71,7 +74,7 @@ const matchesAlertFilter = (event: ActivityEvent, filter: string) => {
   if (filter === "unread") return !event.read;
   if (filter === "high") return event.priority === "high";
   if (filter === "gps") {
-    return ["gps_disabled", "disconnection", "device_offline", "location_paused"].includes(event.type);
+    return ["gps_disabled", "gps_denied", "gps_error", "disconnection", "device_offline", "location_paused"].includes(event.type);
   }
   return true;
 };
@@ -190,10 +193,33 @@ export function AlertsScreen({ mode = "alerts" }: { mode?: ScreenMode }) {
         <Text style={styles.title}>{isAlerts ? "Centro de alertas" : "Historial cronologico"}</Text>
         <Text muted style={styles.subtitle}>
           {isAlerts
-            ? "Solo eventos warning/high: GPS, desconexion, SOS o ubicacion pausada."
+            ? "Solo eventos importantes: GPS, desconexion, SOS o ubicacion pausada."
             : "Todos los eventos de login, perfil, ubicacion, grupos e integrantes."}
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey={isAlerts ? "geokipu_guide_alerts_seen" : "geokipu_guide_activity_seen"}
+        title="Que puedes hacer aqui?"
+        description={
+          isAlerts
+            ? "Aqui aparecen eventos importantes que requieren atencion rapida."
+            : "La bitacora guarda el historial completo de acciones y eventos."
+        }
+        bullets={
+          isAlerts
+            ? [
+                "Revisa alertas de GPS, desconexion o ubicacion pausada.",
+                "Usa Llamar o Contactar si necesitas comunicarte.",
+                "Marca como leido lo que ya revisaste."
+              ]
+            : [
+                "Revisa inicios de sesion, cambios de perfil y eventos de grupos.",
+                "Consulta eventos de ubicacion y seguridad.",
+                "Usa filtros para encontrar informacion mas rapido."
+              ]
+        }
+      />
 
       <View style={styles.stats}>
         <Card style={styles.statCard}>

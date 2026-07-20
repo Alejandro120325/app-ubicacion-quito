@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, Navigation, UsersRound } from "lucide-react";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import SimulatedMap from "../../components/SimulatedMap.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useAdminWorkspace } from "../../hooks/useAdminWorkspace.js";
@@ -69,6 +70,17 @@ const AdminMap = () => {
         </div>
       ) : null}
       {pollingError ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{pollingError}</div> : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_map_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes visualizar la ubicacion compartida o el modo demostracion de GeoKipu."
+        bullets={[
+          "Revisa la ultima ubicacion disponible.",
+          "Identifica sectores importantes en el mapa.",
+          "Activa o pausa el seguimiento con consentimiento."
+        ]}
+      />
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="glass-card min-w-0 p-4 sm:p-5">

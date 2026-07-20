@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LockKeyhole, Save, ShieldCheck, UserRound } from "lucide-react";
 import Button from "../../components/Button.jsx";
 import InputField from "../../components/InputField.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import api, { getApiErrorMessage } from "../../api/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { saveAutoLockSeconds, savePin } from "../../utils/security.js";
@@ -107,6 +108,17 @@ const ProfileSettings = () => {
           {error}
         </div>
       ) : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_profile_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes administrar tus datos personales y opciones de seguridad."
+        bullets={[
+          "Actualiza nombre, telefono e idioma.",
+          "Configura PIN local o privacidad si esta disponible.",
+          "Revisa tu estado de ubicacion compartida."
+        ]}
+      />
 
       <form className="glass-card grid gap-5 p-6" onSubmit={saveProfile}>
         <div className="grid gap-4 md:grid-cols-2">

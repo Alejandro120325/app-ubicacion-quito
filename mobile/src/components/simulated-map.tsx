@@ -85,7 +85,7 @@ export function SimulatedMap({
 
       <View style={styles.badge}>
         <Text selectable={false} style={styles.badgeText}>
-          Mapa simulado Quito
+          Mapa de ubicacion
         </Text>
       </View>
       <Navigation color={colors.primary} size={22} style={styles.navIcon} />
@@ -120,7 +120,7 @@ export function SimulatedMap({
         <View style={styles.statusTop}>
           <View style={styles.statusTitle}>
             <Radio color={colors.secondary} size={16} />
-            <Text style={styles.statusHeading}>Ubicacion simulada</Text>
+            <Text style={styles.statusHeading}>Ubicacion compartida</Text>
           </View>
           <View style={styles.time}>
             <Clock3 color={colors.muted} size={13} />

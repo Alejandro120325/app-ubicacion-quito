@@ -1,5 +1,4 @@
-import { AlertTriangle, MapPin, Power } from "lucide-react-native";
-import { useState } from "react";
+import { AlertTriangle, Crosshair, LocateFixed, MapPin, Power, Radio, RefreshCw } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
 
 import { ActionButton } from "@/components/action-button";
@@ -8,62 +7,89 @@ import { DetailRow } from "@/components/detail-row";
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
-import { api } from "@/services/api";
 import { usePersonaData } from "@/hooks/use-dashboard-data";
-import type { User } from "@/types";
+import { useLiveLocation } from "@/hooks/use-live-location";
 
-type ShareResponse = {
-  sharing: boolean;
-  user: User;
+const formatCoordinate = (value?: number | null) =>
+  Number.isFinite(value) ? Number(value).toFixed(6) : "-";
+
+const formatAccuracy = (value?: number | null) =>
+  Number.isFinite(value) ? `${Math.round(Number(value))} m` : "-";
+
+const formatUpdate = (value?: string | Date | null) => {
+  if (!value) return "Sin actualizacion";
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
+};
+
+const statusLabel = {
+  active: "Ubicacion real activa",
+  demo: "Modo demostracion",
+  denied: "Permiso denegado",
+  paused: "Ubicacion pausada",
+  "permission-pending": "Solicitando permiso",
+  "sending-error": "Error al enviar"
 };
 
 export function PersonaLocationScreen() {
   const { updateUser, user } = useAuth();
-  const { error, loading, location, profile, reload, setProfile } = usePersonaData(user, updateUser);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
+  const { error, groups, loading, location, profile, reload, setProfile } = usePersonaData(user, updateUser);
   const sharing = Boolean(profile?.sharingLocation);
-
-  const toggleSharing = async () => {
-    try {
-      setSaving(true);
-      setMessage("");
-      const data = await api.patch<ShareResponse>("/location/share", { sharing: !sharing });
-      setProfile(data.user);
-      await updateUser(data.user);
-      setMessage(data.sharing ? "Seguimiento activo." : "Uso compartido pausado.");
-      await reload();
-    } catch (requestError) {
-      setMessage(
-        requestError instanceof Error
-          ? requestError.message
-          : "No fue posible actualizar la ubicacion."
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+  const {
+    error: gpsError,
+    isActive,
+    lastSentAt,
+    liveLocation,
+    message,
+    pauseLiveLocation,
+    refreshNow,
+    sending,
+    startLiveLocation,
+    status
+  } = useLiveLocation({
+    groupId: groups[0]?.id || null,
+    reload,
+    setProfile,
+    updateUser,
+    user
+  });
+  const displayLocation = liveLocation || location;
+  const isRealLocation = displayLocation?.simulated === false || status === "active";
+  const statusText = statusLabel[status];
+  const screenError = gpsError || error;
 
   return (
     <GradientScreen>
       <View style={styles.header}>
-        <Pill icon={MapPin} tone={sharing ? "green" : "amber"}>
+        <Pill icon={isRealLocation ? LocateFixed : MapPin} tone={isRealLocation ? "green" : "amber"}>
           Mi ubicacion
         </Pill>
-        <Text style={styles.title}>{sharing ? "Seguimiento activo" : "Seguimiento pausado"}</Text>
+        <Text style={styles.title}>{statusText}</Text>
         <Text muted style={styles.subtitle}>
-          Gestiona si tu grupo puede ver tu ubicacion simulada.
+          Activa GPS real solo cuando quieras compartir tu ubicacion con consentimiento.
         </Text>
       </View>
 
-      {error ? (
+      <SectionHelp
+        storageKey="geokipu_guide_map_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes activar ubicacion real, pausar el seguimiento o mantener el modo demostracion."
+        bullets={[
+          "GeoKipu pedira permiso de ubicacion al activar GPS real.",
+          "La app envia coordenadas mientras esta abierta y en primer plano.",
+          "Puedes pausar el seguimiento en cualquier momento."
+        ]}
+      />
+
+      {screenError ? (
         <Card soft style={styles.notice}>
           <AlertTriangle color="#fde68a" size={18} />
-          <Text style={styles.noticeText}>{error}</Text>
+          <Text style={styles.noticeText}>{screenError}</Text>
         </Card>
       ) : null}
 
@@ -71,29 +97,60 @@ export function PersonaLocationScreen() {
 
       <SimulatedMap
         height={430}
-        lastUpdate={location?.lastUpdate}
-        selectedLabel={location?.sector}
+        lastUpdate={formatUpdate(lastSentAt || displayLocation?.lastUpdate)}
+        selectedLabel={displayLocation?.sector}
       />
 
       <Card style={styles.section}>
+        <View style={styles.statusBanner}>
+          <Radio color={isRealLocation ? colors.secondary : colors.alert} size={16} />
+          <View style={styles.statusBody}>
+            <Text style={styles.statusTitle}>{isRealLocation ? "GPS real" : "Modo demostracion"}</Text>
+            <Text muted style={styles.statusCaption}>
+              {message || (sharing ? "Compartiendo ubicacion." : "Ubicacion pausada.")}
+            </Text>
+          </View>
+        </View>
         <DetailRow
           icon={MapPin}
           label="Ultima ubicacion"
-          value={`${location?.sector || "La Carolina"} - Quito`}
+          value={`${displayLocation?.sector || "La Carolina"} - Quito`}
+        />
+        <DetailRow
+          icon={LocateFixed}
+          label="Coordenadas"
+          value={`${formatCoordinate(displayLocation?.latitude)}, ${formatCoordinate(displayLocation?.longitude)}`}
+        />
+        <DetailRow
+          icon={Crosshair}
+          label="Precision"
+          value={formatAccuracy(displayLocation?.accuracy)}
         />
         <DetailRow
           icon={Power}
           label="Estado"
-          value={sharing ? "Compartiendo" : "Pausado"}
+          value={isActive || sharing ? "Compartiendo" : "Pausado"}
         />
-        {message ? <Text style={styles.message}>{message}</Text> : null}
+        <DetailRow
+          icon={RefreshCw}
+          label="Ultima actualizacion"
+          value={formatUpdate(lastSentAt || displayLocation?.lastUpdate)}
+        />
         <ActionButton
-          icon={Power}
-          loading={saving}
-          onPress={toggleSharing}
-          variant={sharing ? "dark" : "success"}
+          icon={isActive || sharing ? Power : LocateFixed}
+          loading={sending && status === "permission-pending"}
+          onPress={isActive || sharing ? pauseLiveLocation : startLiveLocation}
+          variant={isActive || sharing ? "dark" : "success"}
         >
-          {sharing ? "Pausar ubicacion" : "Activar ubicacion"}
+          {isActive || sharing ? "Pausar ubicacion" : "Activar ubicacion real"}
+        </ActionButton>
+        <ActionButton
+          icon={RefreshCw}
+          loading={sending && status !== "permission-pending"}
+          onPress={refreshNow}
+          variant="secondary"
+        >
+          Actualizar ahora
         </ActionButton>
       </Card>
     </GradientScreen>
@@ -130,9 +187,27 @@ const styles = StyleSheet.create({
   section: {
     gap: 12
   },
-  message: {
-    color: "#bfdbfe",
-    fontSize: 13,
-    fontWeight: "800"
+  statusBanner: {
+    alignItems: "flex-start",
+    backgroundColor: "rgba(20, 184, 166, 0.11)",
+    borderColor: "rgba(45, 212, 191, 0.24)",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 9,
+    padding: 12
+  },
+  statusBody: {
+    flex: 1,
+    gap: 3
+  },
+  statusTitle: {
+    fontSize: 14,
+    fontWeight: "900",
+    lineHeight: 18
+  },
+  statusCaption: {
+    fontSize: 12,
+    lineHeight: 17
   }
 });

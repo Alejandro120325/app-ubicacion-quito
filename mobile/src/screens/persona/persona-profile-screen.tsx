@@ -8,6 +8,7 @@ import { FormField } from "@/components/form-field";
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
 import { Pill } from "@/components/pill";
+import { SectionHelp } from "@/components/section-help";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
@@ -94,6 +95,17 @@ export function PersonaProfileScreen() {
           Edita datos, privacidad y PIN local para proteger ubicaciones.
         </Text>
       </View>
+
+      <SectionHelp
+        storageKey="geokipu_guide_profile_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes administrar tus datos personales y opciones de seguridad."
+        bullets={[
+          "Actualiza nombre, telefono e idioma.",
+          "Configura PIN local o privacidad si esta disponible.",
+          "Revisa tu estado de ubicacion compartida."
+        ]}
+      />
 
       {loading ? <LoadingView message="Cargando perfil..." /> : null}
       {message ? <Text style={styles.success}>{message}</Text> : null}

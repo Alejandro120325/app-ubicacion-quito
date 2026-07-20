@@ -11,6 +11,7 @@ import GroupMapPanel from "../../components/GroupMapPanel.jsx";
 import GroupMemberCard from "../../components/GroupMemberCard.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
+import SectionHelp from "../../components/SectionHelp.jsx";
 import { useLanguage } from "../../context/LanguageContext.jsx";
 import { useGroupLocations } from "../../hooks/useGroupLocations.js";
 import { useAdminWorkspace } from "../../hooks/useAdminWorkspace.js";
@@ -135,6 +136,17 @@ const AdminGroups = () => {
         </div>
       ) : null}
       {pollingError ? <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{pollingError}</div> : null}
+
+      <SectionHelp
+        storageKey="geokipu_guide_groups_seen"
+        title="Que puedes hacer aqui?"
+        description="Aqui puedes organizar tus circulos de confianza y administrar integrantes."
+        bullets={[
+          "Crea, edita o elimina grupos.",
+          "Agrega o quita integrantes.",
+          "Revisa que personas pertenecen a cada grupo."
+        ]}
+      />
 
       <div className="grid items-start gap-6 xl:grid-cols-[0.78fr_1.22fr]">
         <section className="grid gap-4">

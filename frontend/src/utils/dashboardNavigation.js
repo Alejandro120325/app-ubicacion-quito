@@ -1,11 +1,10 @@
 import {
   BellRing,
-  Code2,
   Headphones,
   Home,
+  Info,
   LayoutDashboard,
   MapPin,
-  ServerCog,
   ShieldCheck,
   UsersRound,
   UserRound,
@@ -24,8 +23,7 @@ export const getDashboardLinks = (role, t) => {
       { to: "/admin/bitacora", label: "Bitacora", icon: ScrollText },
       { to: "/admin/perfil", label: "Perfil", icon: UserRound },
       { to: "/admin/soporte", label: "Soporte", icon: Headphones },
-      { to: "/admin/api", label: t("sidebar.api"), icon: Code2 },
-      { to: "/admin/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
+      { to: "/admin/acerca", label: "Acerca de nosotros", icon: Info }
     ];
   }
 
@@ -39,7 +37,6 @@ export const getDashboardLinks = (role, t) => {
     { to: "/persona/privacidad", label: t("sidebar.privacy"), icon: ShieldCheck },
     { to: "/persona/perfil", label: "Perfil", icon: UserRound },
     { to: "/persona/soporte", label: "Soporte", icon: Headphones },
-    { to: "/persona/api", label: t("sidebar.api"), icon: Code2 },
-    { to: "/persona/endpoints-locales", label: t("sidebar.localEndpoints"), icon: ServerCog }
+    { to: "/persona/acerca", label: "Acerca de nosotros", icon: Info }
   ];
 };

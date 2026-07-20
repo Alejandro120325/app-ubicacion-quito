@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import api from "../api/api.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
@@ -20,25 +20,45 @@ export const useAdminWorkspace = () => {
   const { t } = useLanguage();
   const [people, setPeople] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [groupMessage, setGroupMessage] = useState("");
+  const firstLoadRef = useRef(true);
 
-  const loadWorkspace = async () => {
+  const loadWorkspace = useCallback(async () => {
     try {
-      setLoading(true);
-      const [usersResponse, groupsResponse] = await Promise.all([
+      if (firstLoadRef.current) setLoading(true);
+      const [usersResponse, groupsResponse, locationsResponse] = await Promise.all([
         api.get("/users"),
-        api.get("/groups")
+        api.get("/groups"),
+        api.get("/locations")
       ]);
-      const nextPeople = usersResponse.data.users || [];
+      const latestLocations = locationsResponse.data.locations || [];
+      const locationsByUser = new Map();
+      latestLocations.forEach((location) => {
+        const userId = Number(location.userId);
+        if (!locationsByUser.has(userId)) locationsByUser.set(userId, location);
+      });
+      const nextPeople = (usersResponse.data.users || []).map((person) => {
+        const liveLocation = locationsByUser.get(Number(person.id));
+        if (!liveLocation) return person;
+
+        return {
+          ...person,
+          active: liveLocation.sharing ? true : person.active,
+          lastLocation: liveLocation,
+          sharingLocation: liveLocation.sharing ?? person.sharingLocation
+        };
+      });
       const nextGroups = groupsResponse.data.groups || [];
 
       setPeople(nextPeople);
       setGroups(nextGroups);
+      setLocations(latestLocations);
       setSelectedPerson((current) =>
         current ? nextPeople.find((person) => person.id === current.id) || nextPeople[0] || null : nextPeople[0] || null
       );
@@ -52,12 +72,15 @@ export const useAdminWorkspace = () => {
       setError(requestError.response?.data?.message || t("admin.loadError"));
     } finally {
       setLoading(false);
+      firstLoadRef.current = false;
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     loadWorkspace();
-  }, [t]);
+    const timer = window.setInterval(loadWorkspace, 5000);
+    return () => window.clearInterval(timer);
+  }, [loadWorkspace]);
 
   const stats = useMemo(() => {
     const personas = people.filter((person) => person.role === "persona");
@@ -80,7 +103,12 @@ export const useAdminWorkspace = () => {
         .map((person, index) => ({
           label: person.lastLocation?.sector || person.fullName,
           fullName: person.fullName,
+          latitude: person.lastLocation?.latitude,
+          longitude: person.lastLocation?.longitude,
           locationStatus: getPersonStatus(person),
+          sharing: person.sharingLocation,
+          simulated: person.lastLocation?.simulated,
+          updatedAt: person.lastLocation?.updatedAt || person.lastLocation?.lastUpdate,
           ...pointPositions[index % pointPositions.length]
         })),
     [people]
@@ -224,6 +252,7 @@ export const useAdminWorkspace = () => {
     handleUpdateMember,
     loading,
     loadWorkspace,
+    locations,
     mapPoints,
     people,
     selectedGroup,

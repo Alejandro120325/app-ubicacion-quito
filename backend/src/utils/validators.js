@@ -50,6 +50,10 @@ export const validateLocationPayload = (payload = {}) => {
   const speed = payload.speed == null ? null : Number(payload.speed);
   const groupValue = payload.groupId ?? payload.grupoId;
   const groupId = groupValue == null ? null : Number(groupValue);
+  const simulated =
+    typeof payload.simulated === "boolean" ? payload.simulated : payload.simulado;
+  const timestampValue = payload.timestamp ?? payload.updatedAt ?? payload.lastUpdate;
+  const timestamp = timestampValue ? new Date(timestampValue) : null;
 
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
     errors.latitude = "La latitud debe estar entre -90 y 90.";
@@ -63,6 +67,9 @@ export const validateLocationPayload = (payload = {}) => {
   if (groupId != null && (!Number.isInteger(groupId) || groupId < 1)) {
     errors.groupId = "El grupo no es valido.";
   }
+  if (timestampValue && Number.isNaN(timestamp.getTime())) {
+    errors.timestamp = "La fecha de actualizacion no es valida.";
+  }
 
   return {
     isValid: Object.keys(errors).length === 0,
@@ -75,7 +82,9 @@ export const validateLocationPayload = (payload = {}) => {
       speed: Number.isFinite(speed) ? speed : null,
       groupId,
       address: String(payload.address ?? payload.direccion ?? "").trim(),
-      sector: String(payload.sector || "Ubicacion GPS").trim()
+      sector: String(payload.sector || "Ubicacion GPS").trim(),
+      simulated: typeof simulated === "boolean" ? simulated : false,
+      timestamp: timestamp ? timestamp.toISOString() : null
     }
   };
 };

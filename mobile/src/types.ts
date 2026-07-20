@@ -22,6 +22,10 @@ export type SimulatedLocation = {
   sector: string;
   latitude: number;
   longitude: number;
+  accuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
+  address?: string;
   lastUpdate: string;
   sharing?: boolean;
   simulated?: boolean;

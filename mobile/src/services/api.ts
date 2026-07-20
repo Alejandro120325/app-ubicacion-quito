@@ -65,7 +65,7 @@ async function request<T>(path: string, options: ApiOptions = {}): Promise<T> {
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(
-      `No se pudo conectar con el backend (${API_BASE_URL}). Verifica que este levantado o configura EXPO_PUBLIC_API_URL.`,
+      "No se pudo conectar con el servicio de GeoKipu. Verifica tu conexion e intenta nuevamente.",
       0
     );
   }

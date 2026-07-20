@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import { BellRing, Code2, Headphones, LayoutDashboard, LogOut, MapPinned, ScrollText, UserRound, UsersRound } from "lucide-react-native";
+import { BellRing, Headphones, LayoutDashboard, LogOut, MapPinned, ScrollText, UserRound, UsersRound } from "lucide-react-native";
 
 import { GradientScreen } from "@/components/gradient-screen";
 import { LoadingView } from "@/components/loading-view";
@@ -48,7 +48,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="personas"
         options={{
-          title: "Personas",
+          title: "Pers.",
           tabBarIcon: ({ color, size }) => <UsersRound color={color} size={size} />
         }}
       />
@@ -76,15 +76,14 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="bitacora"
         options={{
-          title: "Bitacora",
+          title: "Bita.",
           tabBarIcon: ({ color, size }) => <ScrollText color={color} size={size} />
         }}
       />
       <Tabs.Screen
         name="api"
         options={{
-          title: "API",
-          tabBarIcon: ({ color, size }) => <Code2 color={color} size={size} />
+          href: null
         }}
       />
       <Tabs.Screen
@@ -97,7 +96,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="soporte"
         options={{
-          title: "Soporte",
+          title: "Sop.",
           tabBarIcon: ({ color, size }) => <Headphones color={color} size={size} />
         }}
       />

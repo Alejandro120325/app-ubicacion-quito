@@ -47,7 +47,7 @@ export function FormField({
         />
         {password ? (
           <Pressable
-            accessibilityLabel={visible ? "Ocultar contrasena" : "Mostrar contrasena"}
+            accessibilityLabel={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
             accessibilityRole="button"
             onPress={() => setVisible((current) => !current)}
             style={styles.eyeButton}

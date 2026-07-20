@@ -18,6 +18,8 @@ const canReadEvent = (user, event) =>
 
 export const ALERT_TYPES = [
   "gps_disabled",
+  "gps_denied",
+  "gps_error",
   "disconnection",
   "emergency",
   "location_paused",

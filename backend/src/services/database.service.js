@@ -287,13 +287,14 @@ export const databaseService = {
   async saveLocation(data) {
     const userId = Number(data.userId);
     const groupId = data.groupId == null ? null : Number(data.groupId);
+    const lastUpdate = data.timestamp ? new Date(data.timestamp) : new Date();
     const existing = await Location.findOne({ userId, groupId });
     const payload = {
       ...data,
       userId,
       groupId,
       city: data.city || "Quito",
-      lastUpdate: new Date(),
+      lastUpdate,
       simulated: data.simulated ?? false
     };
     const saved = existing
@@ -304,7 +305,21 @@ export const databaseService = {
         )
       : await Location.create({ id: await nextMongoId(Location), ...payload });
 
-    await this.setUserSharing(userId, Boolean(data.sharing));
+    const updatedUser = await this.setUserSharing(userId, Boolean(data.sharing));
+
+    if (updatedUser) {
+      await GroupMember.updateMany(
+        { $or: [{ userId }, { email: updatedUser.email }] },
+        {
+          $set: {
+            locationStatus: data.sharing ? "sharing" : "paused",
+            lastLocation: payload.sector || payload.address || "Ubicacion GPS",
+            lastUpdate: lastUpdate.toISOString()
+          }
+        }
+      );
+    }
+
     return normalizeMongoLocation(saved);
   },
 
@@ -335,8 +350,10 @@ export const databaseService = {
 
     if (!user) return null;
 
+    const locationUpdate = sharing ? { sharing } : { sharing, lastUpdate: now };
+
     await Promise.all([
-      Location.updateMany({ userId: id }, { $set: { sharing, lastUpdate: now } }),
+      Location.updateMany({ userId: id }, { $set: locationUpdate }),
       GroupMember.updateMany(
         { $or: [{ userId: id }, { email: user.email }] },
         {

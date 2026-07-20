@@ -20,6 +20,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "GeoKipu usa tu ubicacion solo cuando activas el seguimiento y la app esta abierta."
+        }
+      ],
       "expo-secure-store",
       [
         "expo-build-properties",
