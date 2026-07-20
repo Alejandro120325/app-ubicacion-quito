@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { colors, radii } from "@/constants/theme";
 import { Text } from "@/components/text";
 
-type Variant = "primary" | "secondary" | "success" | "dark" | "warning";
+type Variant = "primary" | "secondary" | "success" | "dark" | "warning" | "danger";
 
 type ActionButtonProps = {
   children: ReactNode;
@@ -41,6 +41,11 @@ const variantStyles: Record<Variant, { backgroundColor: string; borderColor: str
     backgroundColor: "rgba(245, 158, 11, 0.92)",
     borderColor: "rgba(253, 230, 138, 0.36)",
     color: colors.background
+  },
+  danger: {
+    backgroundColor: "rgba(244, 63, 94, 0.9)",
+    borderColor: "rgba(251, 113, 133, 0.36)",
+    color: colors.white
   }
 };
 

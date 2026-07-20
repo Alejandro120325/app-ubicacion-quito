@@ -88,3 +88,17 @@ export const api = {
       method: "DELETE"
     })
 };
+
+type ActionResponse = {
+  ok: boolean;
+  message: string;
+};
+
+export const deleteUser = (userId: number) =>
+  api.delete<ActionResponse>(`/users/${userId}`);
+
+export const removeGroupMember = <T>(groupId: number, memberId: number) =>
+  api.delete<T>(`/groups/${groupId}/members/${memberId}`);
+
+export const leaveGroup = <T>(groupId: number) =>
+  api.delete<T>(`/groups/${groupId}/members/me`);

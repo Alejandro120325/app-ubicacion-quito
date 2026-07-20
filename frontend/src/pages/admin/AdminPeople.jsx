@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Clock3, Mail, MapPin, Phone, Search, UsersRound } from "lucide-react";
+import { Clock3, Mail, MapPin, Phone, Search, Trash2, UsersRound } from "lucide-react";
+import Button from "../../components/Button.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import HeaderActions from "../../components/HeaderActions.jsx";
 import InputField from "../../components/InputField.jsx";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
@@ -22,9 +24,19 @@ const getLocationLabel = (location, fallback) =>
 
 const AdminPeople = () => {
   const { t } = useLanguage();
-  const { error, loading, people, selectedPerson, setSelectedPerson } = useAdminWorkspace();
+  const {
+    error,
+    handleDeleteUser,
+    loading,
+    people,
+    peopleMessage,
+    selectedPerson,
+    setSelectedPerson
+  } = useAdminWorkspace();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [personToDelete, setPersonToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filteredPeople = useMemo(
     () =>
@@ -40,6 +52,14 @@ const AdminPeople = () => {
   if (loading) {
     return <LoadingScreen message={t("admin.loading")} />;
   }
+
+  const confirmDeletePerson = async () => {
+    if (!personToDelete) return;
+    setDeleting(true);
+    const success = await handleDeleteUser(personToDelete.id);
+    setDeleting(false);
+    if (success) setPersonToDelete(null);
+  };
 
   return (
     <motion.section
@@ -67,6 +87,11 @@ const AdminPeople = () => {
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {error}
+        </div>
+      ) : null}
+      {peopleMessage ? (
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-text)]">
+          {peopleMessage}
         </div>
       ) : null}
 
@@ -116,6 +141,7 @@ const AdminPeople = () => {
             <UserCard
               key={person.id}
               user={person}
+              onDelete={setPersonToDelete}
               onView={() => setSelectedPerson(person)}
             />
           ))}
@@ -174,12 +200,35 @@ const AdminPeople = () => {
                   </div>
                 ))}
               </dl>
+
+              <Button
+                className="mt-5 w-full"
+                icon={Trash2}
+                variant="danger"
+                onClick={() => setPersonToDelete(selectedPerson)}
+              >
+                Eliminar persona
+              </Button>
             </>
           ) : (
             <p className="text-sm text-[var(--color-muted)]">{t("admin.noData")}</p>
           )}
         </aside>
       </div>
+
+      <ConfirmDialog
+        confirmLabel="Si, eliminar"
+        description={
+          personToDelete
+            ? `Se eliminara a "${personToDelete.fullName}" de personas registradas, membresias y ubicaciones asociadas.`
+            : ""
+        }
+        loading={deleting}
+        open={Boolean(personToDelete)}
+        title="Eliminar persona registrada"
+        onCancel={() => (deleting ? undefined : setPersonToDelete(null))}
+        onConfirm={confirmDeletePerson}
+      />
     </motion.section>
   );
 };

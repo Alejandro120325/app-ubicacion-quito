@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   deleteGroupMember,
   getGroupMembers,
+  leaveGroup,
   patchGroupMember,
   patchGroupMemberLocationStatus,
   postGroupMember
@@ -24,6 +25,7 @@ router.patch("/:groupId", authMiddleware, patchGroup);
 router.delete("/:groupId", authMiddleware, deleteGroup);
 router.get("/:groupId/members", authMiddleware, getGroupMembers);
 router.post("/:groupId/members", authMiddleware, postGroupMember);
+router.delete("/:groupId/members/me", authMiddleware, leaveGroup);
 router.patch("/:groupId/members/:memberId", authMiddleware, patchGroupMember);
 router.delete("/:groupId/members/:memberId", authMiddleware, deleteGroupMember);
 router.patch(

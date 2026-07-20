@@ -1,6 +1,7 @@
 export {
   deleteGroupMember,
   getGroupMembers,
+  leaveGroup,
   patchGroupMember,
   patchGroupMemberLocationStatus,
   postGroupMember

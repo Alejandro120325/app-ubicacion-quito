@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { leaveGroup, removeGroupMember } from "../api/groupMembersApi.js";
 import api from "../api/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -119,12 +120,48 @@ export const usePersonaWorkspace = () => {
     }
   };
 
+  const handleDeleteMember = async (groupId, memberId) => {
+    try {
+      setGroupMessage("");
+      const data = await removeGroupMember(groupId, memberId);
+      const nextGroups = groups.map((group) =>
+        group.id === groupId ? data.group : group
+      );
+      setGroups(nextGroups);
+      setSelectedGroup(data.group);
+      setSelectedMember(data.group?.members?.[0] || null);
+      setGroupMessage(data.message || "Integrante eliminado correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo eliminar el integrante.");
+      return false;
+    }
+  };
+
+  const handleLeaveGroup = async (groupId) => {
+    try {
+      setGroupMessage("");
+      const data = await leaveGroup(groupId);
+      const nextGroups = groups.filter((group) => group.id !== groupId);
+      setGroups(nextGroups);
+      setSelectedGroup(nextGroups[0] || null);
+      setSelectedMember(nextGroups[0]?.members?.[0] || null);
+      setGroupMessage(data.message || "Saliste del grupo correctamente.");
+      return true;
+    } catch (requestError) {
+      setGroupMessage(requestError.response?.data?.message || "No se pudo salir del grupo.");
+      return false;
+    }
+  };
+
   return {
     error,
     groupMessage,
     groups,
     handleAddMember,
     handleCreateGroup,
+    handleDeleteMember,
+    handleLeaveGroup,
     handleToggleSharing,
     loading,
     location,

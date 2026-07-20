@@ -14,7 +14,7 @@ import { SimulatedMap } from "@/components/simulated-map";
 import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAdminData } from "@/hooks/use-dashboard-data";
-import { api } from "@/services/api";
+import { api, removeGroupMember } from "@/services/api";
 import type { Group, GroupMember, LocationStatus } from "@/types";
 
 type GroupResponse = {
@@ -108,6 +108,7 @@ export function AdminGroupsScreen() {
             setSelectedGroupId(nextGroups[0]?.id || null);
             setSelectedMember(nextGroups[0]?.members[0] || null);
             setMessage("Grupo eliminado correctamente.");
+            await reload();
           } catch (requestError) {
             setMessage(requestError instanceof Error ? requestError.message : "No se pudo eliminar el grupo.");
           }
@@ -168,10 +169,11 @@ export function AdminGroupsScreen() {
         text: "Quitar",
         onPress: async () => {
           try {
-            const data = await api.delete<GroupResponse>(`/groups/${currentGroup.id}/members/${member.id}`);
+            const data = await removeGroupMember<GroupResponse>(currentGroup.id, member.id);
             updateGroupState(data.group);
             setSelectedMember(data.group.members[0] || null);
-            setMessage("Integrante quitado correctamente.");
+            setMessage("Integrante eliminado correctamente.");
+            await reload();
           } catch (requestError) {
             setMessage(requestError instanceof Error ? requestError.message : "No se pudo quitar el integrante.");
           }

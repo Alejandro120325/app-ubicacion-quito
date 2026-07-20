@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Eye, Mail, MapPin, Phone } from "lucide-react";
+import { Eye, Mail, MapPin, Phone, Trash2 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import Button from "./Button.jsx";
 
-const UserCard = ({ onView, user }) => {
+const UserCard = ({ onDelete, onView, user }) => {
   const { t } = useLanguage();
   const location = user.lastLocation;
   const isGpsReal = location?.simulated === false;
@@ -55,9 +55,16 @@ const UserCard = ({ onView, user }) => {
         </p>
       </div>
 
-      <Button className="mt-auto w-full" icon={Eye} size="sm" variant="secondary" onClick={onView}>
-        {t("common.details")}
-      </Button>
+      <div className={`mt-auto grid gap-2 ${onDelete ? "sm:grid-cols-2" : ""}`}>
+        <Button className="w-full" icon={Eye} size="sm" variant="secondary" onClick={onView}>
+          {t("common.details")}
+        </Button>
+        {onDelete ? (
+          <Button className="w-full" icon={Trash2} size="sm" variant="danger" onClick={() => onDelete(user)}>
+            Eliminar
+          </Button>
+        ) : null}
+      </div>
     </motion.article>
   );
 };

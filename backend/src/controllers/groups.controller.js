@@ -21,6 +21,22 @@ const canAccessGroup = (user, group) =>
 const canManageGroup = (user, group) =>
   user.role === "admin" || group.createdBy === user.id;
 
+const findGroupMember = (group, memberId) => {
+  const numericId = Number(memberId);
+  const normalizedValue = String(memberId || "").toLowerCase();
+  return group.members.find(
+    (member) =>
+      member.id === numericId ||
+      member.userId === numericId ||
+      String(member.email || "").toLowerCase() === normalizedValue
+  );
+};
+
+const findOwnMembership = (group, user) =>
+  group.members.find(
+    (member) => member.userId === user.id || member.email === user.email
+  );
+
 const recordActivity = async (req, payload) => {
   try {
     await activityService.create(
@@ -274,7 +290,7 @@ export const deleteGroupMember = async (req, res, next) => {
   try {
     const group = await loadAccessibleGroup(req, res, true);
     if (!group) return undefined;
-    const target = group.members.find((member) => member.id === Number(req.params.memberId));
+    const target = findGroupMember(group, req.params.memberId);
     if (!target) {
       return res.status(404).json({ ok: false, message: "Integrante no encontrado." });
     }
@@ -289,13 +305,50 @@ export const deleteGroupMember = async (req, res, next) => {
     await recordActivity(req, {
       groupId: group.id,
       groupName: group.name,
-      type: "member_removed",
-      priority: "warning",
+      type: "group_member_removed",
+      priority: "info",
       message: `${req.user.fullName} quito a ${target.fullName} del grupo ${group.name}.`
     });
     return res.json({
       ok: true,
       message: "Integrante eliminado correctamente",
+      member,
+      group: updatedGroup
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const leaveGroup = async (req, res, next) => {
+  try {
+    const group = await loadAccessibleGroup(req, res);
+    if (!group) return undefined;
+    const target = findOwnMembership(group, req.user);
+
+    if (!target) {
+      return res.status(404).json({ ok: false, message: "No perteneces a este grupo." });
+    }
+    if (group.createdBy === req.user.id) {
+      return res.status(409).json({
+        ok: false,
+        message: "La persona creadora no puede salir de su propio grupo."
+      });
+    }
+
+    const member = await groupMembersService.remove(group.id, target.id);
+    const updatedGroup = await groupsService.getById(group.id);
+    await recordActivity(req, {
+      groupId: group.id,
+      groupName: group.name,
+      type: "group_left",
+      priority: "info",
+      message: `${req.user.fullName} salio del grupo ${group.name}.`
+    });
+
+    return res.json({
+      ok: true,
+      message: "Saliste del grupo correctamente",
       member,
       group: updatedGroup
     });

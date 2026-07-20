@@ -144,9 +144,13 @@ export const databaseService = {
 
     const ownedGroups = await Group.find({ createdBy: id }).select({ id: 1 }).lean();
     const ownedIds = ownedGroups.map((group) => group.id);
+    const memberCleanupFilters = [{ userId: id }, { groupId: { $in: ownedIds } }];
+    if (deleted.email) {
+      memberCleanupFilters.push({ email: String(deleted.email).toLowerCase() });
+    }
     await Promise.all([
       Group.deleteMany({ createdBy: id }),
-      GroupMember.deleteMany({ $or: [{ userId: id }, { groupId: { $in: ownedIds } }] }),
+      GroupMember.deleteMany({ $or: memberCleanupFilters }),
       Location.deleteMany({ $or: [{ userId: id }, { groupId: { $in: ownedIds } }] })
     ]);
 

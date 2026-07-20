@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { removeGroupMember } from "../api/groupMembersApi.js";
+import { deleteUser } from "../api/peopleApi.js";
 import api from "../api/api.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
@@ -27,6 +29,7 @@ export const useAdminWorkspace = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [groupMessage, setGroupMessage] = useState("");
+  const [peopleMessage, setPeopleMessage] = useState("");
   const firstLoadRef = useRef(true);
 
   const loadWorkspace = useCallback(async () => {
@@ -226,17 +229,36 @@ export const useAdminWorkspace = () => {
   const handleDeleteMember = async (groupId, memberId) => {
     try {
       setGroupMessage("");
-      const { data } = await api.delete(`/groups/${groupId}/members/${memberId}`);
+      const data = await removeGroupMember(groupId, memberId);
       const nextGroups = groups.map((group) =>
         group.id === groupId ? data.group : group
       );
       setGroups(nextGroups);
       setSelectedGroup(data.group);
       setSelectedMember(data.group?.members?.[0] || null);
-      setGroupMessage("Integrante quitado correctamente.");
+      setGroupMessage(data.message || "Integrante eliminado correctamente.");
       return true;
     } catch (requestError) {
-      setGroupMessage(requestError.response?.data?.message || "No se pudo quitar el integrante.");
+      setGroupMessage(requestError.response?.data?.message || "No se pudo eliminar el integrante.");
+      return false;
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      setPeopleMessage("");
+      const data = await deleteUser(userId);
+      const nextPeople = people.filter((person) => person.id !== userId);
+      setPeople(nextPeople);
+      setLocations((current) => current.filter((location) => location.userId !== userId));
+      setSelectedPerson((current) =>
+        current?.id === userId ? nextPeople[0] || null : current
+      );
+      setPeopleMessage(data.message || "Persona eliminada correctamente.");
+      await loadWorkspace();
+      return true;
+    } catch (requestError) {
+      setPeopleMessage(requestError.response?.data?.message || "No se pudo eliminar la persona.");
       return false;
     }
   };
@@ -250,6 +272,7 @@ export const useAdminWorkspace = () => {
     handleCreateGroup,
     handleDeleteGroup,
     handleDeleteMember,
+    handleDeleteUser,
     handleUpdateGroup,
     handleUpdateMember,
     loading,
@@ -257,6 +280,7 @@ export const useAdminWorkspace = () => {
     locations,
     mapPoints,
     people,
+    peopleMessage,
     selectedGroup,
     selectedMember,
     selectedPerson,

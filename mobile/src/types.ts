@@ -33,6 +33,7 @@ export type SimulatedLocation = {
 
 export type GroupMember = {
   id: number;
+  userId?: number | null;
   fullName: string;
   email: string;
   phone: string;

@@ -1,7 +1,8 @@
-import { AlertTriangle, CalendarDays, Crosshair, LocateFixed, Mail, MapPin, Phone } from "lucide-react-native";
+import { AlertTriangle, CalendarDays, Crosshair, LocateFixed, Mail, MapPin, Phone, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
+import { ActionButton } from "@/components/action-button";
 import { Card } from "@/components/card";
 import { DetailRow } from "@/components/detail-row";
 import { GradientScreen } from "@/components/gradient-screen";
@@ -11,6 +12,7 @@ import { Pill } from "@/components/pill";
 import { SectionHelp } from "@/components/section-help";
 import { Text } from "@/components/text";
 import { useAdminData } from "@/hooks/use-dashboard-data";
+import { deleteUser } from "@/services/api";
 import type { User } from "@/types";
 
 const getLocationText = (location?: User["lastLocation"]) =>
@@ -20,12 +22,41 @@ const formatAccuracy = (value?: number | null) =>
   Number.isFinite(value) ? `${Math.round(Number(value))} m` : "Sin precision";
 
 export function AdminPeopleScreen() {
-  const { error, loading, people } = useAdminData();
+  const { error, loading, people, reload } = useAdminData();
   const [selectedPerson, setSelectedPerson] = useState<User | null>(people[0] || null);
 
   useEffect(() => {
-    setSelectedPerson((current) => current || people[0] || null);
+    setSelectedPerson((current) =>
+      current && people.some((person) => person.id === current.id) ? current : people[0] || null
+    );
   }, [people]);
+
+  const removePerson = (person: User) => {
+    Alert.alert(
+      "Eliminar persona",
+      `Eliminar a "${person.fullName}" de personas registradas, grupos y ubicaciones asociadas?`,
+      [
+        { style: "cancel", text: "Cancelar" },
+        {
+          style: "destructive",
+          text: "Eliminar",
+          onPress: async () => {
+            try {
+              const response = await deleteUser(person.id);
+              setSelectedPerson(null);
+              await reload();
+              Alert.alert("Persona eliminada", response.message);
+            } catch (requestError) {
+              Alert.alert(
+                "No se pudo eliminar",
+                requestError instanceof Error ? requestError.message : "Intenta nuevamente."
+              );
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <GradientScreen>
@@ -94,6 +125,9 @@ export function AdminPeopleScreen() {
             label="Ultima conexion"
             value={selectedPerson.lastConnection}
           />
+          <ActionButton icon={Trash2} variant="danger" onPress={() => removePerson(selectedPerson)}>
+            Eliminar persona
+          </ActionButton>
         </Card>
       ) : null}
     </GradientScreen>

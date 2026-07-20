@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, UsersRound } from "lucide-react";
+import { LogOut, Plus, Trash2, UsersRound } from "lucide-react";
 import AddMemberModal from "../../components/AddMemberModal.jsx";
 import Button from "../../components/Button.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import CreateGroupModal from "../../components/CreateGroupModal.jsx";
 import GroupCard from "../../components/GroupCard.jsx";
 import GroupMapPanel from "../../components/GroupMapPanel.jsx";
@@ -22,7 +23,10 @@ const PersonaGroups = () => {
     groups,
     handleAddMember,
     handleCreateGroup,
+    handleDeleteMember,
+    handleLeaveGroup,
     loading,
+    profile,
     selectedGroup,
     selectedMember,
     setSelectedGroup,
@@ -31,7 +35,18 @@ const PersonaGroups = () => {
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [groupForMember, setGroupForMember] = useState(null);
+  const [memberToDelete, setMemberToDelete] = useState(null);
+  const [leaveGroupTarget, setLeaveGroupTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const { error: pollingError, lastSync, locations } = useGroupLocations(selectedGroup?.id);
+  const isGroupOwner = (group) => Boolean(group && profile?.id === group.createdBy);
+  const isOwnMember = (member) =>
+    Boolean(profile && (member.userId === profile.id || member.email === profile.email));
+  const canManageSelectedGroup = isGroupOwner(selectedGroup);
+  const canLeaveSelectedGroup =
+    Boolean(selectedGroup) &&
+    !canManageSelectedGroup &&
+    (selectedGroup?.members || []).some(isOwnMember);
   const displayMembers = (selectedGroup?.members || []).map((member) => {
     const liveLocation = locations.find(
       (item) => item.userId === member.userId || item.fullName === member.fullName
@@ -67,6 +82,28 @@ const PersonaGroups = () => {
     setAddMemberOpen(true);
   };
 
+  const confirmDeleteMember = (member) => setMemberToDelete(member);
+
+  const confirmLeaveGroup = () => {
+    if (selectedGroup) setLeaveGroupTarget(selectedGroup);
+  };
+
+  const handleConfirmDeleteMember = async () => {
+    if (!selectedGroup || !memberToDelete) return;
+    setDeleting(true);
+    const success = await handleDeleteMember(selectedGroup.id, memberToDelete.id);
+    setDeleting(false);
+    if (success) setMemberToDelete(null);
+  };
+
+  const handleConfirmLeaveGroup = async () => {
+    if (!leaveGroupTarget) return;
+    setDeleting(true);
+    const success = await handleLeaveGroup(leaveGroupTarget.id);
+    setDeleting(false);
+    if (success) setLeaveGroupTarget(null);
+  };
+
   if (loading) {
     return <LoadingScreen message={t("persona.loading")} />;
   }
@@ -95,6 +132,11 @@ const PersonaGroups = () => {
           <Button icon={Plus} onClick={() => setCreateGroupOpen(true)}>
             {t("groups.create")}
           </Button>
+          {canLeaveSelectedGroup ? (
+            <Button icon={LogOut} variant="secondary" onClick={confirmLeaveGroup}>
+              Salir del grupo
+            </Button>
+          ) : null}
         </HeaderActions>
       </div>
 
@@ -129,7 +171,7 @@ const PersonaGroups = () => {
                 active={selectedGroup?.id === group.id}
                 group={group}
                 key={group.id}
-                onAddMember={openAddMember}
+                onAddMember={isGroupOwner(group) ? openAddMember : undefined}
                 onSelect={(nextGroup) => {
                   setSelectedGroup(nextGroup);
                   setSelectedMember(nextGroup.members?.[0] || null);
@@ -154,7 +196,14 @@ const PersonaGroups = () => {
           {lastSync ? <p className="text-right text-xs text-[var(--color-muted)]">{t("map.lastSync", { value: lastSync.toLocaleTimeString() })}</p> : null}
           <div className="grid gap-4 md:grid-cols-2">
             {displayMembers.map((member) => (
-              <GroupMemberCard key={member.id} member={member} onView={setSelectedMember} />
+              <div className="grid gap-2" key={member.id}>
+                <GroupMemberCard member={member} onView={setSelectedMember} />
+                {canManageSelectedGroup && member.userId !== selectedGroup?.createdBy ? (
+                  <Button icon={Trash2} size="sm" variant="danger" onClick={() => confirmDeleteMember(member)}>
+                    Eliminar integrante
+                  </Button>
+                ) : null}
+              </div>
             ))}
           </div>
         </section>
@@ -170,6 +219,32 @@ const PersonaGroups = () => {
         open={addMemberOpen}
         onClose={() => setAddMemberOpen(false)}
         onSubmit={submitMember}
+      />
+      <ConfirmDialog
+        confirmLabel="Si, eliminar"
+        description={
+          selectedGroup && memberToDelete
+            ? `Se eliminara a "${memberToDelete.fullName}" del grupo "${selectedGroup.name}".`
+            : ""
+        }
+        loading={deleting}
+        open={Boolean(memberToDelete)}
+        title="Eliminar integrante"
+        onCancel={() => (deleting ? undefined : setMemberToDelete(null))}
+        onConfirm={handleConfirmDeleteMember}
+      />
+      <ConfirmDialog
+        confirmLabel="Si, salir"
+        description={
+          leaveGroupTarget
+            ? `Dejaras de ver el grupo "${leaveGroupTarget.name}" y sus integrantes.`
+            : ""
+        }
+        loading={deleting}
+        open={Boolean(leaveGroupTarget)}
+        title="Salir del grupo"
+        onCancel={() => (deleting ? undefined : setLeaveGroupTarget(null))}
+        onConfirm={handleConfirmLeaveGroup}
       />
     </motion.section>
   );

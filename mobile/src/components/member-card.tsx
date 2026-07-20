@@ -71,8 +71,8 @@ export function MemberCard({ member, onDelete, onEdit, onPress }: MemberCardProp
               </ActionButton>
             ) : null}
             {onDelete ? (
-              <ActionButton icon={Trash2} variant="secondary" onPress={() => onDelete(member)}>
-                Quitar
+              <ActionButton icon={Trash2} variant="danger" onPress={() => onDelete(member)}>
+                Eliminar integrante
               </ActionButton>
             ) : null}
           </View>

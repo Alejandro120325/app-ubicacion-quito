@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Edit3, Plus, Trash2, UsersRound } from "lucide-react";
 import AddMemberModal from "../../components/AddMemberModal.jsx";
 import Button from "../../components/Button.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 import CreateGroupModal from "../../components/CreateGroupModal.jsx";
 import EditGroupModal from "../../components/EditGroupModal.jsx";
 import EditMemberModal from "../../components/EditMemberModal.jsx";
@@ -41,6 +42,9 @@ const AdminGroups = () => {
   const [groupForEdit, setGroupForEdit] = useState(null);
   const [editMemberOpen, setEditMemberOpen] = useState(false);
   const [memberForEdit, setMemberForEdit] = useState(null);
+  const [groupToDelete, setGroupToDelete] = useState(null);
+  const [memberToDelete, setMemberToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const { error: pollingError, locations } = useGroupLocations(selectedGroup?.id);
   const displayMembers = (selectedGroup?.members || []).map((member) => {
     const liveLocation = locations.find(
@@ -81,20 +85,29 @@ const AdminGroups = () => {
     setEditGroupOpen(true);
   };
 
-  const confirmDeleteGroup = async (group) => {
-    const confirmed = window.confirm(`Eliminar el grupo "${group.name}"? Esta accion no elimina usuarios globales.`);
-    if (confirmed) await handleDeleteGroup(group.id);
-  };
+  const confirmDeleteGroup = (group) => setGroupToDelete(group);
 
   const openEditMember = (member) => {
     setMemberForEdit(member);
     setEditMemberOpen(true);
   };
 
-  const confirmDeleteMember = async (member) => {
-    if (!selectedGroup) return;
-    const confirmed = window.confirm(`Quitar a "${member.fullName}" del grupo "${selectedGroup.name}"?`);
-    if (confirmed) await handleDeleteMember(selectedGroup.id, member.id);
+  const confirmDeleteMember = (member) => setMemberToDelete(member);
+
+  const handleConfirmDeleteGroup = async () => {
+    if (!groupToDelete) return;
+    setDeleting(true);
+    const success = await handleDeleteGroup(groupToDelete.id);
+    setDeleting(false);
+    if (success) setGroupToDelete(null);
+  };
+
+  const handleConfirmDeleteMember = async () => {
+    if (!selectedGroup || !memberToDelete) return;
+    setDeleting(true);
+    const success = await handleDeleteMember(selectedGroup.id, memberToDelete.id);
+    setDeleting(false);
+    if (success) setMemberToDelete(null);
   };
 
   if (loading) {
@@ -186,7 +199,7 @@ const AdminGroups = () => {
                     Editar
                   </Button>
                   <Button icon={Trash2} size="sm" variant="danger" onClick={() => confirmDeleteMember(member)}>
-                    Quitar
+                    Eliminar integrante
                   </Button>
                 </div>
               </div>
@@ -218,6 +231,32 @@ const AdminGroups = () => {
         open={editMemberOpen}
         onClose={() => setEditMemberOpen(false)}
         onSubmit={handleUpdateMember}
+      />
+      <ConfirmDialog
+        confirmLabel="Si, eliminar"
+        description={
+          groupToDelete
+            ? `Se eliminara el grupo "${groupToDelete.name}". Las cuentas de las personas no se eliminan.`
+            : ""
+        }
+        loading={deleting}
+        open={Boolean(groupToDelete)}
+        title="Eliminar grupo"
+        onCancel={() => (deleting ? undefined : setGroupToDelete(null))}
+        onConfirm={handleConfirmDeleteGroup}
+      />
+      <ConfirmDialog
+        confirmLabel="Si, eliminar"
+        description={
+          selectedGroup && memberToDelete
+            ? `Se eliminara a "${memberToDelete.fullName}" del grupo "${selectedGroup.name}".`
+            : ""
+        }
+        loading={deleting}
+        open={Boolean(memberToDelete)}
+        title="Eliminar integrante"
+        onCancel={() => (deleting ? undefined : setMemberToDelete(null))}
+        onConfirm={handleConfirmDeleteMember}
       />
     </motion.section>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, TextInput, View } from "react-native";
-import { AlertTriangle, Save, UsersRound, X } from "lucide-react-native";
+import { AlertTriangle, LogOut, Save, UsersRound, X } from "lucide-react-native";
 
 import { ActionButton } from "@/components/action-button";
 import { Card } from "@/components/card";
@@ -15,11 +15,12 @@ import { Text } from "@/components/text";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
 import { usePersonaData } from "@/hooks/use-dashboard-data";
-import { api } from "@/services/api";
+import { api, leaveGroup, removeGroupMember } from "@/services/api";
 import type { Group, GroupMember, LocationStatus } from "@/types";
 
 type GroupResponse = {
   group: Group;
+  message?: string;
   member?: GroupMember;
 };
 
@@ -56,6 +57,14 @@ export function PersonaGroupScreen() {
 
   const currentGroup =
     localGroups.find((group) => group.id === selectedGroupId) || localGroups[0] || null;
+  const isGroupOwner = (group: Group | null) => Boolean(group && user?.id === group.createdBy);
+  const isOwnMember = (member: GroupMember) =>
+    Boolean(user && (member.userId === user.id || member.email === user.email));
+  const canManageCurrentGroup = isGroupOwner(currentGroup);
+  const canLeaveCurrentGroup =
+    Boolean(currentGroup) &&
+    !canManageCurrentGroup &&
+    Boolean(currentGroup?.members.some(isOwnMember));
 
   const updateGroupState = (nextGroup: Group) => {
     setLocalGroups((current) =>
@@ -118,6 +127,31 @@ export function PersonaGroupScreen() {
     ]);
   };
 
+  const leaveCurrentGroup = () => {
+    if (!currentGroup) return;
+
+    Alert.alert("Salir del grupo", `Dejaras de ver el grupo "${currentGroup.name}" y sus integrantes.`, [
+      { style: "cancel", text: "Cancelar" },
+      {
+        style: "destructive",
+        text: "Salir",
+        onPress: async () => {
+          try {
+            const data = await leaveGroup<GroupResponse>(currentGroup.id);
+            const nextGroups = localGroups.filter((item) => item.id !== currentGroup.id);
+            setLocalGroups(nextGroups);
+            setSelectedGroupId(nextGroups[0]?.id || null);
+            setSelectedMember(nextGroups[0]?.members[0] || null);
+            setMessage(data.message || "Saliste del grupo correctamente.");
+            await reload();
+          } catch (requestError) {
+            setMessage(requestError instanceof Error ? requestError.message : "No se pudo salir del grupo.");
+          }
+        }
+      }
+    ]);
+  };
+
   const startAddMember = (group: Group) => {
     setSelectedGroupId(group.id);
     setEditingMember(null);
@@ -170,10 +204,11 @@ export function PersonaGroupScreen() {
         text: "Quitar",
         onPress: async () => {
           try {
-            const data = await api.delete<GroupResponse>(`/groups/${currentGroup.id}/members/${member.id}`);
+            const data = await removeGroupMember<GroupResponse>(currentGroup.id, member.id);
             updateGroupState(data.group);
             setSelectedMember(data.group.members[0] || null);
-            setMessage("Integrante quitado correctamente.");
+            setMessage("Integrante eliminado correctamente.");
+            await reload();
           } catch (requestError) {
             setMessage(requestError instanceof Error ? requestError.message : "No se pudo quitar el integrante.");
           }
@@ -225,13 +260,19 @@ export function PersonaGroupScreen() {
             active={currentGroup?.id === group.id}
             group={group}
             key={group.id}
-            onAddMember={startAddMember}
-            onDelete={deleteGroup}
-            onEdit={startEditGroup}
+            onAddMember={isGroupOwner(group) ? startAddMember : undefined}
+            onDelete={isGroupOwner(group) ? deleteGroup : undefined}
+            onEdit={isGroupOwner(group) ? startEditGroup : undefined}
             onPress={selectGroup}
           />
         ))}
       </View>
+
+      {canLeaveCurrentGroup ? (
+        <ActionButton icon={LogOut} variant="secondary" onPress={leaveCurrentGroup}>
+          Salir del grupo
+        </ActionButton>
+      ) : null}
 
       {editingGroup ? (
         <Card style={styles.formCard}>
@@ -281,8 +322,12 @@ export function PersonaGroupScreen() {
               <MemberCard
                 key={member.id}
                 member={member}
-                onDelete={removeMember}
-                onEdit={startEditMember}
+                onDelete={
+                  canManageCurrentGroup && member.userId !== currentGroup.createdBy
+                    ? removeMember
+                    : undefined
+                }
+                onEdit={canManageCurrentGroup ? startEditMember : undefined}
                 onPress={setSelectedMember}
               />
             ))}
